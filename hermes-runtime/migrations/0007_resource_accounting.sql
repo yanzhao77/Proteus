@@ -352,13 +352,16 @@ CREATE OR REPLACE FUNCTION public.hermes_release_reservation_authority(
     p_terminal_status TEXT, p_command_id TEXT, p_actor_type TEXT
 ) RETURNS TABLE(account_version BIGINT, threshold_status TEXT, account_id TEXT, amounts JSONB)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
-DECLARE reservation_row RECORD; account_row RECORD; item RECORD;
+DECLARE reservation_row RECORD; account_row RECORD; item RECORD; stored_command_type TEXT;
 BEGIN
-    IF p_actor_type <> 'control_plane' THEN RAISE EXCEPTION 'ACCOUNTING_AUTHORITY_REQUIRED'; END IF;
     IF p_terminal_status NOT IN ('RELEASED','CANCELLED','EXPIRED') THEN RAISE EXCEPTION 'RESOURCE_RESERVATION_NOT_ACTIVE'; END IF;
-    PERFORM 1 FROM public.command_receipts WHERE command_id=p_command_id AND project_id=p_project_id
+    SELECT command_type INTO stored_command_type FROM public.command_receipts
+    WHERE command_id=p_command_id AND project_id=p_project_id
       AND command_type IN ('resource.release','resource.reconcile') AND status='PROCESSING';
-    IF NOT FOUND THEN RAISE EXCEPTION 'ACCOUNTING_COMMAND_SEMANTICS_MISMATCH'; END IF;
+    IF stored_command_type IS NULL THEN RAISE EXCEPTION 'ACCOUNTING_COMMAND_SEMANTICS_MISMATCH'; END IF;
+    IF p_actor_type <> 'control_plane' AND NOT (
+        p_actor_type='recovery_controller' AND stored_command_type='resource.reconcile'
+    ) THEN RAISE EXCEPTION 'ACCOUNTING_AUTHORITY_REQUIRED'; END IF;
     SELECT * INTO reservation_row FROM public.resource_reservations
     WHERE reservation_id=p_reservation_id AND project_id=p_project_id FOR UPDATE;
     IF NOT FOUND THEN RAISE EXCEPTION 'RESOURCE_RESERVATION_NOT_ACTIVE'; END IF;
@@ -432,11 +435,15 @@ CREATE OR REPLACE FUNCTION public.hermes_settle_reservation_authority(
                 actual JSONB, released JSONB, over_limit BOOLEAN)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
 DECLARE reservation_row RECORD; account_row RECORD; item RECORD; balance_row RECORD;
+        stored_command_type TEXT;
 BEGIN
-    IF p_actor_type <> 'control_plane' THEN RAISE EXCEPTION 'ACCOUNTING_AUTHORITY_REQUIRED'; END IF;
-    PERFORM 1 FROM public.command_receipts WHERE command_id=p_command_id AND project_id=p_project_id
+    SELECT command_type INTO stored_command_type FROM public.command_receipts
+    WHERE command_id=p_command_id AND project_id=p_project_id
       AND command_type IN ('resource.settle','resource.reconcile') AND status='PROCESSING';
-    IF NOT FOUND THEN RAISE EXCEPTION 'ACCOUNTING_COMMAND_SEMANTICS_MISMATCH'; END IF;
+    IF stored_command_type IS NULL THEN RAISE EXCEPTION 'ACCOUNTING_COMMAND_SEMANTICS_MISMATCH'; END IF;
+    IF p_actor_type <> 'control_plane' AND NOT (
+        p_actor_type='recovery_controller' AND stored_command_type='resource.reconcile'
+    ) THEN RAISE EXCEPTION 'ACCOUNTING_AUTHORITY_REQUIRED'; END IF;
     SELECT * INTO reservation_row FROM public.resource_reservations
     WHERE reservation_id=p_reservation_id AND project_id=p_project_id FOR UPDATE;
     IF NOT FOUND THEN RAISE EXCEPTION 'RESOURCE_RESERVATION_NOT_ACTIVE'; END IF;
@@ -504,7 +511,7 @@ BEGIN
       AND project_id=p_project_id FOR SHARE;
     IF NOT FOUND THEN RAISE EXCEPTION 'RESOURCE_ACCOUNT_NOT_FOUND'; END IF;
     IF account_row.version<>p_account_version THEN RAISE EXCEPTION 'RESOURCE_ACCOUNT_VERSION_CONFLICT'; END IF;
-    SELECT * INTO project_row FROM public.projects WHERE project_id=p_project_id FOR SHARE;
+    SELECT * INTO project_row FROM public.projects WHERE project_id=p_project_id;
     IF project_row.version<>p_project_version OR project_row.state<>p_from_state THEN
         RAISE EXCEPTION 'PROJECT_AUTHORITY_PRECONDITION_FAILED';
     END IF;
@@ -522,6 +529,28 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.hermes_record_resource_reconcile_authority(
+    p_reconcile_id TEXT,p_reservation_id TEXT,p_action TEXT,
+    p_project_id TEXT,p_command_id TEXT,p_actor_type TEXT
+) RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog AS $$
+BEGIN
+    IF p_actor_type NOT IN ('control_plane','recovery_controller') THEN
+        RAISE EXCEPTION 'ACCOUNTING_AUTHORITY_REQUIRED';
+    END IF;
+    IF p_action NOT IN ('RELEASE_ORPHAN','SETTLE_USAGE','NO_ACTION') THEN
+        RAISE EXCEPTION 'RESOURCE_RECONCILE_NOT_REQUIRED';
+    END IF;
+    PERFORM 1 FROM public.command_receipts WHERE command_id=p_command_id
+      AND project_id=p_project_id AND command_type='resource.reconcile'
+      AND status='PROCESSING';
+    IF NOT FOUND THEN RAISE EXCEPTION 'ACCOUNTING_COMMAND_SEMANTICS_MISMATCH'; END IF;
+    INSERT INTO public.resource_reconcile_records(
+        reconcile_id,reservation_id,action,command_id)
+    VALUES (p_reconcile_id,p_reservation_id,p_action,p_command_id);
+END;
+$$;
+
 ALTER FUNCTION public.hermes_accounting_status(TEXT,BOOLEAN) OWNER TO hermes_accounting_owner;
 ALTER FUNCTION public.hermes_create_resource_account_authority(TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,INTEGER,INTEGER,INTEGER,TEXT,TEXT) OWNER TO hermes_accounting_owner;
 ALTER FUNCTION public.hermes_reserve_resources_authority(TEXT,TEXT,BIGINT,TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,TEXT,TEXT) OWNER TO hermes_accounting_owner;
@@ -529,6 +558,7 @@ ALTER FUNCTION public.hermes_release_reservation_authority(TEXT,TEXT,BIGINT,TEXT
 ALTER FUNCTION public.hermes_record_resource_usage_authority(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,TEXT,TEXT) OWNER TO hermes_accounting_owner;
 ALTER FUNCTION public.hermes_settle_reservation_authority(TEXT,TEXT,TEXT,BIGINT,TEXT,TEXT) OWNER TO hermes_accounting_owner;
 ALTER FUNCTION public.hermes_issue_budget_fact_authority(TEXT,TEXT,TEXT,BIGINT,BIGINT,TEXT,TEXT,TEXT,TEXT) OWNER TO hermes_accounting_owner;
+ALTER FUNCTION public.hermes_record_resource_reconcile_authority(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) OWNER TO hermes_accounting_owner;
 
 GRANT SELECT ON public.projects,public.command_receipts TO hermes_accounting_owner;
 GRANT SELECT,INSERT,UPDATE ON public.project_budget_facts TO hermes_accounting_owner;
@@ -539,12 +569,14 @@ REVOKE ALL ON FUNCTION public.hermes_release_reservation_authority(TEXT,TEXT,BIG
 REVOKE ALL ON FUNCTION public.hermes_record_resource_usage_authority(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,TEXT,TEXT) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.hermes_settle_reservation_authority(TEXT,TEXT,TEXT,BIGINT,TEXT,TEXT) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.hermes_issue_budget_fact_authority(TEXT,TEXT,TEXT,BIGINT,BIGINT,TEXT,TEXT,TEXT,TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.hermes_record_resource_reconcile_authority(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.hermes_create_resource_account_authority(TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,INTEGER,INTEGER,INTEGER,TEXT,TEXT) TO hermes_accounting_runtime;
 GRANT EXECUTE ON FUNCTION public.hermes_reserve_resources_authority(TEXT,TEXT,BIGINT,TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,TEXT,TEXT) TO hermes_accounting_runtime;
 GRANT EXECUTE ON FUNCTION public.hermes_release_reservation_authority(TEXT,TEXT,BIGINT,TEXT,TEXT,TEXT) TO hermes_accounting_runtime;
 GRANT EXECUTE ON FUNCTION public.hermes_record_resource_usage_authority(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT,JSONB,TEXT,TEXT) TO hermes_accounting_runtime;
 GRANT EXECUTE ON FUNCTION public.hermes_settle_reservation_authority(TEXT,TEXT,TEXT,BIGINT,TEXT,TEXT) TO hermes_accounting_runtime;
 GRANT EXECUTE ON FUNCTION public.hermes_issue_budget_fact_authority(TEXT,TEXT,TEXT,BIGINT,BIGINT,TEXT,TEXT,TEXT,TEXT) TO hermes_accounting_runtime;
+GRANT EXECUTE ON FUNCTION public.hermes_record_resource_reconcile_authority(TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) TO hermes_accounting_runtime;
 GRANT SELECT,INSERT,UPDATE ON public.command_receipts TO hermes_accounting_runtime;
 GRANT SELECT,INSERT ON public.event_log,public.outbox_messages,public.audit_records TO hermes_accounting_runtime;
 GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO hermes_accounting_runtime;

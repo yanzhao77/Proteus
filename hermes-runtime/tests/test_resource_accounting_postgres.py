@@ -249,6 +249,39 @@ class ResourceAccountingPostgresTests(unittest.TestCase):
             "SELECT count(*) FROM event_log WHERE event_type='budget.reconciled'"
         ))
 
+    def test_recovery_controller_releases_explicit_orphan_exactly_once(self):
+        self.create_account({"llm_tokens": 100})
+        self.reserve("orphan", 0, {"llm_tokens": 40}, "preparation-orphan")
+        with psycopg.connect(DATABASE_URL) as connection:
+            connection.execute(
+                """UPDATE resource_preparations
+                   SET status='FAILED',finalized_at=now()
+                   WHERE preparation_id='preparation-orphan'"""
+            )
+        envelope = CommandEnvelope(
+            "cmd-reconcile-orphan", "resource.reconcile",
+            "key-reconcile-orphan", 1,
+            Actor(ActorType.RECOVERY_CONTROLLER, "recovery-1"),
+            "release failed preparation", "project-1",
+        )
+        command = ReconcileReservation(
+            envelope, "reconcile-orphan", "reservation-orphan"
+        )
+        first = self.accounting.reconcile(command)
+        second = self.accounting.reconcile(command)
+        self.assertEqual(first, second)
+        self.assertEqual("RELEASE_ORPHAN", first.response["action"])
+        self.assertEqual(0, self.store.scalar(
+            "SELECT reserved_amount FROM resource_balances WHERE account_id='account-1'"
+        ))
+        self.assertEqual("EXPIRED", self.store.scalar(
+            """SELECT status FROM resource_reservations
+               WHERE reservation_id='reservation-orphan'"""
+        ))
+        self.assertEqual(1, self.store.scalar(
+            "SELECT count(*) FROM resource_reconcile_records"
+        ))
+
     def test_actual_over_reservation_is_recorded_and_enters_hard_stop(self):
         self.create_account({"llm_tokens": 100})
         self.reserve("over", 0, {"llm_tokens": 80})

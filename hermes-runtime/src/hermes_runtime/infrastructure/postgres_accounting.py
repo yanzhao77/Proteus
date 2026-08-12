@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from typing import Any, Dict
 
 from psycopg.types.json import Jsonb
+import psycopg
 
 from hermes_runtime.application.errors import CommandRejected
 from hermes_runtime.domain.models import CommandReceipt
@@ -54,25 +55,15 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         return self._execute(command, self._create_account)
 
     def _create_account(self, connection, command):
-        if not connection.execute(
-            "SELECT 1 FROM projects WHERE project_id=%s FOR SHARE",
-            (command.envelope.project_id,),
-        ).fetchone():
-            raise CommandRejected("PROJECT_NOT_FOUND")
         warn, gate, hard_stop = command.thresholds_basis_points
         connection.execute(
-            """INSERT INTO resource_accounts(
-               account_id,project_id,scope_type,scope_id,currency,
-               warn_basis_points,gate_basis_points,hard_stop_basis_points)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+            """SELECT public.hermes_create_resource_account_authority(
+               %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (command.account_id, command.envelope.project_id, command.scope_type,
-             command.scope_id, command.currency or None, warn, gate, hard_stop),
+             command.scope_id, command.currency or None, Jsonb(command.limits),
+             warn, gate, hard_stop, command.envelope.command_id,
+             command.envelope.actor.actor_type.value),
         )
-        for dimension, limit in sorted(command.limits.items()):
-            connection.execute(
-                "INSERT INTO resource_balances(account_id,dimension,limit_amount) VALUES (%s,%s,%s)",
-                (command.account_id, dimension, limit),
-            )
         self._trigger_fault(AccountingFaultPoint.AFTER_ACCOUNT_BEFORE_EVENT)
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.account_created",
@@ -88,69 +79,21 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         return self._execute(command, self._reserve)
 
     def _reserve(self, connection, command):
-        account = connection.execute(
-            """SELECT project_id,currency,version,threshold_status,
-                      warn_basis_points,gate_basis_points,hard_stop_basis_points
-               FROM resource_accounts WHERE account_id=%s FOR UPDATE""",
-            (command.account_id,),
+        row = connection.execute(
+            """SELECT account_version,threshold_status
+               FROM public.hermes_reserve_resources_authority(
+               %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (command.account_id, command.envelope.project_id,
+             command.envelope.expected_version, command.reservation_id,
+             command.owner_type, command.owner_id,
+             command.preparation_id or None, command.currency or None,
+             Jsonb(command.amounts), command.envelope.command_id,
+             command.envelope.actor.actor_type.value),
         ).fetchone()
-        if not account:
-            raise CommandRejected("RESOURCE_ACCOUNT_NOT_FOUND")
-        if account[0] != command.envelope.project_id:
-            raise CommandRejected("RESOURCE_ACCOUNT_NOT_FOUND")
-        if account[2] != command.envelope.expected_version:
-            raise CommandRejected("RESOURCE_ACCOUNT_VERSION_CONFLICT")
-        if account[3] == "HARD_STOP":
-            raise CommandRejected("RESOURCE_HARD_STOP")
-        if command.currency and command.currency != account[1]:
-            raise CommandRejected("RESOURCE_CURRENCY_MISMATCH")
-        rows = connection.execute(
-            """SELECT dimension,limit_amount,consumed_amount,reserved_amount
-               FROM resource_balances WHERE account_id=%s FOR UPDATE""",
-            (command.account_id,),
-        ).fetchall()
-        balances = {row[0]: row[1:] for row in rows}
-        if any(name not in balances or amount > max(0, balances[name][0] - balances[name][1] - balances[name][2])
-               for name, amount in command.amounts.items()):
-            raise CommandRejected("RESOURCE_RESERVATION_INFEASIBLE")
-        if command.preparation_id:
-            connection.execute(
-                """INSERT INTO resource_preparations(
-                   preparation_id,project_id,owner_type,owner_id,status)
-                   VALUES (%s,%s,%s,%s,'PREPARED')""",
-                (command.preparation_id, account[0], command.owner_type, command.owner_id),
-            )
-        next_version = account[2] + 1
-        connection.execute(
-            """INSERT INTO resource_reservations(
-               reservation_id,account_id,project_id,owner_type,owner_id,
-               preparation_id,currency,status,account_version,command_id)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,'ACTIVE',%s,%s)""",
-            (command.reservation_id, command.account_id, account[0], command.owner_type,
-             command.owner_id, command.preparation_id or None, account[1], next_version,
-             command.envelope.command_id),
-        )
-        for dimension, amount in sorted(command.amounts.items()):
-            connection.execute(
-                "INSERT INTO resource_reservation_amounts(reservation_id,dimension,amount) VALUES (%s,%s,%s)",
-                (command.reservation_id, dimension, amount),
-            )
         self._trigger_fault(AccountingFaultPoint.AFTER_RESERVATION_BEFORE_BALANCE)
-        for dimension, amount in command.amounts.items():
-            connection.execute(
-                """UPDATE resource_balances SET reserved_amount=reserved_amount+%s
-                   WHERE account_id=%s AND dimension=%s""",
-                (amount, command.account_id, dimension),
-            )
         self._trigger_fault(AccountingFaultPoint.AFTER_BALANCE_BEFORE_EVENT)
-        status = self._update_account_status(connection, command.account_id, next_version)
-        self._invalidate_budget_facts(connection, command.account_id)
         self._trigger_fault(AccountingFaultPoint.AFTER_PREPARATION_RESERVE)
-        if command.preparation_id:
-            connection.execute(
-                "UPDATE resource_preparations SET status='FINALIZED',finalized_at=now() WHERE preparation_id=%s",
-                (command.preparation_id,),
-            )
+        next_version, status = row
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.reserved",
             {"account_id": command.account_id, "reservation_id": command.reservation_id,
@@ -168,27 +111,18 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         return self._execute(command, self._release)
 
     def _release(self, connection, command):
-        reservation = self._reservation_for_update(connection, command.reservation_id)
-        if reservation[5] != "ACTIVE":
-            raise CommandRejected("RESOURCE_RELEASE_ALREADY_APPLIED")
-        account = self._account_for_update(connection, reservation[0], command.envelope.expected_version)
-        amounts = self._reservation_amounts(connection, command.reservation_id)
-        for dimension, amount in amounts.items():
-            connection.execute(
-                """UPDATE resource_balances SET reserved_amount=reserved_amount-%s
-                   WHERE account_id=%s AND dimension=%s AND reserved_amount >= %s""",
-                (amount, reservation[0], dimension, amount),
-            )
-        connection.execute(
-            "UPDATE resource_reservations SET status=%s,terminal_at=now() WHERE reservation_id=%s",
-            (command.terminal_status, command.reservation_id),
-        )
-        next_version = account[2] + 1
-        status = self._update_account_status(connection, reservation[0], next_version)
-        self._invalidate_budget_facts(connection, reservation[0])
+        next_version, status, account_id, amounts = connection.execute(
+            """SELECT account_version,threshold_status,account_id,amounts
+               FROM public.hermes_release_reservation_authority(
+               %s,%s,%s,%s,%s,%s)""",
+            (command.reservation_id, command.envelope.project_id,
+             command.envelope.expected_version, command.terminal_status,
+             command.envelope.command_id,
+             command.envelope.actor.actor_type.value),
+        ).fetchone()
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.released",
-            {"account_id": reservation[0], "reservation_id": command.reservation_id,
+            {"account_id": account_id, "reservation_id": command.reservation_id,
              "terminal_status": command.terminal_status, "amounts": amounts,
              "threshold_status": status, "entity_version": next_version},
         )
@@ -200,32 +134,15 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         return self._execute(command, self._record_usage)
 
     def _record_usage(self, connection, command):
-        reservation = self._reservation_for_update(connection, command.reservation_id)
-        if reservation[1] != command.envelope.project_id:
-            raise CommandRejected("RESOURCE_RESERVATION_OWNER_MISMATCH")
-        if (reservation[2], reservation[3]) != (command.owner_type, command.owner_id):
-            raise CommandRejected("RESOURCE_RESERVATION_OWNER_MISMATCH")
-        if command.currency and command.currency != reservation[4]:
-            raise CommandRejected("RESOURCE_CURRENCY_MISMATCH")
-        conflict = connection.execute(
-            "SELECT reservation_id FROM resource_usage_records WHERE sample_id=%s",
-            (command.sample_id,),
-        ).fetchone()
-        if conflict:
-            raise CommandRejected("RESOURCE_USAGE_DUPLICATE_CONFLICT")
         connection.execute(
-            """INSERT INTO resource_usage_records(
-               usage_id,sample_id,reservation_id,project_id,owner_type,owner_id,currency,command_id)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+            """SELECT public.hermes_record_resource_usage_authority(
+               %s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (command.usage_id, command.sample_id, command.reservation_id,
              command.envelope.project_id, command.owner_type, command.owner_id,
-             reservation[4], command.envelope.command_id),
+             command.currency or None, Jsonb(command.amounts),
+             command.envelope.command_id,
+             command.envelope.actor.actor_type.value),
         )
-        for dimension, amount in sorted(command.amounts.items()):
-            connection.execute(
-                "INSERT INTO resource_usage_amounts(usage_id,dimension,amount) VALUES (%s,%s,%s)",
-                (command.usage_id, dimension, amount),
-            )
         self._trigger_fault(AccountingFaultPoint.AFTER_USAGE_BEFORE_EVENT)
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.usage_recorded",
@@ -239,65 +156,23 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         return self._execute(command, self._settle)
 
     def _settle(self, connection, command):
-        reservation = self._reservation_for_update(connection, command.reservation_id)
-        if reservation[5] != "ACTIVE":
-            raise CommandRejected("RESOURCE_SETTLEMENT_ALREADY_APPLIED")
-        account = self._account_for_update(connection, reservation[0], command.envelope.expected_version)
-        usage_rows = connection.execute(
-            """SELECT ur.usage_id,ua.dimension,ua.amount
-               FROM resource_usage_records ur JOIN resource_usage_amounts ua USING(usage_id)
-               LEFT JOIN resource_settlement_usage su USING(usage_id)
-               WHERE ur.reservation_id=%s AND su.usage_id IS NULL
-               ORDER BY ur.usage_id,ua.dimension FOR UPDATE OF ur""",
-            (command.reservation_id,),
-        ).fetchall()
-        if not usage_rows:
-            raise CommandRejected("RESOURCE_RECONCILE_NOT_REQUIRED")
-        actual: Dict[str, int] = {}
-        usage_ids = set()
-        for usage_id, dimension, amount in usage_rows:
-            usage_ids.add(usage_id)
-            actual[dimension] = actual.get(dimension, 0) + amount
-        reserved = self._reservation_amounts(connection, command.reservation_id)
-        next_version = account[2] + 1
-        over_limit = False
-        for dimension in set(reserved) | set(actual):
-            consumed = actual.get(dimension, 0)
-            released = reserved.get(dimension, 0)
-            updated = connection.execute(
-                """UPDATE resource_balances
-                   SET consumed_amount=consumed_amount+%s,
-                       reserved_amount=reserved_amount-%s
-                   WHERE account_id=%s AND dimension=%s AND reserved_amount >= %s
-                   RETURNING limit_amount,consumed_amount,reserved_amount""",
-                (consumed, released, reservation[0], dimension, released),
-            ).fetchone()
-            if not updated:
-                raise CommandRejected("RESOURCE_SETTLEMENT_USAGE_CONFLICT")
-            over_limit = over_limit or updated[1] + updated[2] > updated[0]
-        self._trigger_fault(AccountingFaultPoint.AFTER_CONSUMED_BEFORE_RELEASE)
-        connection.execute(
-            """INSERT INTO resource_settlements(
-               settlement_id,reservation_id,account_id,project_id,account_version,
-               over_limit,command_id) VALUES (%s,%s,%s,%s,%s,%s,%s)""",
-            (command.settlement_id, command.reservation_id, reservation[0], reservation[1],
-             next_version, over_limit, command.envelope.command_id),
-        )
-        for usage_id in sorted(usage_ids):
+        next_version, status, account_id, actual, reserved, over_limit = (
             connection.execute(
-                "INSERT INTO resource_settlement_usage(settlement_id,usage_id) VALUES (%s,%s)",
-                (command.settlement_id, usage_id),
-            )
-        connection.execute(
-            "UPDATE resource_reservations SET status='SETTLED',terminal_at=now() WHERE reservation_id=%s",
-            (command.reservation_id,),
+                """SELECT account_version,threshold_status,account_id,actual,
+                          released,over_limit
+                   FROM public.hermes_settle_reservation_authority(
+                   %s,%s,%s,%s,%s,%s)""",
+                (command.settlement_id, command.reservation_id,
+                 command.envelope.project_id, command.envelope.expected_version,
+                 command.envelope.command_id,
+                 command.envelope.actor.actor_type.value),
+            ).fetchone()
         )
+        self._trigger_fault(AccountingFaultPoint.AFTER_CONSUMED_BEFORE_RELEASE)
         self._trigger_fault(AccountingFaultPoint.AFTER_SETTLEMENT_BEFORE_EVENT)
-        status = self._update_account_status(connection, reservation[0], next_version, over_limit)
-        self._invalidate_budget_facts(connection, reservation[0])
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.settled",
-            {"account_id": reservation[0], "reservation_id": command.reservation_id,
+            {"account_id": account_id, "reservation_id": command.reservation_id,
              "settlement_id": command.settlement_id, "actual": actual,
              "released": reserved, "over_limit": over_limit,
              "threshold_status": status, "entity_version": next_version},
@@ -338,33 +213,14 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
             ).fetchone()
             if preparation and preparation[0] == "FINALIZED":
                 raise CommandRejected("RESOURCE_RECONCILE_NOT_REQUIRED")
-            account = self._account_for_update(
-                connection, reservation[0], command.envelope.expected_version
-            )
-            amounts = self._reservation_amounts(
-                connection, command.reservation_id
-            )
-            for dimension, amount in amounts.items():
-                row = connection.execute(
-                    """UPDATE resource_balances
-                       SET reserved_amount=reserved_amount-%s
-                       WHERE account_id=%s AND dimension=%s
-                         AND reserved_amount >= %s RETURNING reserved_amount""",
-                    (amount, reservation[0], dimension, amount),
-                ).fetchone()
-                if not row:
-                    raise CommandRejected("RESOURCE_SETTLEMENT_USAGE_CONFLICT")
-            connection.execute(
-                """UPDATE resource_reservations
-                   SET status='EXPIRED',terminal_at=now()
-                   WHERE reservation_id=%s""",
-                (command.reservation_id,),
-            )
-            next_version = account[2] + 1
-            status = self._update_account_status(
-                connection, reservation[0], next_version
-            )
-            self._invalidate_budget_facts(connection, reservation[0])
+            next_version, status, _, _ = connection.execute(
+                """SELECT account_version,threshold_status,account_id,amounts
+                   FROM public.hermes_release_reservation_authority(
+                   %s,%s,%s,'EXPIRED',%s,%s)""",
+                (command.reservation_id, command.envelope.project_id,
+                 command.envelope.expected_version, command.envelope.command_id,
+                 command.envelope.actor.actor_type.value),
+            ).fetchone()
             action = "RELEASE_ORPHAN"
             receipt = CommandReceipt(
                 command.envelope.command_id, "APPLIED", "RESOURCE_RECONCILED",
@@ -372,11 +228,11 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
                 "action": action, "threshold_status": status},
             )
         connection.execute(
-            """INSERT INTO resource_reconcile_records(
-               reconcile_id,reservation_id,action,command_id)
-               VALUES (%s,%s,%s,%s)""",
+            """SELECT public.hermes_record_resource_reconcile_authority(
+               %s,%s,%s,%s,%s,%s)""",
             (command.reconcile_id, command.reservation_id, action,
-             command.envelope.command_id),
+             command.envelope.project_id, command.envelope.command_id,
+             command.envelope.actor.actor_type.value),
         )
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.reconciled",
@@ -394,46 +250,24 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         return self._execute(command, self._issue_budget_fact)
 
     def _issue_budget_fact(self, connection, command):
-        account = connection.execute(
-            """SELECT project_id,version,threshold_status FROM resource_accounts
-               WHERE account_id=%s FOR SHARE""", (command.account_id,)
-        ).fetchone()
-        if not account or account[0] != command.envelope.project_id:
-            raise CommandRejected("RESOURCE_ACCOUNT_NOT_FOUND")
-        if account[1] != command.envelope.expected_version:
-            raise CommandRejected("RESOURCE_ACCOUNT_VERSION_CONFLICT")
-        project = connection.execute(
-            "SELECT state,version FROM projects WHERE project_id=%s FOR SHARE",
-            (account[0],),
-        ).fetchone()
-        if not project or project[1] != command.project_version or project[0] != command.from_state:
-            raise CommandRejected("PROJECT_AUTHORITY_PRECONDITION_FAILED")
-        hard_stop = account[2] == "HARD_STOP"
-        connection.execute(
-            """UPDATE project_budget_facts SET valid=false,invalidated_at=now()
-               WHERE project_id=%s AND project_version=%s AND from_state=%s
-                 AND to_state=%s AND valid""",
-            (account[0], command.project_version, command.from_state, command.to_state),
-        )
-        connection.execute(
-            """INSERT INTO project_budget_facts(
-               budget_fact_id,project_id,project_version,from_state,to_state,status,
-               authority,budget_scope_id,version,resource_account_id,
-               resource_account_version,hard_stop)
-               VALUES (%s,%s,%s,%s,%s,%s,'budget_engine',%s,%s,%s,%s,%s)""",
-            (command.budget_fact_id, account[0], command.project_version,
-             command.from_state, command.to_state,
-             "HARD_STOP" if hard_stop else "OK", command.account_id, account[1],
-             command.account_id, account[1], hard_stop),
-        )
+        hard_stop = connection.execute(
+            """SELECT public.hermes_issue_budget_fact_authority(
+               %s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (command.budget_fact_id, command.account_id,
+             command.envelope.project_id, command.envelope.expected_version,
+             command.project_version, command.from_state, command.to_state,
+             command.envelope.command_id,
+             command.envelope.actor.actor_type.value),
+        ).fetchone()[0]
         self._trigger_fault(AccountingFaultPoint.AFTER_BUDGET_FACT_BEFORE_EVENT)
         event_id = self._append_event_and_outbox(
             connection, command.envelope, "budget.fact_issued",
             {"budget_fact_id": command.budget_fact_id, "account_id": command.account_id,
-             "resource_account_version": account[1], "hard_stop": hard_stop},
+             "resource_account_version": command.envelope.expected_version,
+             "hard_stop": hard_stop},
         )
         return CommandReceipt(command.envelope.command_id, "APPLIED", "BUDGET_FACT_ISSUED",
-            account[1], (event_id,), {"budget_fact_id": command.budget_fact_id,
+            command.envelope.expected_version, (event_id,), {"budget_fact_id": command.budget_fact_id,
             "hard_stop": hard_stop})
 
     def _execute(self, command, operation):
@@ -452,6 +286,15 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         except CommandRejected as exc:
             self._persist_rejection(command.envelope, request_hash, exc.code, exc.detail)
             raise
+        except psycopg.DatabaseError as exc:
+            primary = getattr(exc.diag, "message_primary", "") or str(exc)
+            code = primary.splitlines()[0]
+            if code.startswith("duplicate key value"):
+                code = "RESOURCE_ID_CONFLICT"
+            elif not code.startswith("RESOURCE_") and not code.startswith("ACCOUNTING_") and not code.startswith("PROJECT_"):
+                raise
+            self._persist_rejection(command.envelope, request_hash, code, "")
+            raise CommandRejected(code)
         except RuntimeError as exc:
             self._persist_fault_audit(command, exc)
             raise
