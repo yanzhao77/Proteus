@@ -187,10 +187,11 @@ class SelectionPostgresTests(unittest.TestCase):
                    WHERE action_id=%s""",
                 (repair["action_id"],),
             ).fetchone()[0])
-            self.assertFalse(connection.execute(
-                """SELECT EXISTS (
-                   SELECT 1 FROM information_schema.tables
-                   WHERE table_schema='public' AND table_name='execution_requests')"""
+            self.assertEqual(0, connection.execute(
+                "SELECT count(*) FROM execution_requests"
+            ).fetchone()[0])
+            self.assertEqual(0, connection.execute(
+                "SELECT count(*) FROM execution_queue_items"
             ).fetchone()[0])
             self.assertEqual(0, connection.execute(
                 """SELECT count(*) FROM event_log

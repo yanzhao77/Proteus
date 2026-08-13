@@ -19,6 +19,7 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | [Hermes Runtime Normative Specification V1.0](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) | authority, ownership, invariants, phases and traceability |
 | [Hermes Command and Event Protocol V1.0](docs/specs/Hermes_Command_Event_Protocol_V1.0.md) | Command, authoritative transaction, Event, Outbox, delivery and recovery |
 | [Hermes Execution Lease Protocol V1.0](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | ExecutionRequest, Lease, fencing, result admission and accounting interaction |
+| [Hermes P2 Execution Admission Normative Specification V1.0](docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md) | READY/admission separation, Reservation handoff, queue prerequisites, AgentRun/fencing and P2/P3 ownership |
 | [Hermes Conformance Test Specification V1.0](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | V1.2 §30.2 tests, fault injection and phase gates |
 
 ## ADR registry
@@ -66,6 +67,16 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0039 | Deterministic ActionScore and Conservative Defaults | ACCEPTED | P1 | Runtime §§13-14/26/30 | [ADR-0039](docs/adr/ADR-0039-deterministic-action-score.md) | — |
 | ADR-0040 | Action Selection, Conflict Rules and Immutable DecisionRecord | ACCEPTED | P1 | Runtime §§11-14/26/30 | [ADR-0040](docs/adr/ADR-0040-action-selection-decision-record.md) | — |
 | ADR-0041 | Selection/Reservation Atomic Bridge and Permission Boundary | ACCEPTED | P1 | Runtime §§13-14/18/26/30 | [ADR-0041](docs/adr/ADR-0041-selection-reservation-atomic-bridge.md) | ADR-0014 (Selection bridge details) |
+| ADR-0042 | Separate Task READY from Execution Admission | ACCEPTED | P2-0 | Runtime §§5/15/26/30; P2 Admission §§4-5 | [ADR-0042](docs/adr/ADR-0042-ready-vs-execution-admission.md) | — |
+| ADR-0043 | P2 Handoff of Selection-Created ResourceReservation | ACCEPTED | P2-0 | Runtime §§13-15/26/30; P2 Admission §8 | [ADR-0043](docs/adr/ADR-0043-selection-reservation-handoff.md) | ADR-0014/0041 handoff ambiguity |
+| ADR-0044 | ExecutionRequest PREPARING and QUEUED Semantics | ACCEPTED | P2-0 | Runtime §§15/17/26/30; P2 Admission §§5-7 | [ADR-0044](docs/adr/ADR-0044-execution-request-queued-semantics.md) | — |
+| ADR-0045 | Action Routing and Lock Scope Boundary | ACCEPTED | P2-0 | Runtime §§10/14-17/26; P2 Admission §§9/13 | [ADR-0045](docs/adr/ADR-0045-action-routing-and-lock-scope-boundary.md) | — |
+| ADR-0046 | AgentRun Evolution, Fencing and Stale Result Boundary | ACCEPTED | P2-0 | Runtime §§15-17/21/26/30; P2 Admission §§11-12 | [ADR-0046](docs/adr/ADR-0046-agentrun-fencing-stale-result-boundary.md) | — |
+| ADR-0047 | Capability, Context and Sandbox Freeze Before Queue | ACCEPTED | P2-0 | Runtime §§16/19/21/26; P2 Admission §10 | [ADR-0047](docs/adr/ADR-0047-capability-context-sandbox-freeze.md) | — |
+| ADR-0048 | P2 Capability Registry, Context Selector and Sandbox Compiler Minimums | ACCEPTED | P2-1 | Runtime §§16/19/21/26; P2 Admission §10 | [ADR-0048](docs/adr/ADR-0048-p2-capability-context-sandbox-minimums.md) | — |
+| ADR-0049 | P2 ExecutionRequest Preparation and Durable Queue Enqueue | ACCEPTED | P2-2 | Runtime §§15-18/26/30; P2 Admission §§5-8/14-17 | [ADR-0049](docs/adr/ADR-0049-p2-execution-request-queue-preparation.md) | — |
+| ADR-0050 | P2 Scheduler Lease, Fencing and Lock Authority | ACCEPTED | P2-3 | Runtime §§15-18/26/30; Lease §§6-16; P2 Admission §§11-13 | [ADR-0050](docs/adr/ADR-0050-p2-scheduler-lease-fencing-lock-authority.md) | — |
+| ADR-0051 | P2 Worker Lifecycle, Fenced Result Admission and Settlement Coupling | ACCEPTED | P2-4 | Runtime §§14-17/26/30; Lease §§7-17; P2 Admission §§11-12/15/17-21 | [ADR-0051](docs/adr/ADR-0051-p2-worker-lifecycle-fenced-result-admission.md) | — |
 
 ## Migrated decisions
 

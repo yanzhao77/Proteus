@@ -10,6 +10,7 @@ Related documents:
 - [Core Runtime Design V1.2](../Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md)
 - [Command and Event Protocol](Hermes_Command_Event_Protocol_V1.0.md)
 - [Execution Lease Protocol](Hermes_Execution_Lease_Protocol_V1.0.md)
+- [P2 Execution Admission Normative Specification](Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
 - [Conformance Test Specification](Hermes_Conformance_Test_Spec_V1.0.md)
 - [ADR index](../../ARCHITECTURE_DECISIONS.md)
 
@@ -285,6 +286,14 @@ The fourteen V1.2 §26 invariants are incorporated and MUST be enforced as follo
 Resource Accounting MUST be complete before distributed Worker scheduling is declared conformant, but MUST NOT block all P0 work.
 
 P0 MUST persist the minimum AgentRun identity, Project/Task scope and independent execution context needed to authorize CompletionClaim and VerificationResult. This identity authority is not P2 execution scheduling: ExecutionRequest, Queue, Lease/fencing, heartbeat, spawn, retry and complete Worker lifecycle remain P2 requirements.
+
+P2 execution implementation MUST follow the P2 Execution Admission Normative
+Specification before claiming Queue, Scheduler, Lease/Fencing or Worker runtime
+conformance. In particular, Task `READY` is not execution-admissible, P2 binds
+Selection-created ResourceReservations instead of reserving twice, and
+ExecutionRequest `QUEUED` requires Capability, Context, Sandbox, Policy/Risk,
+VerificationPlan, Artifact, Reservation and lock-scope prerequisites to be
+frozen.
 
 ## 22. V1.0 conflict and evolution notes
 

@@ -162,7 +162,13 @@ class PolicyRiskPostgresTests(unittest.TestCase):
                 """SELECT EXISTS (
                    SELECT 1 FROM information_schema.tables
                    WHERE table_schema='public'
-                     AND table_name IN ('selected_actions','execution_requests'))"""
+                     AND table_name='selected_actions')"""
+            ).fetchone()[0])
+            self.assertEqual(0, connection.execute(
+                "SELECT count(*) FROM execution_requests"
+            ).fetchone()[0])
+            self.assertEqual(0, connection.execute(
+                "SELECT count(*) FROM execution_queue_items"
             ).fetchone()[0])
 
     def test_hash_stale_and_version_rejections(self):
