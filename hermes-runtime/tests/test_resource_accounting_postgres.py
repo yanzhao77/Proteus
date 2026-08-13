@@ -298,6 +298,39 @@ class ResourceAccountingPostgresTests(unittest.TestCase):
         with self.assertRaisesRegex(CommandRejected, "RESOURCE_HARD_STOP"):
             self.reserve("blocked", 2, {"llm_tokens": 0})
 
+    def test_actual_above_reservation_enters_hard_stop_before_account_limit(self):
+        self.create_account({"llm_tokens": 100})
+        self.reserve("estimate", 0, {"llm_tokens": 80})
+        self.usage(
+            "estimate", "reservation-estimate", "owner-estimate",
+            {"llm_tokens": 90},
+        )
+        receipt = self.accounting.settle(SettleReservation(
+            self.envelope("resource.settle", "estimate-settle", 1),
+            "settlement-estimate", "reservation-estimate",
+        ))
+        self.assertTrue(receipt.response["over_limit"])
+        self.assertEqual((90, 0), self._balance("llm_tokens"))
+        self.assertEqual("HARD_STOP", receipt.response["threshold_status"])
+
+    def test_late_usage_after_settlement_is_rejected_and_audited(self):
+        self.create_account({"llm_tokens": 100})
+        self.reserve("closed", 0, {"llm_tokens": 40})
+        self.usage("closed", "reservation-closed", "owner-closed", {"llm_tokens": 30})
+        self.accounting.settle(SettleReservation(
+            self.envelope("resource.settle", "closed-settle", 1),
+            "settlement-closed", "reservation-closed",
+        ))
+        with self.assertRaisesRegex(CommandRejected, "RESOURCE_RESERVATION_NOT_ACTIVE"):
+            self.usage(
+                "late", "reservation-closed", "owner-closed",
+                {"llm_tokens": 1},
+            )
+        self.assertEqual(1, self.store.scalar(
+            """SELECT count(*) FROM audit_records
+               WHERE reason_code='RESOURCE_RESERVATION_NOT_ACTIVE'"""
+        ))
+
     def test_budget_fact_binds_account_version_and_becomes_stale(self):
         self.create_account({"llm_tokens": 100})
         fact = IssueProjectBudgetFact(

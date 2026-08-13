@@ -408,6 +408,9 @@ BEGIN
     IF NOT FOUND OR reservation_row.owner_type<>p_owner_type OR reservation_row.owner_id<>p_owner_id THEN
         RAISE EXCEPTION 'RESOURCE_RESERVATION_OWNER_MISMATCH';
     END IF;
+    IF reservation_row.status<>'ACTIVE' THEN
+        RAISE EXCEPTION 'RESOURCE_RESERVATION_NOT_ACTIVE';
+    END IF;
     IF p_currency IS DISTINCT FROM reservation_row.currency THEN RAISE EXCEPTION 'RESOURCE_CURRENCY_MISMATCH'; END IF;
     IF EXISTS(SELECT 1 FROM public.resource_usage_records WHERE sample_id=p_sample_id) THEN
         RAISE EXCEPTION 'RESOURCE_USAGE_DUPLICATE_CONFLICT';
@@ -476,7 +479,8 @@ BEGIN
         IF NOT FOUND THEN RAISE EXCEPTION 'RESOURCE_SETTLEMENT_USAGE_CONFLICT'; END IF;
         actual := actual || jsonb_build_object(item.dimension,item.consumed);
         released := released || jsonb_build_object(item.dimension,item.reserved);
-        over_limit := over_limit OR balance_row.consumed_amount+balance_row.reserved_amount>balance_row.limit_amount;
+        over_limit := over_limit OR item.consumed>item.reserved
+          OR balance_row.consumed_amount+balance_row.reserved_amount>balance_row.limit_amount;
     END LOOP;
     account_version := account_row.version+1; account_id := reservation_row.account_id;
     INSERT INTO public.resource_settlements(settlement_id,reservation_id,account_id,project_id,

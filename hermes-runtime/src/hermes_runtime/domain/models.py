@@ -10,6 +10,11 @@ class ActorType(str, Enum):
     VERIFIER = "verifier"
     SCHEDULER = "scheduler"
     CONTROL_PLANE = "control_plane"
+    DIAGNOSIS_ENGINE = "diagnosis_engine"
+    ACTION_PLANNER = "action_planner"
+    POLICY_ENGINE = "policy_engine"
+    RISK_ENGINE = "risk_engine"
+    ACTION_SELECTION = "action_selection"
     RECOVERY_CONTROLLER = "recovery_controller"
     SYSTEM_OPERATOR = "system_operator"
 

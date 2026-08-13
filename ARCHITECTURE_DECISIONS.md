@@ -56,6 +56,16 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0029 | Minimal P0 AgentRun Authority | ACCEPTED | P0/P2 boundary | Runtime §21 | [ADR-0029](docs/adr/ADR-0029-minimal-p0-agent-run-authority.md) | — |
 | ADR-0030 | Worker and Verifier Run/Context Independence | ACCEPTED | P0 | Runtime Invariant 14 | [ADR-0030](docs/adr/ADR-0030-worker-verifier-run-context-independence.md) | ADR-0012 |
 | ADR-0031 | Legacy VerificationResult and Run Reference Migration | ACCEPTED | P0 migration | Runtime §15 | [ADR-0031](docs/adr/ADR-0031-legacy-verification-result-migration.md) | — |
+| ADR-0032 | Resource Account Budget Fact Bridge | ACCEPTED | P1 | Runtime §§5/13 | [ADR-0032](docs/adr/ADR-0032-resource-account-budget-fact-bridge.md) | — |
+| ADR-0033 | AnalysisContext Observed-Sequence Authority | ACCEPTED | P1 | Runtime §§7-9/18 | [ADR-0033](docs/adr/ADR-0033-analysis-context-observed-sequence-authority.md) | — |
+| ADR-0034 | Situation Fingerprint and Lifecycle Authority | ACCEPTED | P1 | Runtime §§8/21/28 | [ADR-0034](docs/adr/ADR-0034-situation-fingerprint-and-lifecycle-authority.md) | — |
+| ADR-0035 | Deterministic Diagnosis Rule Authority | ACCEPTED | P1 | Runtime §§9/19-21/25-28/30 | [ADR-0035](docs/adr/ADR-0035-diagnosis-rule-authority.md) | — |
+| ADR-0036 | Candidate Action Planner and Versioned Action Registry | ACCEPTED | P1 | Runtime §§10-14/19-21/25-28/30 | [ADR-0036](docs/adr/ADR-0036-candidate-action-planner-registry.md) | — |
+| ADR-0037 | Policy Bundle Authority and Constraint Merge | ACCEPTED | P1 | Runtime §§11/14/23/26/28/30 | [ADR-0037](docs/adr/ADR-0037-policy-bundle-authority.md) | — |
+| ADR-0038 | Deterministic Risk Model Authority | ACCEPTED | P1 | Runtime §§12/14/26/28/30 | [ADR-0038](docs/adr/ADR-0038-deterministic-risk-model-authority.md) | — |
+| ADR-0039 | Deterministic ActionScore and Conservative Defaults | ACCEPTED | P1 | Runtime §§13-14/26/30 | [ADR-0039](docs/adr/ADR-0039-deterministic-action-score.md) | — |
+| ADR-0040 | Action Selection, Conflict Rules and Immutable DecisionRecord | ACCEPTED | P1 | Runtime §§11-14/26/30 | [ADR-0040](docs/adr/ADR-0040-action-selection-decision-record.md) | — |
+| ADR-0041 | Selection/Reservation Atomic Bridge and Permission Boundary | ACCEPTED | P1 | Runtime §§13-14/18/26/30 | [ADR-0041](docs/adr/ADR-0041-selection-reservation-atomic-bridge.md) | ADR-0014 (Selection bridge details) |
 
 ## Migrated decisions
 

@@ -54,6 +54,11 @@ class PostgresResourceAccountingStore(PostgresProjectStore):
         ThresholdPolicy(warn, gate, hard_stop).validate()
         return self._execute(command, self._create_account)
 
+    def record_security_rejection(self, command, code: str, detail: str) -> None:
+        self._persist_rejection(
+            command.envelope, self._accounting_hash(command), code, detail
+        )
+
     def _create_account(self, connection, command):
         warn, gate, hard_stop = command.thresholds_basis_points
         connection.execute(

@@ -26,7 +26,7 @@ class ResourceAccounting:
         if actor.actor_type not in {
             ActorType.CONTROL_PLANE, ActorType.RECOVERY_CONTROLLER
         }:
-            raise CommandRejected("ACCOUNTING_AUTHORITY_REQUIRED")
+            self._reject(command, "ACCOUNTING_AUTHORITY_REQUIRED")
         return self._apply(command, "resource.reconcile", "reconcile", False)
 
     def issue_budget_fact(self, command):
@@ -37,9 +37,17 @@ class ResourceAccounting:
     def _apply(self, command, command_type, method, check_actor=True):
         envelope = command.envelope
         if check_actor and envelope.actor.actor_type is not ActorType.CONTROL_PLANE:
-            raise CommandRejected("ACCOUNTING_AUTHORITY_REQUIRED")
+            self._reject(command, "ACCOUNTING_AUTHORITY_REQUIRED")
         if envelope.command_type != command_type:
-            raise CommandRejected("ACCOUNTING_COMMAND_SEMANTICS_MISMATCH")
+            self._reject(command, "ACCOUNTING_COMMAND_SEMANTICS_MISMATCH")
         if not envelope.reason.strip():
-            raise CommandRejected("COMMAND_REASON_REQUIRED")
-        return getattr(self._store, method)(command)
+            self._reject(command, "COMMAND_REASON_REQUIRED")
+        try:
+            return getattr(self._store, method)(command)
+        except CommandRejected as exc:
+            self._store.record_security_rejection(command, exc.code, exc.detail)
+            raise
+
+    def _reject(self, command, code):
+        self._store.record_security_rejection(command, code, "")
+        raise CommandRejected(code)
