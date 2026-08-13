@@ -5,6 +5,20 @@
 **Phase:** P2, with contracts specified before implementation  
 **Related:** [Runtime Normative Specification](Hermes_Runtime_Normative_Spec_V1.0.md), [Command/Event Protocol](Hermes_Command_Event_Protocol_V1.0.md), [Conformance Tests](Hermes_Conformance_Test_Spec_V1.0.md)
 
+## 0. P2-0 amendment: admission and reservation handoff
+
+[Hermes P2 Execution Admission Normative Specification V1.0](Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
+is the controlling P2-0 amendment for execution admission, Reservation handoff,
+`PREPARING`/`QUEUED` semantics, Capability/Context/Sandbox freeze points,
+AgentRun evolution and P2/P3 test ownership.
+
+Where this protocol says PREPARING reserves resources, read it as the pre-P1
+generic lifecycle. After P1 Selection, non-zero selected actions already have an
+ACTIVE ResourceReservation. P2 MUST bind and hand off that existing Reservation
+to the ExecutionRequest and MUST NOT create a second Reservation for the same
+DecisionRecord/SelectedAction/Preparation. `QUEUED` MUST mean all admission
+prerequisites are frozen and valid, not merely that a selected action exists.
+
 ## 1. Scope and non-goals
 
 This protocol defines ExecutionRequest queueing, PostgreSQL Lease, Fencing Token, result admission, cancellation, retry and accounting interaction. It does not choose business actions, diagnose failures, produce Verification verdicts, require Kubernetes/Kafka/Redis, or define a fixed Worker organization.
@@ -13,7 +27,9 @@ This protocol defines ExecutionRequest queueing, PostgreSQL Lease, Fencing Token
 
 - Control Plane creates an ExecutionRequest only from a selected, allowed Action.
 - Queue persists runnable requests and priority.
-- Scheduler matches capabilities, reserves resources, acquires Lease and monitors execution.
+- Scheduler leases only already admitted `QUEUED` requests, renews/takes over
+  leases and monitors execution. Capability, Context, Sandbox and Reservation
+  handoff are completed before queueing by admission/preparation authority.
 - Worker executes one leased request under a CompiledSandboxProfile.
 - Execution Adapter returns structured Result and metrics, never state transitions.
 - Verification runs independently after admitted Artifact creation.
@@ -48,7 +64,7 @@ The database clock MUST define expiry. Client clocks MUST NOT decide ownership.
 
 ## 5. Resource reservation before Lease
 
-For an Action that consumes metered resources:
+For an Action that consumes metered resources in the pre-P1 generic model:
 
 ```text
 Selected Action
@@ -58,7 +74,13 @@ Selected Action
   -> Scheduler may acquire Lease
 ```
 
-Reservation and QUEUED transition SHOULD share one local transaction. If request creation fails after reservation, the transaction MUST roll back or reconcile MUST release an orphan reservation. A Lease MUST NOT be granted without a valid reservation when the resource dimension requires one.
+After P1, Selection has already created ACTIVE ResourceReservation for non-zero
+selected actions. P2 request preparation binds that Reservation and transitions
+to `QUEUED` in one local transaction. If request preparation fails after a
+durable preparation record, it MUST either roll back, mark deterministic
+`PREPARATION_FAILED` and release, or retain only under a bounded idempotent retry
+and reconcile policy. A Lease MUST NOT be granted without a valid Reservation
+handoff when the resource dimension requires one.
 
 ## 6. Atomic acquire
 
@@ -79,6 +101,32 @@ RETURNING fencing_token, lease_expires_at, version;
 ```
 
 Actual SQL MAY differ, but two contenders MUST result in exactly one successful current owner. “SELECT then UPDATE”, process mutex and unfenced distributed lock are forbidden correctness foundations.
+
+### 6.1 P2-3 authority table amendment
+
+The P2-3 implementation keeps P2-2 `execution_requests` and
+`execution_queue_items` immutable as admission/enqueue snapshots. Scheduler
+state is authoritative in separate current tables:
+
+```text
+execution_request_current_states
+execution_queue_current_states
+execution_leases
+execution_fencing_counters
+execution_lock_ownerships
+```
+
+Therefore the immutable snapshot column `execution_requests.request_state =
+'QUEUED'` means “admitted and originally queued,” while
+`execution_request_current_states.request_state` owns the mutable
+`QUEUED <-> LEASED` Scheduler state. This avoids rewriting audit facts while
+preserving the protocol invariant that the current request has at most one
+active Lease.
+
+P2-3 uses the versioned profile `p2-default/1`: 30000 ms initial TTL, 10000 ms
+renew interval, 30000 ms maximum extension, 300000 ms maximum lifetime, immediate
+takeover after PostgreSQL-clock expiry, zero requeue backoff and acquisition
+batch size one.
 
 ## 7. Fencing Token
 
@@ -118,6 +166,27 @@ sequenceDiagram
 ```
 
 Result admission MUST validate request, Worker/run identity, current owner, token, policy constraints, declared export paths, Artifact hashes and usage schema. It creates CompletionClaim/Artifact Candidates, not PASS.
+
+### 9.1 P2-4 implementation checkpoint
+
+P2-4 implements Result admission through the existing P0 AgentRun,
+CompletionClaim, Artifact and P1 Accounting models. Worker admission first
+acknowledges a current ACTIVE Lease and moves the ExecutionRequest from `LEASED`
+to `RUNNING`. Later Artifact Candidate, Evidence Candidate, Usage sample and
+terminal Result writes must carry the same current request/run/attempt/Lease
+version/fencing token/context binding.
+
+An accepted terminal Result closes execution authority, not task correctness:
+`ExecutionResult(SUCCEEDED)` may promote the selected Artifact Candidate and
+create a CompletionClaim, but it does not create a VerificationResult and does
+not mark a Task `PASSED` or `FAILED`.
+
+When terminal Result admission succeeds, the same PostgreSQL transaction writes
+the immutable Result, CompletionClaim/settlement links, ResourceReservation
+settlement or release, terminal Run/Request/Queue state, Events, Outbox and
+CommandReceipt. The Lease row remains a Lease lifecycle record: it is moved to
+`RELINQUISHED` and its business terminal outcome is recorded as terminal reason;
+Lease state is not overloaded with `SUCCEEDED` or `FAILED`.
 
 ## 10. Two Schedulers compete
 
@@ -234,16 +303,32 @@ allocation
 
 ## 16. Lock scopes and concurrency
 
-Write Actions for one Task are serial by default. Read-only diagnosis MAY run concurrently when Policy and Budget allow. Locks use declared scopes:
+Write Actions for one Task are serial by default. Read-only diagnosis MAY run concurrently when Policy and Budget allow. P2-3 uses the ADR-0045 declared scopes:
 
 | Scope | Protects |
 | --- | --- |
-| project | global project operation such as packaging or migration |
-| path | overlapping filesystem write set |
-| component | service/module mutation |
-| resource | database, environment, external account or deployment target |
+| repository | repository-level mutation |
+| workspace | workspace-level mutation |
+| branch_ref | branch/ref mutation |
+| artifact_namespace | artifact namespace mutation |
+| external_environment | external account/environment mutation |
+| deployment_target | deployment target mutation |
 
-Locks MUST be acquired in canonical order `(project, resource, component, path)` to reduce deadlock. A Lease grants execution ownership but does not replace all domain locks.
+Locks MUST be acquired in ADR-0045 canonical kind order and stable scope order to
+reduce deadlock. Lock ownership is bound to Lease ID and fencing token; lock
+expiry MUST NOT exceed Lease expiry. A Lease grants execution ownership but does
+not replace all domain locks.
+
+P2-3 Queue fairness is best effort:
+
+```text
+priority DESC -> available_at ASC -> enqueued_at ASC -> queue_item_id ASC
+```
+
+`FOR UPDATE SKIP LOCKED` MAY skip a row already locked by another Scheduler
+claim transaction, and a row whose lock scopes conflict with an active unexpired
+Lease MAY be skipped so another eligible item can run. Strict global fairness,
+starvation observation and operational remediation remain P3.
 
 ## 17. Worker and Verification isolation
 

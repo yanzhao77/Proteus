@@ -6,7 +6,7 @@
 
 把一个想法持续推进为可验证、可交付的软件项目。默认自主运行，人类按风险介入，所有关键结论都有证据支撑。
 
-[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收](docs/P0_ACCEPTANCE_MATRIX.md) · [P1 验收](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md)
+[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收](docs/P0_ACCEPTANCE_MATRIX.md) · [P1 验收](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) · [P2 验收](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)
 
 </div>
 
@@ -23,9 +23,9 @@ Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时�
 - **Failure Is Feedback**：失败进入诊断、修复和重规划闭环，而不是直接终止流程。
 - **Everything Is Recoverable**：命令幂等、事件可重放、投递可恢复，进程崩溃不应破坏业务事实。
 
-当前仓库已经完成 **P0 权威骨架** 和 **P1 自治决策链**。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord。项目下一阶段是 **P2 动态执行与反馈闭环**。
+当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**，以及 **P2 Slice 1-3 的执行准备与调度权威链**。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁。
 
-当前边界停在 **selected execution intent**：系统能够可靠地决定下一步做什么、解释为什么选择它并原子预留资源，但尚未创建 ExecutionRequest，也尚未调度 Worker 执行。因此它是一个经过并发与权限约束验证的核心运行时，而不是可直接部署的完整自主软件工厂。
+项目当前正在开发 **P2 Slice 4**：AgentRun Worker 生命周期、fenced Result/Usage/Artifact candidate admission、最小 stale-result quarantine 和 settlement coupling。领域模型、application command、PostgreSQL adapter 和 `0016_worker_lifecycle_result_admission.sql` 已落地，并有 5 个领域测试、8 个 PostgreSQL 集成/并发/故障注入测试和 6 个权限测试。P2-4 核心验收项已具备 PASS 证据，但真实 Docker/Process sandbox 执行、外部 Worker spawn 和 P3 完整 quarantine/reconcile 运维仍未实现。
 
 ## 核心闭环
 
@@ -37,14 +37,15 @@ flowchart LR
     P --> C["Policy + Risk"]
     C --> B["Budget + ActionScore"]
     B --> R["DecisionRecord + Reservation"]
-    R -. "P2" .-> X["ExecutionRequest"]
-    X -.-> W["Worker + Sandbox"]
+    R --> X["ExecutionRequest"]
+    X --> L["Queue + Lease + Fencing"]
+    L -. "P2-4" .-> W["Worker + Sandbox"]
     W -.-> A["Artifact + Evidence"]
     A -.-> V["Independent Verification"]
     V -. "FAIL feedback" .-> E
 ```
 
-实线部分是已经完成的 P1 自治决策链，虚线部分属于 P2。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
+实线部分是已经完成并具备测试证据的 P0、P1 和 P2 Slice 1-3 权威链；从 Worker 启动开始的虚线部分属于正在开发的 P2 Slice 4 及后续反馈闭环。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
 
 ## 当前实现
 
@@ -62,12 +63,14 @@ flowchart LR
 | Policy / Risk | P1 已完成 | DENY/REQUIRE_HUMAN fail-closed；Risk 只评估风险，不授予权限 |
 | Action Selection | P1 已完成 | 预算可行性、确定性评分、冲突过滤、不可变 DecisionRecord |
 | Selection / Reservation bridge | P1 已完成 | SelectedAction、Reservation、Event、Outbox、Receipt 同事务提交 |
-| ExecutionRequest / Scheduler | P2 待实现 | Queue、Lease/Fencing、heartbeat、取消、Worker assignment |
-| Capability / Sandbox / Worker | P2 待实现 | Capability Registry、Context Bundle、SandboxProfile、真实执行回流 |
+| Capability / Context / Sandbox | P2-1 已完成 | 版本化 WorkerTemplate、确定性匹配、不可变 Context Bundle、fail-closed SandboxProfile 编译 |
+| ExecutionRequest / Queue | P2-2 已完成 | admission fail-closed、P1 Reservation 单次交接、冻结输入、同事务 Queue/Event/Outbox/Receipt |
+| Scheduler / Lease / Fencing | P2-3 已完成 | PostgreSQL 原子 claim、单调 token、续租/过期接管/重排队、执行锁与权限隔离 |
+| Worker lifecycle / Result admission | P2-4 核心已实现 | AgentRun、current-token candidate/result、quarantine、settlement 和 19 项专项测试；真实 sandbox/外部 Worker 与 P3 运维仍待完成 |
 | Human Gate / Recovery | P3 待实现 | Gate lifecycle、resume、checkpoint、reconcile、late-result quarantine |
 | Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
-P0 和 P1 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md) 以及各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
+P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
 
 ## 快速开始
 
@@ -123,7 +126,7 @@ HERMES_TEST_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_te
 
 如果没有显式设置 `HERMES_TEST_DATABASE_URL`，测试发现仍可运行，但 PostgreSQL 集成测试会被跳过；SQLite 或 mock 不被视为 PostgreSQL authority/concurrency 语义的有效证明。
 
-当前 P0/P1 回归基线共发现 **275 项测试**。P1 验收矩阵记录 PostgreSQL 14 和 PostgreSQL 16 的完整回归结果；阶段验收不能把跳过的数据库、并发或权限测试计为通过。
+当前 P0-P2 回归基线共发现 **341 项测试**。2026-08-13 在 PostgreSQL 16 上执行完整套件为 **341/341 通过、0 跳过**，其中包括 5 个 P2-4 领域测试、8 个 PostgreSQL 集成/并发/故障注入测试和 6 个权限测试。阶段验收不能把跳过的数据库、并发或权限测试计为通过。
 
 ### 执行一次 Outbox Relay
 
@@ -168,6 +171,7 @@ Proteus/
 | [Runtime Normative Specification](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) | authority、ownership、阶段和 traceability 的规范来源 |
 | [Command & Event Protocol](docs/specs/Hermes_Command_Event_Protocol_V1.0.md) | 命令事务、事件、Outbox、投递与恢复协议 |
 | [Execution Lease Protocol](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | lease、fencing、result admission 与 accounting 交互 |
+| [P2 Execution Admission Specification](docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md) | P2 admission、Reservation handoff、Queue、Lease、Worker 与 P2/P3 责任边界 |
 | [Conformance Test Specification](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | 一致性测试、故障注入与阶段门槛 |
 | [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md) | P0 权威骨架验收结果 |
 | [P1 Resource Accounting](docs/P1_RESOURCE_ACCOUNTING_ACCEPTANCE_MATRIX.md) | P1 Slice 1 资源核算验收结果 |
@@ -176,6 +180,7 @@ Proteus/
 | [P1 Candidate Action Planner](docs/P1_CANDIDATE_ACTION_PLANNER_ACCEPTANCE_MATRIX.md) | P1 Slice 4 候选行动规划验收结果 |
 | [P1 Policy and Risk](docs/P1_POLICY_RISK_ACCEPTANCE_MATRIX.md) | P1 Slice 5 策略与风险验收结果 |
 | [P1 Action Selection](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) | P1 Slice 6 评分、选择、DecisionRecord 与预留验收结果 |
+| [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md) | P2 Slice 1-4 的执行准备、调度、Worker/result admission 状态与证据 |
 | [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 规范优先级、ADR 状态与待决问题 |
 
 当文档之间出现冲突时，请遵循 [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) 中定义的 authority order，而不是依据文件名或版本号自行推断。

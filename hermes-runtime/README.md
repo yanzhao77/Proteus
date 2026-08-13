@@ -1,4 +1,4 @@
-# Hermes Runtime: P0 Authority plus P1 Resource, Situation, Diagnosis and Planner Slices
+# Hermes Runtime: P0-P2 Authority Runtime Slices
 
 This package implements these authority, delivery and accounting slices:
 
@@ -64,14 +64,92 @@ Current CandidateAction + current PolicyDecision + current RiskAssessment
 -> immutable DecisionRecord + SelectedAction refs
 -> atomic ResourceReservation + budget.reserved + decision.recorded
 -> Outbox + CommandReceipt
+
+SelectedAction execution intent
+-> versioned Capability schema + immutable WorkerTemplate revision
+-> separate availability/admission state
+-> deterministic capability match record with exact revision/version
+-> immutable Context Bundle manifest refs/hashes
+-> backend-neutral `contract-only/1.0` SandboxProfile hash
+-> Event/Outbox/CommandReceipt
+
+Admitted SelectedAction execution
+-> `execution.prepare_request` fail-closed admission validation
+-> existing P1 ResourceReservation handoff/binding
+-> immutable `QUEUED` ExecutionRequest snapshot
+-> durable pending PostgreSQL Queue item
+-> `execution.request_prepared` + `execution.queued`
+-> Outbox + CommandReceipt
+
+QUEUED ExecutionRequest
+-> Scheduler registration/admission
+-> PostgreSQL durable Queue claim
+-> atomic execution lock acquisition
+-> monotonic fencing token allocation
+-> ACTIVE Lease in current authority tables
+-> renew / PostgreSQL-clock expiry takeover / relinquish requeue
+-> `execution.lease_*` Events
+-> Outbox + CommandReceipt
+
+LEASED ExecutionRequest
+-> `execution.start_run` Worker admission
+-> P2 WORKER AgentRun binding on the existing P0 AgentRun model
+-> RUNNING current state
+-> fenced Artifact/Evidence Candidate and Usage sample admission
+-> immutable structured ExecutionResult
+-> current-token terminal admission or stale-payload quarantine
+-> CompletionClaim bridge without Verification PASS
+-> ResourceReservation settlement/release in the same transaction
+-> terminal Request/Queue/Run state and Lease/lock release
+-> Events + Outbox + CommandReceipt
 ```
 
-It does not implement Web APIs, Human Gate lifecycle, ExecutionRequest,
-Scheduler/Lease/fencing, Worker selection, SandboxProfile compilation, dynamic
-Capability Registry, Agent execution coupling, Kafka, Redis, Kubernetes, LLM
-planning/policy/risk/selection or full Event Sourcing. FI-16/FI-17 are closed
-only for the Accounting preparation and settlement portions; P2/P3 execution
-coupling remains future work.
+It does not yet provide an external Worker process manager/spawn service, real
+Docker/Process sandbox execution, Web APIs, Human Gate lifecycle, Kafka, Redis,
+Kubernetes, LLM planning/policy/risk/selection, P2-5 feedback/replan loop, P3
+quarantine/reconcile operations or full Event Sourcing.
+FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
+P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
+Worker stale-token isolation and FI-17 P2 run/settlement coupling. Full P3
+quarantine operations and reconcile remain future work.
+
+P2 execution contracts are specified and tracked in
+[`docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
+and [`docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md`](../docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md).
+They define that Task `READY` is not execution-admissible, P2 hands off the
+existing P1 Selection Reservation instead of reserving again, and `QUEUED` means
+Capability, Context, Sandbox, Policy/Risk, Reservation, VerificationPlan,
+Artifact and lock prerequisites are already frozen.
+
+P2-1 implements only the freeze-object prerequisites: Capability Registry,
+WorkerTemplate revision/availability, Context Bundle manifest and
+SandboxProfile Compiler.
+
+P2-2 implements only the preparation/enqueue side: `execution.prepare_request`,
+immutable `QUEUED` ExecutionRequest, Reservation binding/handoff, durable pending
+Queue item, same-transaction Events/Outbox/Receipt and stable rejection receipts.
+`PREPARING` is transaction-local in the current implementation; no durable
+runnable `PREPARING` row exists. P2-2 still does not claim Queue items, acquire
+leases, mint fencing tokens, spawn Workers, execute sandboxed code, accept
+Results or settle execution usage.
+
+P2-3 implements Scheduler/Lease/Fencing/Lock authority only:
+`scheduler.register`, `scheduler.acquire_lease`, `scheduler.renew_lease`,
+`scheduler.relinquish_lease` and `validate_current_lease`. It keeps P2-2
+snapshot tables immutable and stores mutable Scheduler state in
+`execution_request_current_states`, `execution_queue_current_states`,
+`execution_leases`, `execution_fencing_counters` and
+`execution_lock_ownerships`.
+
+P2-4 implements the Worker lifecycle and fenced Result admission core. Migration
+`0016_worker_lifecycle_result_admission.sql` establishes database-side Worker
+assignment, AgentRun binding, candidate admission, minimal quarantine,
+CompletionClaim bridging, terminal Result admission and settlement/release
+coupling. The domain model, application commands and PostgreSQL adapter are
+present, with five domain tests, eight PostgreSQL integration/concurrency/
+fault-injection tests and six permission tests. Real Docker/Process sandbox
+execution, external Worker spawning, P2-5 feedback/replan and P3 quarantine
+retention/adoption/reconcile operations remain outside this slice.
 
 ## Authority boundary
 
@@ -126,14 +204,78 @@ coupling remains future work.
   and CommandReceipt finalization.
 - SelectedAction refs are execution intent only. They are not ExecutionRequest,
   queue item, lease, Worker assignment, Sandbox profile or Human Gate state.
+- `hermes_capability_runtime` executes only guarded Capability/Context/Sandbox
+  functions. It cannot directly mutate WorkerTemplate revisions, availability,
+  Context Bundles, SandboxProfiles, upstream Selection/Policy/Risk/Accounting
+  state, Project or Task authority.
+- WorkerTemplate trust uses `UNTRUSTED < STANDARD < ELEVATED < PRIVILEGED`.
+  Trust changes require a new immutable revision; availability is mutable but
+  versioned separately.
+- Context Bundle selectors are typed and bounded. Bundles store refs, versions
+  and hashes only; secret values are rejected before authority writes.
+- SandboxProfile compilation uses `contract-only/1.0`, intersects allowlists,
+  unions deny/mitigation requirements, tightens numeric upper bounds and rejects
+  unknown or unsupported mandatory constraints.
+- `hermes_execution_runtime` executes only the guarded
+  `execution.prepare_request` path. It cannot directly insert or update
+  ExecutionRequest, Reservation binding or Queue tables.
+- ExecutionRequest `QUEUED` means admission inputs are frozen, exact versions and
+  hashes are bound, the P1 Reservation is handed off once, and a future Scheduler
+  may attempt Lease acquisition. It does not mean leased, running, succeeded or
+  Task `PASSED`.
+- Lock intents are normalized, deduplicated and frozen on the Request. Actual
+  lock/Lease ownership and fencing are owned by P2-3 Scheduler authority.
+- `hermes_scheduler_runtime` executes only guarded Scheduler functions. It
+  cannot directly mutate Lease, token, lock, Queue or Request current-state
+  tables, and Worker/Verifier/Capability/Accounting/Planner/Execution runtimes
+  cannot claim Queue items or mint fencing tokens.
+- Lease profile `p2-default/1` uses integer millisecond limits: 30000 initial
+  TTL, 10000 renew interval, 30000 max extension, 300000 max lifetime, immediate
+  takeover after DB-clock expiry, zero requeue backoff and single-item claim.
+- Queue claim fairness is best effort by priority, available_at, enqueued_at and
+  queue_item_id; locked or scope-conflicting head items may be skipped so another
+  eligible item can run.
+- `hermes_worker_runtime` executes only five guarded Worker admission functions:
+  `hermes_start_worker_run`,
+  `hermes_record_execution_artifact_candidate`,
+  `hermes_record_execution_evidence_candidate`,
+  `hermes_record_execution_usage_sample` and
+  `hermes_submit_execution_result`.
+- Worker runtime cannot directly insert/update AgentRun, Result, Candidate,
+  Usage, CompletionClaim, VerificationResult, Task, Event Log, Outbox, Lease or
+  Accounting authority tables, and cannot execute internal settlement,
+  quarantine, validation or event helper functions.
+- P2 Worker execution extends `agent_runs`; no second ExecutionRun model exists.
+  A current Worker Run binds one request/attempt/Lease/token/frozen
+  WorkerTemplate/Context/Sandbox/Reservation tuple.
+- Accepted `ExecutionResult(SUCCEEDED)` may create an Artifact and
+  CompletionClaim, but never creates a VerificationResult and never marks a Task
+  `PASSED` or `FAILED`.
+- Stale Worker payloads are committed to minimal immutable quarantine with an
+  Event/Outbox and do not mutate current Result, Usage, Settlement, Artifact,
+  Task or Verification authority.
+- Terminal Result admission commits Result, CompletionClaim link,
+  settlement/release link, Request/Queue/Run terminal state, Lease/lock release,
+  Events, Outbox and CommandReceipt in one PostgreSQL transaction.
 
 Only `ControlPlane` receives a `PostgresRuntimeStore`. Accounting uses
 `ResourceAccounting` with a `PostgresResourceAccountingStore`; Selection uses
-`ActionSelection` with a `PostgresSelectionStore`. The migrations define and
-test separate NOLOGIN capability roles for authority, Accounting, Situation,
-Diagnosis, Planner, Policy, Risk, Selection, Relay, Consumer, Redrive, Worker and
-read-only access. A production deployment MUST create distinct login credentials
-and grant each process only its matching capability role.
+`ActionSelection` with a `PostgresSelectionStore`; P2-1 execution-preparation
+freeze objects use `ExecutionPreparationAuthority` with a
+`PostgresCapabilityStore`; P2-2 request preparation uses
+`ExecutionPreparation` with a `PostgresExecutionStore`; P2-3 scheduling uses
+`ExecutionScheduler` with a `PostgresSchedulerStore`; P2-4 Worker execution uses
+`WorkerExecution` with a `PostgresWorkerExecutionStore`. The migrations define and test separate NOLOGIN
+capability roles for authority, Accounting, Situation, Diagnosis, Planner,
+Policy, Risk, Selection, Capability/Context/Sandbox, Relay, Consumer, Redrive,
+Worker and read-only access. A production deployment MUST create distinct login
+credentials and grant each process only its matching capability role.
+
+The current regression suite discovers 341 tests. On 2026-08-13 the complete
+PostgreSQL 16-backed suite passed 341/341 with zero skips. A PostgreSQL-backed
+run is required to validate migrations, concurrency and permissions; discovery
+without `HERMES_TEST_DATABASE_URL` skips those checks and is not phase
+acceptance.
 
 ## Run pure domain tests
 
