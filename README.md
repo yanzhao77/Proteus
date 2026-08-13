@@ -6,7 +6,7 @@
 
 把一个想法持续推进为可验证、可交付的软件项目。默认自主运行，人类按风险介入，所有关键结论都有证据支撑。
 
-[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收矩阵](docs/P0_ACCEPTANCE_MATRIX.md)
+[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收](docs/P0_ACCEPTANCE_MATRIX.md) · [P1 验收](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md)
 
 </div>
 
@@ -23,27 +23,28 @@ Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时�
 - **Failure Is Feedback**：失败进入诊断、修复和重规划闭环，而不是直接终止流程。
 - **Everything Is Recoverable**：命令幂等、事件可重放、投递可恢复，进程崩溃不应破坏业务事实。
 
-当前仓库处于 **核心运行时 P0 纵向切片** 阶段：架构与协议已经形成体系，Python/PostgreSQL 实现覆盖了关键 authority、verification、work graph 和 event delivery 路径；它还不是一个可直接部署的完整自主软件工厂。
+当前仓库已经完成 **P0 权威骨架** 和 **P1 自治决策链**。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord。项目下一阶段是 **P2 动态执行与反馈闭环**。
+
+当前边界停在 **selected execution intent**：系统能够可靠地决定下一步做什么、解释为什么选择它并原子预留资源，但尚未创建 ExecutionRequest，也尚未调度 Worker 执行。因此它是一个经过并发与权限约束验证的核心运行时，而不是可直接部署的完整自主软件工厂。
 
 ## 核心闭环
 
 ```mermaid
 flowchart LR
-    I["Idea / Goal"] --> CP["Control Plane"]
-    CP --> WG["Work Graph"]
-    WG --> W["Worker Run"]
-    W --> A["Artifact + Completion Claim"]
-    A --> V["Independent Verifier Run"]
-    V --> E{"Evidence satisfies plan?"}
-    E -->|Yes| S["Authoritative State Transition"]
-    E -->|No| F["Feedback + Repair Task"]
-    F --> WG
-    S --> O["Event Log + Outbox"]
-    O --> CP
-    S --> D["Verified Delivery"]
+    E["Authoritative Event"] --> S["Situation"]
+    S --> D["Diagnosis"]
+    D --> P["Candidate Actions"]
+    P --> C["Policy + Risk"]
+    C --> B["Budget + ActionScore"]
+    B --> R["DecisionRecord + Reservation"]
+    R -. "P2" .-> X["ExecutionRequest"]
+    X -.-> W["Worker + Sandbox"]
+    W -.-> A["Artifact + Evidence"]
+    A -.-> V["Independent Verification"]
+    V -. "FAIL feedback" .-> E
 ```
 
-这里最重要的边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Agent 也不能绕过 Control Plane 写入权威事实。**
+实线部分是已经完成的 P1 自治决策链，虚线部分属于 P2。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
 
 ## 当前实现
 
@@ -55,11 +56,18 @@ flowchart LR
 | Event Log / Outbox | 已实现 | 状态、事件、Outbox 和 CommandReceipt 在同一本地事务提交 |
 | Event delivery | 已实现 | relay lease、重试、DLQ、授权 redrive、至少一次投递 |
 | Idempotent consumer | 已实现 | Inbox 去重、partition-local 连续 checkpoint、gap parking/drain |
-| Resource accounting | 基础切片 | 资源预留、结算及 PostgreSQL 持久化边界 |
-| Web API / Scheduler / Agent adapter | 未实现 | 属于后续阶段，不应从当前 P0 能力推断 |
-| Human Gate / Sandbox / external broker | 未实现 | 规范已定义部分边界，实现尚未纳入当前切片 |
+| Resource Accounting | P1 已完成 | 十二维整数资源、原子预留、Usage、Settlement、threshold 与 Budget Fact |
+| Situation / Diagnosis | P1 已完成 | sequence-bounded AnalysisContext、确定性分类、指纹去重与证据约束诊断 |
+| Candidate Action Planner | P1 已完成 | 版本化 Registry、确定性候选生成、ResourceEstimate 与权威状态隔离 |
+| Policy / Risk | P1 已完成 | DENY/REQUIRE_HUMAN fail-closed；Risk 只评估风险，不授予权限 |
+| Action Selection | P1 已完成 | 预算可行性、确定性评分、冲突过滤、不可变 DecisionRecord |
+| Selection / Reservation bridge | P1 已完成 | SelectedAction、Reservation、Event、Outbox、Receipt 同事务提交 |
+| ExecutionRequest / Scheduler | P2 待实现 | Queue、Lease/Fencing、heartbeat、取消、Worker assignment |
+| Capability / Sandbox / Worker | P2 待实现 | Capability Registry、Context Bundle、SandboxProfile、真实执行回流 |
+| Human Gate / Recovery | P3 待实现 | Gate lifecycle、resume、checkpoint、reconcile、late-result quarantine |
+| Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
-完整的 P0 需求到实现与测试映射见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)。更精确的 runtime 能力边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
+P0 和 P1 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md) 以及各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
 
 ## 快速开始
 
@@ -80,6 +88,12 @@ PYTHONPATH=src python3 -m unittest \
   tests.test_graph_domain \
   tests.test_project_domain \
   tests.test_resource_accounting_domain \
+  tests.test_situation_domain \
+  tests.test_diagnosis_domain \
+  tests.test_planner_domain \
+  tests.test_policy_domain \
+  tests.test_risk_domain \
+  tests.test_selection_domain \
   tests.test_architecture_boundaries -v
 ```
 
@@ -88,7 +102,7 @@ PYTHONPATH=src python3 -m unittest \
 启动一个本地 PostgreSQL：
 
 ```bash
-docker run --rm --name hermes-p0-postgres \
+docker run --rm --name hermes-runtime-postgres \
   -e POSTGRES_PASSWORD=hermes \
   -e POSTGRES_DB=hermes_test \
   -p 55432:5432 \
@@ -108,6 +122,8 @@ HERMES_TEST_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_te
 ```
 
 如果没有显式设置 `HERMES_TEST_DATABASE_URL`，测试发现仍可运行，但 PostgreSQL 集成测试会被跳过；SQLite 或 mock 不被视为 PostgreSQL authority/concurrency 语义的有效证明。
+
+当前 P0/P1 回归基线共发现 **275 项测试**。P1 验收矩阵记录 PostgreSQL 14 和 PostgreSQL 16 的完整回归结果；阶段验收不能把跳过的数据库、并发或权限测试计为通过。
 
 ### 执行一次 Outbox Relay
 
@@ -153,6 +169,13 @@ Proteus/
 | [Command & Event Protocol](docs/specs/Hermes_Command_Event_Protocol_V1.0.md) | 命令事务、事件、Outbox、投递与恢复协议 |
 | [Execution Lease Protocol](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | lease、fencing、result admission 与 accounting 交互 |
 | [Conformance Test Specification](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | 一致性测试、故障注入与阶段门槛 |
+| [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md) | P0 权威骨架验收结果 |
+| [P1 Resource Accounting](docs/P1_RESOURCE_ACCOUNTING_ACCEPTANCE_MATRIX.md) | P1 Slice 1 资源核算验收结果 |
+| [P1 Situation Analyzer](docs/P1_SITUATION_ANALYZER_ACCEPTANCE_MATRIX.md) | P1 Slice 2 情境分析验收结果 |
+| [P1 Diagnosis Engine](docs/P1_DIAGNOSIS_ENGINE_ACCEPTANCE_MATRIX.md) | P1 Slice 3 诊断引擎验收结果 |
+| [P1 Candidate Action Planner](docs/P1_CANDIDATE_ACTION_PLANNER_ACCEPTANCE_MATRIX.md) | P1 Slice 4 候选行动规划验收结果 |
+| [P1 Policy and Risk](docs/P1_POLICY_RISK_ACCEPTANCE_MATRIX.md) | P1 Slice 5 策略与风险验收结果 |
+| [P1 Action Selection](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) | P1 Slice 6 评分、选择、DecisionRecord 与预留验收结果 |
 | [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 规范优先级、ADR 状态与待决问题 |
 
 当文档之间出现冲突时，请遵循 [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) 中定义的 authority order，而不是依据文件名或版本号自行推断。
@@ -165,7 +188,8 @@ Proteus/
 - 系统使用 authoritative state + immutable event log + transactional outbox，不采用 full event sourcing。
 - 投递语义是 at-least-once；业务 effect 依靠 inbox/idempotency 保证不重复。
 - `supporting_refs` 只提供事实定位线索，不构成权限或状态迁移依据。
-- 生产部署必须为 Control Plane、Relay、Consumer、Redrive、Worker 和只读访问使用不同登录身份，并只授予对应 capability role。
+- SelectedAction 是已经预留资源的执行意图，不是 ExecutionRequest、Queue、Lease、Worker assignment 或 SandboxProfile。
+- 生产部署必须为 Control Plane、Accounting、Situation、Diagnosis、Planner、Policy、Risk、Selection、Relay、Consumer、Redrive、Worker 和只读访问使用不同登录身份，并只授予对应 capability role。
 
 ## License
 
