@@ -66,7 +66,7 @@ flowchart LR
 | Capability / Context / Sandbox | P2-1 已完成 | 版本化 WorkerTemplate、确定性匹配、不可变 Context Bundle、fail-closed SandboxProfile 编译 |
 | ExecutionRequest / Queue | P2-2 已完成 | admission fail-closed、P1 Reservation 单次交接、冻结输入、同事务 Queue/Event/Outbox/Receipt |
 | Scheduler / Lease / Fencing | P2-3 已完成 | PostgreSQL 原子 claim、单调 token、续租/过期接管/重排队、执行锁与权限隔离 |
-| Worker lifecycle / Result admission | P2 已完成 | AgentRun、current-token candidate/result、minimal quarantine、settlement；真实 sandbox/外部 Worker 仍待 P3-5 |
+| Worker lifecycle / Result admission | P2 已完成 | AgentRun、current-token candidate/result、minimal quarantine、settlement；真实 Docker target 由 P3-5 承接 |
 | Human Gate / Waiting / Resume | P3-1 已完成 | Gate Request/Decision/Application 分离；ResumeContext 当前 guard 重检 |
 | Checkpoint / Replay / Reconcile | P3-2 已完成 | replay shadow generation、checkpoint/reconcile finding/plan、无 authority fold/patch |
 | Quarantine / Evidence invalidation | P3-3 已完成 | append-only review/adoption/redrive；Evidence invalidation 不删证据、不改 VerificationResult、阻断 stale Gate resume |

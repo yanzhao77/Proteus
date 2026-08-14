@@ -56,7 +56,7 @@ Allowed status values follow the existing repository vocabulary:
 | FI-12G authority protection | P3-REC-001, P3-REC-003 | P3-2 | PASS | Replay writes shadow generation only and Replay/Reconcile roles cannot patch Project/Task/Accounting/Lease authority. |
 | CT-003 full quarantine operations | P3-QUAR-001, P3-QUAR-002, P3-QUAR-003 | P3-3 | PASS | P3-3 implements append-only review lifecycle, guarded adoption shell and redrive request ledger on top of immutable P2 quarantine records. |
 | FI-09 full stale worker operations | P3-QUAR-001, P3-QUAR-002, P3-QUAR-003 | P3-3 | PASS | Stale worker payloads remain unable to mutate authority; P3-3 review/adoption/redrive operations are separately guarded and audited. |
-| FI-17 full reconcile after settlement crash | P3-REC-003, FI-12F | P3-2/P3-5 | PLANNED | P2 atomic settlement and P3-2 checkpoint repair are PASS; production external side-effect reconciliation remains P3-5. |
+| FI-17 full reconcile after settlement crash | P3-REC-003, FI-12F, P3-PROD-002 | P3-2/P3-5 | PASS | P2 atomic settlement and P3-2 checkpoint repair are PASS; P3-5 records side-effect receipts and surfaces effect-before-receipt uncertainty as reconcile findings through `test_effect_before_receipt_creates_reconcile_finding_and_rolls_back_receipt`. |
 | CT-007/P3 Evidence invalidation | P3-EVID-001, P3-EVID-002 | P3-3 | PASS | P3-3 invalidation is append-only, preserves Evidence/VerificationResult history, emits stale dependency/reverification facts and blocks invalidated Evidence in Gate decision/resume paths. |
 
 No unexplained P3 GAP is intentionally hidden by this matrix.

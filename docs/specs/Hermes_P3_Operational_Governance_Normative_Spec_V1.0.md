@@ -1,13 +1,13 @@
 # Hermes P3 Operational Governance Normative Specification V1.0
 
-Status: SPECIFIED; P3-3 QUARANTINE / EVIDENCE INVALIDATION RUNTIME IMPLEMENTED
-Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume; P3-2 Checkpoint + Replay + Reconcile; P3-3 Quarantine + Evidence Invalidation
+Status: SPECIFIED; P3-1 through P3-6 runtime authority implemented
+Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume; P3-2 Checkpoint + Replay + Reconcile; P3-3 Quarantine + Evidence Invalidation; P3-4 Decision Explain/Audit/Trace; P3-5 Docker target 1.0 Production Execution; P3-6 End-to-End Hardening
 Date: 2026-08-14
 
 This specification closes the P3 operational governance contracts for Hermes
-Runtime V1.2. It defines the authority boundaries required before P3-1 and later
-runtime implementation work may begin. P3-1 implements only the Human Gate and
-Project waiting/resume runtime boundary in
+Runtime V1.2. It defines the authority boundaries required before P3 runtime
+implementation work and records the slices now implemented. P3-1 implements the
+Human Gate and Project waiting/resume runtime boundary in
 [`0018_human_gate_waiting_resume.sql`](../../hermes-runtime/migrations/0018_human_gate_waiting_resume.sql),
 [`HumanGateAuthority`](../../hermes-runtime/src/hermes_runtime/application/human_gates.py)
 and the PostgreSQL/domain/permission tests listed in the P3 acceptance matrix.
@@ -15,14 +15,23 @@ P3-2 implements the Checkpoint, Replay and Reconcile runtime boundary in
 [`0019_checkpoint_replay_reconcile.sql`](../../hermes-runtime/migrations/0019_checkpoint_replay_reconcile.sql),
 [`ReplayReconcileAuthority`](../../hermes-runtime/src/hermes_runtime/application/replay_reconcile.py)
 and the PostgreSQL/domain/permission tests listed in the P3 acceptance matrix.
-It does not implement Human Gate UI, production IdP/OIDC/SAML integration,
 P3-3 implements quarantine review/adoption/redrive and Evidence invalidation in
 [`0020_quarantine_evidence_invalidation.sql`](../../hermes-runtime/migrations/0020_quarantine_evidence_invalidation.sql),
 [`QuarantineAuthority`](../../hermes-runtime/src/hermes_runtime/application/quarantine.py)
 and
 [`EvidenceInvalidationAuthority`](../../hermes-runtime/src/hermes_runtime/application/evidence_invalidation.py).
-It does not implement P3-4 explain/audit query runtime, P3-5 production sandbox
-adapters or production Human Gate UI/IdP integration.
+P3-4 implements Decision Explain, Audit and Trace runtime in
+[`0021_decision_explain_audit_trace.sql`](../../hermes-runtime/migrations/0021_decision_explain_audit_trace.sql)
+and [`DecisionExplainAuthority`](../../hermes-runtime/src/hermes_runtime/application/explain.py).
+P3-5 implements Docker target 1.0 production execution and side-effect receipt
+authority in
+[`0022_production_docker_execution.sql`](../../hermes-runtime/migrations/0022_production_docker_execution.sql),
+[`ProductionExecutionAuthority`](../../hermes-runtime/src/hermes_runtime/application/docker_execution.py)
+and [`DockerExecutionAdapter`](../../hermes-runtime/src/hermes_runtime/infrastructure/docker_adapter.py).
+P3-6 adds cross-slice end-to-end hardening tests and the completion summary.
+This runtime still does not implement Human Gate UI, production
+IdP/OIDC/SAML integration, non-Docker execution targets, cloud credential
+integrations or real third-party irreversible side-effect integrations.
 
 Normative priority remains:
 
@@ -68,9 +77,12 @@ P2 deliberately stops before:
   external side-effect reconciliation.
 
 These are P3 responsibilities and MUST NOT be claimed as implemented by P3-0.
-P3-1 closes the first two bullets for PostgreSQL runtime authority only; the
-checkpoint/replay/reconcile bullet is closed by P3-2 for PostgreSQL runtime
-authority only. The remaining bullets stay planned under their later P3 slices.
+P3-1 closes the first two bullets for PostgreSQL runtime authority;
+checkpoint/replay/reconcile is closed by P3-2; quarantine and Evidence
+invalidation are closed by P3-3; immutable Explain/Audit/Trace is closed by
+P3-4; Docker target 1.0 and side-effect receipt authority are closed by P3-5.
+P3-6 verifies the cross-slice boundary without adding a new durable authority
+migration.
 
 ## 2. P3 conflict and GAP closure
 

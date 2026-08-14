@@ -121,13 +121,19 @@ Checkpoint / Inbox / Event Log
 -> reconcile observe / finding / immutable plan / authorized apply
 -> whitelisted checkpoint repair only when Inbox+effect continuity is proven
 -> no Project/Task/Accounting/Lease/Verification authority rebuild
+
+Quarantine / Evidence / Explain / Docker
+-> append-only quarantine review/adoption/redrive requests
+-> append-only Evidence invalidation and re-verification requirements
+-> immutable Decision Explain snapshots, reference graph and audit traces
+-> Docker target 1.0 run plans, process observations and side-effect receipts
+-> P3 end-to-end hardening without Task PASS authority bypass
 ```
 
-It does not yet provide an external Worker process manager/spawn service, real
-Docker/Process sandbox execution, Web APIs, Human Gate UI, production IdP
+It still does not provide Web APIs, Human Gate UI, production IdP/OIDC/SAML
 integration, Kafka, Redis, Kubernetes, LLM planning/policy/risk/selection,
-Decision Explain runtime, external irreversible side-effect reconciliation or
-full Event Sourcing.
+browser/VM/GPU execution targets, cloud credential integrations, third-party
+irreversible side-effect integrations or full Event Sourcing.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
@@ -135,9 +141,11 @@ structured Feedback emission and bounded autonomous recovery loop entry. P3-1
 closes the database-backed Human Gate lifecycle and Project waiting/resume
 authority. P3-2 closes checkpoint/replay/reconcile runtime authority and
 FI-12A through FI-12G. P3-3 closes quarantine review/adoption/redrive and
-Evidence invalidation runtime authority. Human Gate UI, production IdP
-integration, Decision Explain and production sandbox/external side-effect
-reconciliation remain future work.
+Evidence invalidation runtime authority. P3-4 closes Decision Explain/Audit/Trace
+runtime. P3-5 closes Docker target 1.0 production execution and side-effect
+receipt authority. P3-6 closes cross-slice hardening. Human Gate UI, production
+IdP integration, non-Docker execution targets and real cloud/third-party
+irreversible side-effect integrations remain productization work.
 
 P2 execution contracts are specified and tracked in
 [`docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
