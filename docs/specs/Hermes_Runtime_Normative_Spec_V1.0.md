@@ -295,6 +295,14 @@ ExecutionRequest `QUEUED` requires Capability, Context, Sandbox, Policy/Risk,
 VerificationPlan, Artifact, Reservation and lock-scope prerequisites to be
 frozen.
 
+P2 Feedback conformance additionally requires failed execution outcomes to emit
+structured Feedback, enter Situation/Diagnosis/Planner, and record bounded
+RecoveryCycle/RecoveryAttempt facts without granting Recovery Controller Task
+verdict authority. Recovery completion links are audit facts; Task `PASSED` or
+`FAILED` still requires independent Verification and Control Plane transition.
+Human Gate lifecycle, checkpoint replay/reconcile, quarantine adoption/redrive
+and external-side-effect reconciliation remain P3.
+
 ## 22. V1.0 conflict and evolution notes
 
 V1.0 is visionary. Where it depicts Main Hermes selecting Agents or Evidence/Judge directly advancing state, V1.2 refines this: Control Plane selects via Scheduler and commits all state after Guard. V1.0 fixed Agent labels are capability examples, not persistent authority roles. V1.0 Human Gate interaction layer is refined into an independent Gate service parallel to Agent Runtime and Verification. These are semantic refinements, not deletion of the original goals.

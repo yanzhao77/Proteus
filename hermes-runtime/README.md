@@ -102,16 +102,27 @@ LEASED ExecutionRequest
 -> ResourceReservation settlement/release in the same transaction
 -> terminal Request/Queue/Run state and Lease/lock release
 -> Events + Outbox + CommandReceipt
+
+FAILED ExecutionResult
+-> `recovery.emit_feedback` structured failure taxonomy
+-> immutable execution_feedback_records + compatibility feedback_records
+-> `feedback.created` + `recovery.cycle_started`
+-> Situation / Diagnosis / Planner consumption
+-> bounded RecoveryCycle / RecoveryAttempt ledger
+-> retry / repair / switch-worker / collaboration / replan / human-gate protocol
+-> later execution and independent Verification links
+-> Recovery completion without Task PASS/FAIL authority
 ```
 
 It does not yet provide an external Worker process manager/spawn service, real
 Docker/Process sandbox execution, Web APIs, Human Gate lifecycle, Kafka, Redis,
-Kubernetes, LLM planning/policy/risk/selection, P2-5 feedback/replan loop, P3
-quarantine/reconcile operations or full Event Sourcing.
+Kubernetes, LLM planning/policy/risk/selection, P3 quarantine/reconcile
+operations or full Event Sourcing.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
-Worker stale-token isolation and FI-17 P2 run/settlement coupling. Full P3
-quarantine operations and reconcile remain future work.
+Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
+structured Feedback emission and bounded autonomous recovery loop entry. Full P3
+Human Gate lifecycle, quarantine operations and reconcile remain future work.
 
 P2 execution contracts are specified and tracked in
 [`docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
@@ -151,6 +162,17 @@ fault-injection tests and six permission tests. Real Docker/Process sandbox
 execution, external Worker spawning, P2-5 feedback/replan and P3 quarantine
 retention/adoption/reconcile operations remain outside this slice.
 
+P2-5 implements structured Feedback and bounded autonomous recovery loop entry.
+Migration `0017_feedback_recovery_loop.sql` establishes
+`execution_feedback_records`, `recovery_cycles`, `recovery_attempts` and minimal
+`recovery_collaboration_requests`, with guarded Recovery Controller functions for
+emitting execution failure feedback, planning bounded attempts and completing
+attempt ledger entries. It connects failed P2-4 ExecutionResults back through the
+existing P1 Situation, Diagnosis and Planner chain, then proves that final Task
+PASS still requires independent Verification plus Control Plane transition. It
+does not implement Human Gate UX, production Worker process management, real
+Docker/Process sandbox execution or P3 replay/quarantine reconciliation.
+
 ## Authority boundary
 
 - Worker calls `SubmitCompletionClaim`; it cannot produce a verdict or write Task state.
@@ -181,6 +203,12 @@ retention/adoption/reconcile operations remain outside this slice.
   `planner-rules/1.0` and `resource-estimator/1.0`.
 - CandidateAction is not authorization, risk approval, selection, queueing,
   leasing, Worker assignment or execution. ResourceEstimate is not Reservation.
+- `hermes_recovery_runtime` executes only guarded Recovery functions. It cannot
+  directly write Task, Verification, Worker execution, Event Log, Outbox,
+  Accounting or upstream P1 authority tables.
+- Recovery Feedback is a structured fact and planning input, not a state
+  transition. RecoveryAttempt completion records links to later execution,
+  result and verification facts, but cannot mark a Task `PASSED` or `FAILED`.
 - `hermes_policy_runtime` executes only the guarded Policy function; PolicyDecision
   is immutable and `ALLOW` only means the Candidate may enter later checks.
 - `hermes_risk_runtime` executes only the guarded Risk function; RiskAssessment

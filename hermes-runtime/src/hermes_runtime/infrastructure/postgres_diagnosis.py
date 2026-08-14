@@ -229,6 +229,30 @@ class PostgresDiagnosisStore(PostgresRuntimeStore):
                 ))
         if findings:
             return tuple(findings)
+        if context["trigger_event_type"] == "feedback.created":
+            event = connection.execute(
+                """SELECT payload FROM event_log
+                   WHERE event_id=%s AND project_id=%s""",
+                (context["trigger_event_id"], context["project_id"]),
+            ).fetchone()
+            if event:
+                codes = event["payload"].get("finding_codes") or ()
+                return tuple(
+                    CanonicalFinding(
+                        str(code),
+                        "feedback_finding",
+                        situation["severity"],
+                        situation["task_id"],
+                        _first(situation["affected_artifact_refs"]),
+                        None,
+                        _first(situation["affected_components"]),
+                        _first(verification_ids),
+                        None,
+                        tuple(context["evidence_refs"] or ()),
+                        None,
+                    )
+                    for code in codes
+                )
         if situation["failure_type"]:
             return (CanonicalFinding(
                 str(situation["failure_type"]),
