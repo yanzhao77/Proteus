@@ -524,6 +524,18 @@ project/task/decision/request/run refs, redaction class, retention policy and
 authorization scope. Metrics are observability, not authority. Missing trace
 links are reported as missing; they MUST NOT be fabricated.
 
+P3-4 runtime implementation records this contract as immutable
+`decision_explain_snapshots`, immutable reference graph nodes/edges and
+append-only `audit_trace_records`. A capture binds source aggregate type/id,
+expected source version, source hash, schema version, producer version,
+snapshot hash, ref graph hash, actor, authorization, causation/correlation and
+trace refs in the same PostgreSQL transaction as Event Log, Outbox and
+CommandReceipt. Query actors read the captured facts under tenant/project scope;
+they MUST NOT recompute historical explanations with new rule, model, Policy,
+Risk or compiler versions. Unsafe raw prompt, chain-of-thought, secret values
+and unbounded stdout/stderr MUST be rejected or replaced with safe handles and
+hashes before capture.
+
 ## 11. Production execution boundary
 
 P2 `contract-only/1.0` SandboxProfile is not a production sandbox.
