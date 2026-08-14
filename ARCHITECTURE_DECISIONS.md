@@ -21,6 +21,7 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | [Hermes Execution Lease Protocol V1.0](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | ExecutionRequest, Lease, fencing, result admission and accounting interaction |
 | [Hermes P2 Execution Admission Normative Specification V1.0](docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md) | READY/admission separation, Reservation handoff, queue prerequisites, AgentRun/fencing and P2/P3 ownership |
 | [Hermes P3 Operational Governance Normative Specification V1.0](docs/specs/Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md) | Human Gate, waiting/resume, replay/reconcile, quarantine operations, Evidence invalidation, explain/audit/trace and production execution boundaries |
+| [Hermes P4 Productization Normative Specification V1.0](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) | product API, Human Gate identity, Artifact/Secret/Retention and observability/export productization boundaries |
 | [Hermes Conformance Test Specification V1.0](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | V1.2 §30.2 tests, fault injection and phase gates |
 
 ## ADR registry
@@ -91,6 +92,10 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0062 | P3-3 PostgreSQL Quarantine and Evidence Invalidation Runtime Authority | ACCEPTED | P3-3 | P3 Governance §§8-9 | [ADR-0062](docs/adr/ADR-0062-p3-quarantine-evidence-runtime-authority.md) | ADR-0056/0057 implementation detail |
 | ADR-0063 | P3-4 PostgreSQL Decision Explain Audit and Trace Runtime Authority | ACCEPTED | P3-4 | P3 Governance §10 | [ADR-0063](docs/adr/ADR-0063-p3-decision-explain-audit-runtime-authority.md) | ADR-0058 implementation detail |
 | ADR-0064 | P3-5 Production Docker Execution Runtime Authority | ACCEPTED | P3-5 | P3 Governance §11 | [ADR-0064](docs/adr/ADR-0064-p3-production-docker-execution-runtime-authority.md) | ADR-0059 implementation detail |
+| ADR-0065 | P4 Public API Productization Boundary | ACCEPTED | P4-0/P4-1 | P4 Productization §§2/6 | [ADR-0065](docs/adr/ADR-0065-p4-public-api-productization-boundary.md) | — |
+| ADR-0066 | P4 Human Gate Identity Product Boundary | ACCEPTED | P4-0/P4-2 | P4 Productization §§3/6 | [ADR-0066](docs/adr/ADR-0066-p4-human-gate-identity-product-boundary.md) | — |
+| ADR-0067 | P4 Artifact Secret Retention Boundary | ACCEPTED | P4-0/P4-3 | P4 Productization §§4/6 | [ADR-0067](docs/adr/ADR-0067-p4-artifact-secret-retention-boundary.md) | — |
+| ADR-0068 | P4 Observability Export Boundary | ACCEPTED | P4-0/P4-4 | P4 Productization §§5/6 | [ADR-0068](docs/adr/ADR-0068-p4-observability-export-boundary.md) | — |
 
 ## Migrated decisions
 
@@ -108,8 +113,10 @@ The following remain OPEN and require separate evidence-backed ADRs before being
 - SQLAlchemy or another persistence mapper beyond the first slice;
 - production PostgreSQL version beyond the PostgreSQL 14+ conformance baseline;
 - dependency management tool;
-- JSON Schema, Pydantic or another payload validator;
 - Kafka, Redis or another broker/cache;
-- Artifact object store and Human Gate identity provider.
+- production FastAPI/public web server;
+- production JSON Schema, Pydantic or another payload validator;
+- production Artifact object store and Human Gate identity provider;
+- production secret manager and observability backend.
 
 No runtime code, API initialization, database model or empty test is authorized merely by this index.
