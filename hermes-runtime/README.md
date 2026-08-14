@@ -134,6 +134,9 @@ It still does not provide Web APIs, Human Gate UI, production IdP/OIDC/SAML
 integration, Kafka, Redis, Kubernetes, LLM planning/policy/risk/selection,
 browser/VM/GPU execution targets, cloud credential integrations, third-party
 irreversible side-effect integrations or full Event Sourcing.
+P4-0 through P4-5 add productization facades and ports for API, Human Gate
+identity assertions, local Artifact/Secret/Retention and observability exports
+without adding a second authority path or production web/IdP/cloud dependency.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes

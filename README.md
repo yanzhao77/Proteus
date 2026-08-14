@@ -6,7 +6,7 @@
 
 把一个想法持续推进为可验证、可交付的软件项目。默认自主运行，人类按风险介入，所有关键结论都有证据支撑。
 
-[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收](docs/P0_ACCEPTANCE_MATRIX.md) · [P1 验收](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) · [P2 验收](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)
+[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [P4 产品化规范](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收](docs/P0_ACCEPTANCE_MATRIX.md) · [P1 验收](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) · [P2 验收](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md) · [P4 验收](docs/P4_PRODUCTIZATION_ACCEPTANCE_MATRIX.md)
 
 </div>
 
@@ -23,7 +23,7 @@ Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时�
 - **Failure Is Feedback**：失败进入诊断、修复和重规划闭环，而不是直接终止流程。
 - **Everything Is Recoverable**：命令幂等、事件可重放、投递可恢复，进程崩溃不应破坏业务事实。
 
-当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**，以及 **P3 运维治理 runtime**。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation、immutable Decision Explain/Audit/Trace、第一个真实 Docker execution target，以及跨切片 E2E hardening。
+当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**、**P3 运维治理 runtime**，以及 **P4 产品化边界**。P4 Productization 将这些权威能力包成可产品化的 API、Human Gate、Artifact/Secret/Retention 与 Observability 边界，但不会新增绕过 Control Plane 的状态写入路径。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation、immutable Decision Explain/Audit/Trace、第一个真实 Docker execution target，以及跨切片 E2E hardening。
 
 ## 核心闭环
 
@@ -71,6 +71,12 @@ flowchart LR
 | Decision Explain / Audit / Trace | P3-4 已完成 | immutable snapshot/ref graph、缺链显式 MISSING、授权查询、audit trace 与脱敏 |
 | Production Docker execution | P3-5 已完成 | Docker target 1.0、非 root/只读 rootfs/deny network、fencing labels、artifact/output/usage、side-effect receipts |
 | P3 E2E hardening | P3-6 已完成 | Human Gate、Docker、side-effect、Quarantine、Evidence、Replay/Reconcile、Explain 端到端权限边界 |
+| P4 Productization Contract | P4-0 已完成 | Public API、Human Gate identity、Artifact/Secret/Retention、Observability/export 产品边界；无新增 core authority |
+| P4 Public API boundary | P4-1 已完成 | stdlib in-process facade；只允许语义查询/命令 wrapper，拒绝 generic PATCH/status/Event/SQL |
+| P4 Human Gate product boundary | P4-2 已完成 | local/test identity assertion；Gate 展示与 Decision 提交分离，不能直接 Project resume |
+| P4 Artifact/Secret/Retention | P4-3 已完成 | content-addressed local artifact store；secret handle-only；retention tombstone 与 active dependency guard |
+| P4 Observability/export | P4-4 已完成 | OpenTelemetry-compatible local envelope；redaction；MISSING links；metrics/traces 不授权 |
+| P4 E2E hardening | P4-5 已完成 | API、Gate、Artifact、Secret、Retention、Observability 跨边界回归 |
 | Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
@@ -184,6 +190,9 @@ Proteus/
 | [P1 Policy and Risk](docs/P1_POLICY_RISK_ACCEPTANCE_MATRIX.md) | P1 Slice 5 策略与风险验收结果 |
 | [P1 Action Selection](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) | P1 Slice 6 评分、选择、DecisionRecord 与预留验收结果 |
 | [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md) | P2 Slice 1-4 的执行准备、调度、Worker/result admission 状态与证据 |
+| [P4 Productization Specification](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) | P4 API、Human Gate identity、Artifact/Secret/Retention 与 Observability 产品化边界 |
+| [P4 Productization Acceptance Matrix](docs/P4_PRODUCTIZATION_ACCEPTANCE_MATRIX.md) | P4 产品化切片验收状态 |
+| [P4 Completion Summary](docs/Hermes_P4_COMPLETION_SUMMARY.md) | P4 产品化完成范围、边界和验证摘要 |
 | [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 规范优先级、ADR 状态与待决问题 |
 
 当文档之间出现冲突时，请遵循 [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) 中定义的 authority order，而不是依据文件名或版本号自行推断。
