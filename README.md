@@ -73,6 +73,7 @@ flowchart LR
 | P3 E2E hardening | P3-6 已完成 | Human Gate、Docker、side-effect、Quarantine、Evidence、Replay/Reconcile、Explain 端到端权限边界 |
 | P4 Productization Contract | P4-0 已完成 | Public API、Human Gate identity、Artifact/Secret/Retention、Observability/export 产品边界；无新增 core authority |
 | P4 Public API boundary | P4-1 已完成 | stdlib in-process facade；只允许语义查询/命令 wrapper，拒绝 generic PATCH/status/Event/SQL |
+| P4 Human Gate product boundary | P4-2 已完成 | local/test identity assertion；Gate 展示与 Decision 提交分离，不能直接 Project resume |
 | Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
