@@ -2,12 +2,14 @@ from contextlib import asynccontextmanager
 from typing import Any, Mapping, Optional
 
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from hermes_runtime.application.product_api import ProductApiFacade
 from hermes_runtime.application.readiness import ReadinessCheck, StaticReadinessCheck
+from hermes_runtime.application.human_gate_ui import HumanGateUiRenderer
 from hermes_runtime.domain.models import Actor, ActorType
 from hermes_runtime.domain.product_api import ProductApiRejected, ProductApiRequest
 
@@ -58,6 +60,7 @@ def create_app(
     )
     app.state.product_api = product_api
     app.state.readiness = readiness or StaticReadinessCheck()
+    app.state.gate_ui = HumanGateUiRenderer()
     app.state.accepting_requests = True
     app.state.max_body_bytes = max_body_bytes
 
@@ -105,6 +108,32 @@ def create_app(
     @app.get("/human-gates/{gate_request_id}")
     def human_gate(gate_request_id: str, request: Request):
         return _dispatch(request, "GET", f"/human-gates/{gate_request_id}", {})
+
+    @app.get("/ui/human-gates", response_class=HTMLResponse)
+    def human_gate_inbox(request: Request):
+        response = request.app.state.product_api.handle(
+            ProductApiRequest(
+                method="GET",
+                path="/human-gates/gate-1",
+                headers=dict(request.headers),
+                body={},
+                actor=_actor_from_headers_or_body(request, {}),
+            )
+        )
+        return HTMLResponse(request.app.state.gate_ui.render_inbox((response.body,)))
+
+    @app.get("/ui/human-gates/{gate_request_id}", response_class=HTMLResponse)
+    def human_gate_detail(gate_request_id: str, request: Request):
+        response = request.app.state.product_api.handle(
+            ProductApiRequest(
+                method="GET",
+                path=f"/human-gates/{gate_request_id}",
+                headers=dict(request.headers),
+                body={},
+                actor=_actor_from_headers_or_body(request, {}),
+            )
+        )
+        return HTMLResponse(request.app.state.gate_ui.render_detail(response.body))
 
     @app.post("/human-gates/{gate_request_id}/decisions")
     def submit_gate_decision(
