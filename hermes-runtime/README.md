@@ -112,20 +112,32 @@ FAILED ExecutionResult
 -> retry / repair / switch-worker / collaboration / replan / human-gate protocol
 -> later execution and independent Verification links
 -> Recovery completion without Task PASS/FAIL authority
+
+Checkpoint / Inbox / Event Log
+-> versioned and hash-checked contiguous checkpoint authority
+-> isolated replay session and target generation
+-> shadow projection rebuild / idempotent consumer replay / authority audit boundary
+-> verified generation digest and atomic read-model pointer activation
+-> reconcile observe / finding / immutable plan / authorized apply
+-> whitelisted checkpoint repair only when Inbox+effect continuity is proven
+-> no Project/Task/Accounting/Lease/Verification authority rebuild
 ```
 
 It does not yet provide an external Worker process manager/spawn service, real
 Docker/Process sandbox execution, Web APIs, Human Gate UI, production IdP
 integration, Kafka, Redis, Kubernetes, LLM planning/policy/risk/selection, P3
-quarantine/reconcile operations, Evidence invalidation workflow, Decision
-Explain runtime or full Event Sourcing.
+quarantine review/adoption/redrive, Evidence invalidation workflow, Decision
+Explain runtime, external irreversible side-effect reconciliation or full Event
+Sourcing.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
 structured Feedback emission and bounded autonomous recovery loop entry. P3-1
 closes the database-backed Human Gate lifecycle and Project waiting/resume
-authority. Human Gate UI, production IdP integration, quarantine operations and
-reconcile remain future work.
+authority. P3-2 closes checkpoint/replay/reconcile runtime authority and
+FI-12A through FI-12G. Human Gate UI, production IdP integration, quarantine
+operations, Evidence invalidation, Decision Explain and production sandbox/
+external side-effect reconciliation remain future work.
 
 P2 execution contracts are specified and tracked in
 [`docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
@@ -199,6 +211,22 @@ integration/concurrency/fault tests and four permission tests. PostgreSQL 14 and
 PostgreSQL 16 full regression both discovered 369 tests and passed on
 2026-08-14; no-DB discovery also found 369 tests and passed with database tests
 skipped.
+
+P3-2 implements Checkpoint + Replay + Reconcile authority as a PostgreSQL
+overlay on the existing Event Log, Outbox, Inbox and Checkpoint system.
+Migration `0019_checkpoint_replay_reconcile.sql` adds versioned/hash-checked
+consumer checkpoints, immutable checkpoint history, replay sessions, replay
+generations, shadow projection events, generation pointers, reconcile findings
+and reconcile plans/repairs. Replay supports read-model rebuild, idempotent
+consumer replay and authority-audit modes inside isolated target generations,
+then atomically activates a verified generation pointer. Reconcile separates
+observe, finding, dry-run/apply plan and authorized apply; the implemented
+repair path advances a checkpoint only when existing Inbox and effect records
+prove contiguous committed work. Replay/Reconcile cannot rebuild or patch
+Project, Task, Accounting, Lease, Worker, Verification or Event Log authority.
+P3-3 stale Result quarantine adoption/redrive, Evidence invalidation
+propagation, P3-4 explain/query runtime and P3-5 production sandbox/external
+side-effect reconciliation remain outside this slice.
 
 ## Authority boundary
 
@@ -323,6 +351,17 @@ skipped.
   current Gate, Decision, Waiting, ResumeContext hash, Project version, approver
   authorization, Evidence, Policy and Budget before committing
   `human_gate.decision_applied` and `project.resumed`.
+- `hermes_replay_runtime` executes only guarded Replay functions. It can create
+  isolated sessions/generations, build shadow projection rows and activate a
+  verified generation pointer; it cannot write Project, Task, Accounting,
+  Lease, Worker, Verification or Event Log authority directly.
+- `hermes_reconcile_runtime` observes authority/read-model mismatches and
+  creates immutable dry-run/apply plans only; it cannot apply repairs or patch
+  authority tables.
+- `hermes_reconcile_apply_runtime` applies whitelisted semantic repairs only.
+  In P3-2 the only implemented mutating repair is
+  `ADVANCE_CHECKPOINT_IF_EFFECT_CONTIGUOUS`, guarded by existing Inbox/effect
+  continuity and checkpoint version/hash checks.
 
 Only `ControlPlane` receives a `PostgresRuntimeStore`. Accounting uses
 `ResourceAccounting` with a `PostgresResourceAccountingStore`; Selection uses
@@ -332,19 +371,21 @@ freeze objects use `ExecutionPreparationAuthority` with a
 `ExecutionPreparation` with a `PostgresExecutionStore`; P2-3 scheduling uses
 `ExecutionScheduler` with a `PostgresSchedulerStore`; P2-4 Worker execution uses
 `WorkerExecution` with a `PostgresWorkerExecutionStore`; P3-1 Human Gate uses
-`HumanGateAuthority` with a `PostgresHumanGateStore`. The migrations define and
+`HumanGateAuthority` with a `PostgresHumanGateStore`; P3-2 Replay/Reconcile
+uses `ReplayReconcileAuthority` with a `PostgresReplayReconcileStore`. The migrations define and
 test separate NOLOGIN capability roles for authority, Accounting, Situation,
 Diagnosis, Planner, Policy, Risk, Selection, Capability/Context/Sandbox, Relay,
-Consumer, Redrive, Worker, Human Gate request/decision and read-only access. A
-production deployment MUST create distinct login credentials and grant each
-process only its matching capability role.
+Consumer, Redrive, Worker, Human Gate request/decision, Replay/Reconcile and
+read-only access. A production deployment MUST create distinct login credentials
+and grant each process only its matching capability role.
 
-The P3-1 regression baseline discovers 369 tests when project dependencies are
-installed. On 2026-08-14 the complete PostgreSQL-backed suite passed on both
-PostgreSQL 14 and PostgreSQL 16 during the P3-1 flow. A PostgreSQL-backed run is
-required to validate migrations, concurrency and permissions; discovery without
-project dependencies or without `HERMES_TEST_DATABASE_URL` is not phase
-acceptance.
+The P3-2 regression baseline discovers 382 tests when project dependencies are
+installed. On 2026-08-14 the no-DB suite discovered 382 tests and passed with
+database tests skipped. The complete PostgreSQL-backed suite also discovered
+382 tests and passed on both PostgreSQL 14 and PostgreSQL 16 during the P3-2
+flow. A PostgreSQL-backed run is required to validate migrations, concurrency
+and permissions; discovery without project dependencies or without
+`HERMES_TEST_DATABASE_URL` is not phase acceptance.
 
 ## Run pure domain tests
 
