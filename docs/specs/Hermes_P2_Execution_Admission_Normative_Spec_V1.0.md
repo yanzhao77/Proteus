@@ -590,6 +590,11 @@ ExecutionRequest and related audit records MUST preserve:
 | P2-5 | Feedback emission from execution outcomes, deterministic failure taxonomy, RecoveryCycle/Attempt ledger, bounded retry/repair/switch-worker/collaboration/replan protocol and loop entry back through Situation/Diagnosis/Planner | Human Gate UX, full replay/reconcile, quarantine adoption/redrive, production Worker process manager |
 | P3 | Human Gate, checkpoint/replay/reconcile operations, full quarantine retention/adoption/redrive, evidence invalidation workflows | P2 minimal execution safety |
 
+P3-0 specifies the P3 side of this boundary in
+[`Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md`](Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md)
+and [`P3_OPERATIONAL_GOVERNANCE_ACCEPTANCE_MATRIX.md`](../P3_OPERATIONAL_GOVERNANCE_ACCEPTANCE_MATRIX.md).
+It is documentation-only and does not add runtime code, migrations or tests.
+
 ### 20.1 P2-5 implemented recovery boundary
 
 P2-5 Recovery Controller MAY emit structured Feedback only from a failed P2-4

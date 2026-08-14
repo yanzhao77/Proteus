@@ -176,6 +176,12 @@ ExecutionRequest、Lease 和 AgentRun 是持久化运行时实体。Scheduler �
 
 Gate Answer 是用户事实，不是状态迁移。Gate Command MUST 校验 Gate version、expiry、answer actor 和授权范围。OPEN Gate MUST 有可解析 `resume_context_ref`；否则创建失败。Main Hermes MAY 展示和提交回答，但 MUST NOT 代表用户批准。
 
+P3-0 closes the detailed Gate contract in
+[`Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md`](Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md#4-human-gate-authority):
+Gate Request and Gate Decision are separate authorities; requester and approver
+identity are distinct; expired or superseded decisions fail closed; and Human
+Gate facts are consumed only by later guarded Control Plane Commands.
+
 ## 13. Command lifecycle
 
 所有改变权威事实的 Command MUST 包含：
@@ -239,6 +245,13 @@ Short transactions MAY independently protect Project state, Task/Graph patch, Le
 Checkpoint MUST include authoritative versions, Work Graph snapshot, Event cursor, active Situations, open executions, Artifact manifest, Evidence index, Budget snapshot and open Gates. Replay MAY rebuild Projection, audit behavior, or apply post-Snapshot facts during recovery; it MUST NOT be described as the sole normal write path.
 
 Reconcile MUST detect orphan Lease, un-settled usage, stale Reservation, missing Outbox publication, late Result and invalid Evidence reference. Recovery actions MUST be idempotent and emit audit Events.
+
+P3-0 expands this into the operational boundary in
+[`Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md`](Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md#6-checkpoint-replay-and-reconcile):
+Replay rebuilds consumer/read/recovery state and never overwrites authoritative
+state by fold; Reconcile compares authority, Event Log, Outbox, Inbox,
+Checkpoint and external facts; repair is planned separately from apply and must
+execute through guarded Commands.
 
 ## 19. Security and isolation
 
