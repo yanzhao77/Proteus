@@ -566,6 +566,16 @@ idempotency, receipt capture, causation, fencing token propagation and reconcile
 If a side effect exists without a matching receipt/checkpoint, Reconcile must
 surface it and repair through guarded Commands.
 
+P3-5 runtime selects Docker target 1.0 as the first production execution target.
+The compiler MUST emit a structured, hashable run plan rather than arbitrary
+shell text. The adapter MUST run outside PostgreSQL authority transactions,
+propagate request/run/lease/fencing refs into labels and envelopes, deny network
+by default, avoid mounting Docker socket or authority credentials into Worker
+containers, bound stdout/stderr, export artifacts only from declared paths and
+mark unprovable usage dimensions as unknown/untrusted. Side-effect receipts are
+append-only external facts checked against current fencing; irreversible effects
+without current Gate/Policy authorization fail closed.
+
 ## 12. Stable P3 rejection codes
 
 ### Human Gate

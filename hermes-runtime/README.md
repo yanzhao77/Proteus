@@ -391,12 +391,15 @@ quarantine operations use `QuarantineAuthority` with a
 `PostgresQuarantineStore`; Evidence invalidation uses
 `EvidenceInvalidationAuthority` with a `PostgresEvidenceInvalidationStore`;
 P3-4 Decision Explain/Audit/Trace uses `DecisionExplainAuthority` with a
-`PostgresExplainStore`. The
+`PostgresExplainStore`; P3-5 production Docker execution uses
+`ProductionExecutionAuthority`, `PostgresProductionExecutionStore` and
+`DockerExecutionAdapter`. The
 migrations define and test separate NOLOGIN capability roles for authority,
 Accounting, Situation, Diagnosis, Planner, Policy, Risk, Selection,
 Capability/Context/Sandbox, Relay, Consumer, Redrive, Worker, Human Gate
 request/decision, Replay/Reconcile, Quarantine review/adoption/redrive,
-Evidence invalidation, Explain capture/query, metrics and read-only access. A
+Evidence invalidation, Explain capture/query, Docker adapter, side-effect,
+metrics and read-only access. A
 production deployment MUST create distinct login credentials and grant each
 process only its matching capability role.
 
@@ -405,6 +408,10 @@ and audit trace records in `0021_decision_explain_audit_trace.sql`. Historical
 Explain records are not recomputed with newer rules, late facts create new
 captures instead of mutating old snapshots, missing links are explicit
 `MISSING` nodes, and query access is scoped by tenant/project authorization.
+The P3-5 runtime adds Docker target 1.0 with deterministic run plans,
+deny-by-default network, read-only root filesystem, non-root user, cap drop,
+no-new-privileges, bounded output, declared artifact export and side-effect
+receipt/reconcile facts in `0022_production_docker_execution.sql`.
 A PostgreSQL-backed run is required to validate migrations, concurrency and
 permissions; discovery without project dependencies or without
 `HERMES_TEST_DATABASE_URL` is not phase acceptance.

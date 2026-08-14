@@ -23,7 +23,7 @@ Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时�
 - **Failure Is Feedback**：失败进入诊断、修复和重规划闭环，而不是直接终止流程。
 - **Everything Is Recoverable**：命令幂等、事件可重放、投递可恢复，进程崩溃不应破坏业务事实。
 
-当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**，以及 **P3-1 至 P3-4 运维治理 runtime**。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation，以及 immutable Decision Explain/Audit/Trace。
+当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**，以及 **P3-1 至 P3-5 运维治理 runtime**。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation、immutable Decision Explain/Audit/Trace，以及第一个真实 Docker execution target。
 
 ## 核心闭环
 
@@ -43,7 +43,7 @@ flowchart LR
     V -. "FAIL feedback" .-> E
 ```
 
-实线部分已经覆盖 P0、P1、P2 以及 P3-1/P3-2/P3-3/P3-4 的数据库 authority slices；生产 UI 和真实 Docker sandbox 仍在后续 P3-5/P3-6 切片内。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score/Explain 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
+实线部分已经覆盖 P0、P1、P2 以及 P3-1/P3-2/P3-3/P3-4/P3-5 的数据库 authority slices；生产 UI、IdP 和云集成仍不属于当前 runtime。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score/Explain/Docker Adapter 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
 
 ## 当前实现
 
@@ -69,6 +69,7 @@ flowchart LR
 | Checkpoint / Replay / Reconcile | P3-2 已完成 | replay shadow generation、checkpoint/reconcile finding/plan、无 authority fold/patch |
 | Quarantine / Evidence invalidation | P3-3 已完成 | append-only review/adoption/redrive；Evidence invalidation 不删证据、不改 VerificationResult、阻断 stale Gate resume |
 | Decision Explain / Audit / Trace | P3-4 已完成 | immutable snapshot/ref graph、缺链显式 MISSING、授权查询、audit trace 与脱敏 |
+| Production Docker execution | P3-5 已完成 | Docker target 1.0、非 root/只读 rootfs/deny network、fencing labels、artifact/output/usage、side-effect receipts |
 | Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
@@ -127,7 +128,7 @@ HERMES_TEST_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_te
 
 如果没有显式设置 `HERMES_TEST_DATABASE_URL`，测试发现仍可运行，但 PostgreSQL 集成测试会被跳过；SQLite 或 mock 不被视为 PostgreSQL authority/concurrency 语义的有效证明。
 
-当前 P0-P3-4 回归基线在 P3-4 focused 阶段新增 Explain/Audit/Trace 测试；最终 P3-5/P3-6 全量数字以本分支阶段门记录为准。阶段验收不能把跳过的数据库、Docker、并发或权限测试计为通过。
+当前 P0-P3-5 回归基线在 P3-4/P3-5 阶段新增 Explain/Audit/Trace 与 Docker execution 测试；最终 P3-6 全量数字以本分支阶段门记录为准。阶段验收不能把跳过的数据库、Docker、并发或权限测试计为通过。
 
 ### 执行一次 Outbox Relay
 
