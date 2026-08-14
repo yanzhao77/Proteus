@@ -145,6 +145,10 @@ PostgreSQL authority.
 P5-1 implements the FastAPI transport as an application factory over the P4
 ProductApiFacade. Importing the module does not connect to PostgreSQL, start
 loops or mutate authority.
+P5-2 adds a supervised runtime loop harness for relay, consumer/checkpoint,
+scheduler, Docker worker and reconcile roles. The harness provides bounded
+batches, backoff, cancellation and readiness state; correctness still depends on
+existing PostgreSQL lease/fencing/idempotency authority.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
