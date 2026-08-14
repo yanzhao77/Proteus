@@ -152,6 +152,10 @@ existing PostgreSQL lease/fencing/idempotency authority.
 P5-3 adds a PyJWT/cryptography OIDC verifier and minimal Human Gate UI routes.
 Verified identity maps to scoped assertions; the UI cannot directly resume a
 Project or edit Task/Project status.
+P5-4 adds production-compatible adapters for S3 Artifact storage, Vault KV-v2
+secret handles and OTLP telemetry. Product/API/UI layers continue to see
+artifact hashes and secret handles rather than mutable locations or secret
+values.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
