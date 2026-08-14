@@ -1,7 +1,7 @@
 # Hermes P3 Operational Governance Normative Specification V1.0
 
-Status: SPECIFIED; P3-1 HUMAN GATE RUNTIME IMPLEMENTED
-Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume
+Status: SPECIFIED; P3-2 CHECKPOINT / REPLAY / RECONCILE RUNTIME IMPLEMENTED
+Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume; P3-2 Checkpoint + Replay + Reconcile
 Date: 2026-08-14
 
 This specification closes the P3 operational governance contracts for Hermes
@@ -11,9 +11,13 @@ Project waiting/resume runtime boundary in
 [`0018_human_gate_waiting_resume.sql`](../../hermes-runtime/migrations/0018_human_gate_waiting_resume.sql),
 [`HumanGateAuthority`](../../hermes-runtime/src/hermes_runtime/application/human_gates.py)
 and the PostgreSQL/domain/permission tests listed in the P3 acceptance matrix.
+P3-2 implements the Checkpoint, Replay and Reconcile runtime boundary in
+[`0019_checkpoint_replay_reconcile.sql`](../../hermes-runtime/migrations/0019_checkpoint_replay_reconcile.sql),
+[`ReplayReconcileAuthority`](../../hermes-runtime/src/hermes_runtime/application/replay_reconcile.py)
+and the PostgreSQL/domain/permission tests listed in the P3 acceptance matrix.
 It does not implement Human Gate UI, production IdP/OIDC/SAML integration,
-P3-2 replay/reconcile, P3-3 quarantine adoption/redrive/Evidence invalidation,
-P3-4 explain/audit query runtime or production sandbox adapters.
+P3-3 quarantine adoption/redrive/Evidence invalidation, P3-4 explain/audit
+query runtime or production sandbox adapters.
 
 Normative priority remains:
 
@@ -60,7 +64,8 @@ P2 deliberately stops before:
 
 These are P3 responsibilities and MUST NOT be claimed as implemented by P3-0.
 P3-1 closes the first two bullets for PostgreSQL runtime authority only; the
-remaining bullets stay planned under their later P3 slices.
+checkpoint/replay/reconcile bullet is closed by P3-2 for PostgreSQL runtime
+authority only. The remaining bullets stay planned under their later P3 slices.
 
 ## 2. P3 conflict and GAP closure
 
@@ -299,6 +304,26 @@ Repair MUST be planned separately from execution. Dry-run explain produces an
 auditable reconcile plan. Applying a plan submits guarded Commands; it MUST NOT
 directly patch authority tables. Concurrent Reconcilers use expected plan
 version and lock scope; stale plans fail with `RECONCILE_PLAN_STALE`.
+
+### 6.4 P3-2 implementation boundary
+
+P3-2 implements this section as a PostgreSQL authority overlay, not as full
+Event Sourcing. The implemented model adds generation-scoped checkpoints,
+checkpoint hashes, immutable checkpoint history, replay sessions/generations,
+shadow projection rows, generation pointers, reconcile findings and immutable
+plans.
+
+Replay may create and activate a read-model generation pointer after verifying a
+shadow projection digest. Replay may not overwrite Project, Task, Accounting,
+Lease, Worker, Verification or Event Log authority. Reconcile observe/plan may
+surface all supported finding kinds; apply is restricted to whitelisted semantic
+repairs. The only mutating P3-2 repair currently implemented is
+`ADVANCE_CHECKPOINT_IF_EFFECT_CONTIGUOUS`, and only when Inbox/effect continuity
+proves the checkpoint can advance without skipping a gap.
+
+Unsupported repairs remain `BLOCKED`/planned until the owning guarded Command is
+implemented by a later slice. External irreversible side-effect replay is not
+implemented.
 
 ## 7. CT-009, CT-010 and FI-12 contracts
 
