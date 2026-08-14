@@ -1,14 +1,19 @@
 # Hermes P3 Operational Governance Normative Specification V1.0
 
-Status: SPECIFIED
-Phase: P3-0 contract closure
+Status: SPECIFIED; P3-1 HUMAN GATE RUNTIME IMPLEMENTED
+Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume
 Date: 2026-08-14
 
 This specification closes the P3 operational governance contracts for Hermes
 Runtime V1.2. It defines the authority boundaries required before P3-1 and later
-runtime implementation work may begin. It does not implement runtime code,
-database migrations, tests, UI, identity-provider integration or production
-sandbox adapters.
+runtime implementation work may begin. P3-1 implements only the Human Gate and
+Project waiting/resume runtime boundary in
+[`0018_human_gate_waiting_resume.sql`](../../hermes-runtime/migrations/0018_human_gate_waiting_resume.sql),
+[`HumanGateAuthority`](../../hermes-runtime/src/hermes_runtime/application/human_gates.py)
+and the PostgreSQL/domain/permission tests listed in the P3 acceptance matrix.
+It does not implement Human Gate UI, production IdP/OIDC/SAML integration,
+P3-2 replay/reconcile, P3-3 quarantine adoption/redrive/Evidence invalidation,
+P3-4 explain/audit query runtime or production sandbox adapters.
 
 Normative priority remains:
 
@@ -54,6 +59,8 @@ P2 deliberately stops before:
   external side-effect reconciliation.
 
 These are P3 responsibilities and MUST NOT be claimed as implemented by P3-0.
+P3-1 closes the first two bullets for PostgreSQL runtime authority only; the
+remaining bullets stay planned under their later P3 slices.
 
 ## 2. P3 conflict and GAP closure
 
