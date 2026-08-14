@@ -1,0 +1,28 @@
+# Hermes P5 Deployable Product Acceptance Matrix
+
+Date: 2026-08-14
+
+Status: P5-0 contract closure started; implementation rows remain `PENDING`.
+
+| Row | Requirement | Authority invariant | Slice | Status | Evidence |
+| --- | --- | --- | --- | --- | --- |
+| P5-CONTRACT-001 | P5 deployment/product boundary is specified before code. | P5 adds product transport/adapters but no second state authority. | P5-0 | SPECIFIED | `docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md`, ADR-0069 through ADR-0072 |
+| P5-CONTRACT-002 | P4 completion summary reflects merged baseline. | P5 starts from `origin/master` after P4 merge, not stale feature branch wording. | P5-0 | SPECIFIED | `docs/Hermes_P4_COMPLETION_SUMMARY.md` |
+| P5-API-001 | FastAPI service exposes only allowlisted semantic routes. | API cannot bypass Control Plane or expose generic mutation. | P5-1 | PENDING | Pending P5-1 implementation/tests |
+| P5-API-002 | Authority-changing endpoints validate command metadata and idempotency. | API preserves command_id/idempotency_key/expected_version/actor/reason. | P5-1 | PENDING | Pending P5-1 implementation/tests |
+| P5-API-003 | Error envelope and redaction prevent secret/internal leakage. | Exceptions/log-like payloads do not become covert secret channels. | P5-1 | PENDING | Pending P5-1 implementation/tests |
+| P5-API-004 | Live/readiness endpoints are health-only. | Health cannot mutate authority or enqueue repairs. | P5-1 | PENDING | Pending P5-1 implementation/tests |
+| P5-SERVICE-001 | Runtime supervisor loops are bounded, cancellable and readiness-aware. | Loops orchestrate existing services without duplicating authority logic. | P5-2 | PENDING | Pending P5-2 implementation/tests |
+| P5-SERVICE-002 | Multi-instance safety relies on DB lease/fencing/idempotency. | Process-local locks are not correctness claims. | P5-2 | PENDING | Pending P5-2 implementation/tests |
+| P5-IDP-001 | OIDC/JWT verifier validates signature, issuer, audience, subject, time and algorithm. | Identity assertion is scoped fact, not Project resume authority. | P5-3 | PENDING | Pending P5-3 implementation/tests |
+| P5-IDP-002 | Production profile disables local/test issuer. | Test identity cannot become production bypass. | P5-3 | PENDING | Pending P5-3 implementation/tests |
+| P5-UI-001 | Human Gate UI presents inbox/detail/evidence/risk/reason/decision/status/explain. | UI can submit Gate Decision only. | P5-3 | PENDING | Pending P5-3 implementation/tests |
+| P5-UI-002 | UI has no generic editor or direct resume/status controls. | UI cannot mutate Project/Task authority directly. | P5-3 | PENDING | Pending P5-3 implementation/tests |
+| P5-ART-001 | S3-compatible adapter is immutable and content-addressed. | Verification remains bound to exact hash, not URL/path. | P5-4 | PENDING | Pending P5-4 implementation/tests |
+| P5-SECRET-001 | Secret Manager adapter exposes handle metadata and resolves only at execution boundary. | Secret values do not enter API/UI/Event/Outbox/log/trace/artifact. | P5-4 | PENDING | Pending P5-4 implementation/tests |
+| P5-OBS-001 | OTLP-compatible exporter redacts and bounds backend failure behavior. | Observability cannot authorize, recover, PASS/FAIL or advance checkpoint. | P5-4 | PENDING | Pending P5-4 implementation/tests |
+| P5-DEPLOY-001 | Single-node deployment baseline defines entrypoints, Compose and hardened container posture. | Deployment roles preserve least privilege and separate migration/bootstrap. | P5-5 | PENDING | Pending P5-5 implementation/tests |
+| P5-DEPLOY-002 | Operations runbook covers readiness, backup/restore, migrations, rotation and rollback. | Ops repair does not become generic authority patch. | P5-5 | PENDING | Pending P5-5 implementation/tests |
+| P5-E2E-001 | Full P5 E2E/fault-injection hardening passes. | API/OIDC/UI/supervisor/adapters/observability preserve P0-P4 invariants. | P5-6 | PENDING | Pending P5-6 implementation/tests |
+
+Skipped or mocked external checks MUST NOT be counted as PASS.

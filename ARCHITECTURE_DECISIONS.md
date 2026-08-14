@@ -22,6 +22,7 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | [Hermes P2 Execution Admission Normative Specification V1.0](docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md) | READY/admission separation, Reservation handoff, queue prerequisites, AgentRun/fencing and P2/P3 ownership |
 | [Hermes P3 Operational Governance Normative Specification V1.0](docs/specs/Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md) | Human Gate, waiting/resume, replay/reconcile, quarantine operations, Evidence invalidation, explain/audit/trace and production execution boundaries |
 | [Hermes P4 Productization Normative Specification V1.0](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) | product API, Human Gate identity, Artifact/Secret/Retention and observability/export productization boundaries |
+| [Hermes P5 Deployable Product Normative Specification V1.0](docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md) | deployable single-node product, FastAPI transport, supervised runtime, OIDC/UI, production-compatible adapters and operations baseline |
 | [Hermes Conformance Test Specification V1.0](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | V1.2 §30.2 tests, fault injection and phase gates |
 
 ## ADR registry
@@ -96,6 +97,10 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0066 | P4 Human Gate Identity Product Boundary | ACCEPTED | P4-0/P4-2 | P4 Productization §§3/6 | [ADR-0066](docs/adr/ADR-0066-p4-human-gate-identity-product-boundary.md) | — |
 | ADR-0067 | P4 Artifact Secret Retention Boundary | ACCEPTED | P4-0/P4-3 | P4 Productization §§4/6 | [ADR-0067](docs/adr/ADR-0067-p4-artifact-secret-retention-boundary.md) | — |
 | ADR-0068 | P4 Observability Export Boundary | ACCEPTED | P4-0/P4-4 | P4 Productization §§5/6 | [ADR-0068](docs/adr/ADR-0068-p4-observability-export-boundary.md) | — |
+| ADR-0069 | P5 FastAPI Service Host Boundary | ACCEPTED | P5-0/P5-1 | P5 Product §§3/P5-API | [ADR-0069](docs/adr/ADR-0069-p5-fastapi-service-host-boundary.md) | ADR-0065 transport decision |
+| ADR-0070 | P5 Supervised Runtime Services | ACCEPTED | P5-0/P5-2 | P5 Product §§3/P5-SERVICE | [ADR-0070](docs/adr/ADR-0070-p5-supervised-runtime-services.md) | — |
+| ADR-0071 | P5 Production OIDC and Human Gate UI Boundary | ACCEPTED | P5-0/P5-3 | P5 Product §§3/P5-IDP/P5-UI | [ADR-0071](docs/adr/ADR-0071-p5-production-identity-ui-boundary.md) | ADR-0066 production decision |
+| ADR-0072 | P5 Production Adapters and Deployment Boundary | ACCEPTED | P5-0/P5-4/P5-5/P5-6 | P5 Product §§3/P5-ART/P5-SECRET/P5-OBS/P5-DEPLOY/P5-E2E | [ADR-0072](docs/adr/ADR-0072-p5-production-adapters-deployment-boundary.md) | ADR-0067/0068 production decision |
 
 ## Migrated decisions
 
@@ -109,14 +114,11 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 The following remain OPEN and require separate evidence-backed ADRs before being locked:
 
 - runtime-wide implementation language and long-term supported versions beyond the first slice;
-- FastAPI or another API framework;
 - SQLAlchemy or another persistence mapper beyond the first slice;
 - production PostgreSQL version beyond the PostgreSQL 14+ conformance baseline;
 - dependency management tool;
 - Kafka, Redis or another broker/cache;
-- production FastAPI/public web server;
-- production JSON Schema, Pydantic or another payload validator;
-- production Artifact object store and Human Gate identity provider;
-- production secret manager and observability backend.
+- additional public API transports beyond P5 FastAPI;
+- additional cloud Artifact object stores, IdPs, secret managers and observability backends beyond P5 selected adapters.
 
 No runtime code, API initialization, database model or empty test is authorized merely by this index.

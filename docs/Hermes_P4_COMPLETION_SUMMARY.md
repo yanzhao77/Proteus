@@ -2,7 +2,7 @@
 
 Date: 2026-08-14
 
-Status: P4-0 through P4-5 complete on branch `codex/p4-productization`.
+Status: P4-0 through P4-5 complete and merged to `master` as baseline for P5.
 
 ## Completed objective
 
