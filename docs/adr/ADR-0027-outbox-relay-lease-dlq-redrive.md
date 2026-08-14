@@ -4,7 +4,7 @@ Status: ACCEPTED
 Date: 2026-08-12  
 Supersedes: None  
 Superseded by: None  
-Related specifications: [Command/Event Protocol §§9-14](../specs/Hermes_Command_Event_Protocol_V1.0.md#9-outbox-relay)
+Related specifications: [Command/Event Protocol §§9-14](../specs/Hermes_Command_Event_Protocol_V1.0.md#9-outbox-relay-state-machine)
 
 ## Context
 

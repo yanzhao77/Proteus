@@ -20,6 +20,7 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | [Hermes Command and Event Protocol V1.0](docs/specs/Hermes_Command_Event_Protocol_V1.0.md) | Command, authoritative transaction, Event, Outbox, delivery and recovery |
 | [Hermes Execution Lease Protocol V1.0](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | ExecutionRequest, Lease, fencing, result admission and accounting interaction |
 | [Hermes P2 Execution Admission Normative Specification V1.0](docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md) | READY/admission separation, Reservation handoff, queue prerequisites, AgentRun/fencing and P2/P3 ownership |
+| [Hermes P3 Operational Governance Normative Specification V1.0](docs/specs/Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md) | Human Gate, waiting/resume, replay/reconcile, quarantine operations, Evidence invalidation, explain/audit/trace and production execution boundaries |
 | [Hermes Conformance Test Specification V1.0](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | V1.2 §30.2 tests, fault injection and phase gates |
 
 ## ADR registry
@@ -78,6 +79,13 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0050 | P2 Scheduler Lease, Fencing and Lock Authority | ACCEPTED | P2-3 | Runtime §§15-18/26/30; Lease §§6-16; P2 Admission §§11-13 | [ADR-0050](docs/adr/ADR-0050-p2-scheduler-lease-fencing-lock-authority.md) | — |
 | ADR-0051 | P2 Worker Lifecycle, Fenced Result Admission and Settlement Coupling | ACCEPTED | P2-4 | Runtime §§14-17/26/30; Lease §§7-17; P2 Admission §§11-12/15/17-21 | [ADR-0051](docs/adr/ADR-0051-p2-worker-lifecycle-fenced-result-admission.md) | — |
 | ADR-0052 | P2 Feedback and Bounded Autonomous Recovery Loop | ACCEPTED | P2-5 | Runtime §§21/25-26/30; Lease §14; P2 Admission §§18/20-21 | [ADR-0052](docs/adr/ADR-0052-p2-feedback-autonomous-recovery-loop.md) | — |
+| ADR-0053 | P3 Human Gate Request and Decision Authority | ACCEPTED | P3-0/P3-1 | P3 Governance §§4,7 | [ADR-0053](docs/adr/ADR-0053-p3-human-gate-authority.md) | — |
+| ADR-0054 | P3 Project Waiting Records and Immutable Resume Context | ACCEPTED | P3-0/P3-1 | P3 Governance §5 | [ADR-0054](docs/adr/ADR-0054-p3-project-waiting-resume-context.md) | — |
+| ADR-0055 | P3 Checkpoint, Replay and Reconcile Boundary | ACCEPTED | P3-0/P3-2 | P3 Governance §§6-7 | [ADR-0055](docs/adr/ADR-0055-p3-checkpoint-replay-reconcile.md) | — |
+| ADR-0056 | P3 Quarantine Review, Adoption and Redrive Authority | ACCEPTED | P3-0/P3-3 | P3 Governance §8 | [ADR-0056](docs/adr/ADR-0056-p3-quarantine-adoption-redrive.md) | — |
+| ADR-0057 | P3 Evidence Invalidation and Re-verification Authority | ACCEPTED | P3-0/P3-3 | P3 Governance §9 | [ADR-0057](docs/adr/ADR-0057-p3-evidence-invalidation.md) | — |
+| ADR-0058 | P3 Immutable Decision Explain, Audit and Trace | ACCEPTED | P3-0/P3-4 | P3 Governance §10 | [ADR-0058](docs/adr/ADR-0058-p3-decision-explain-audit-trace.md) | — |
+| ADR-0059 | P3 Production Execution Adapter and External Side-effect Boundary | ACCEPTED | P3-0/P3-5 | P3 Governance §11 | [ADR-0059](docs/adr/ADR-0059-p3-production-execution-boundary.md) | — |
 
 ## Migrated decisions
 
@@ -96,7 +104,7 @@ The following remain OPEN and require separate evidence-backed ADRs before being
 - production PostgreSQL version beyond the PostgreSQL 14+ conformance baseline;
 - dependency management tool;
 - JSON Schema, Pydantic or another payload validator;
-- Docker versus restricted Process Adapter priority;
+- Docker versus restricted Process Adapter priority for P3-5, using the decision gate in [ADR-0059](docs/adr/ADR-0059-p3-production-execution-boundary.md);
 - Kafka, Redis or another broker/cache;
 - Artifact object store and Human Gate identity provider.
 

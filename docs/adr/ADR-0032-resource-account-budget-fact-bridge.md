@@ -4,7 +4,7 @@ Status: ACCEPTED
 Date: 2026-08-12  
 Supersedes: None  
 Superseded by: None  
-Related specifications: [Core Runtime V1.2 §13](../Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md#13-budget--resource-accounting)
+Related specifications: [Core Runtime V1.2 §13](../Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md#13-budget-resource-accounting)
 
 ## Context
 

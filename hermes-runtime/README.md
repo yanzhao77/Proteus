@@ -1,4 +1,4 @@
-# Hermes Runtime: P0-P2 Authority Runtime Slices
+# Hermes Runtime: P0-P3 Authority Runtime Slices
 
 This package implements these authority, delivery and accounting slices:
 
@@ -117,7 +117,8 @@ FAILED ExecutionResult
 It does not yet provide an external Worker process manager/spawn service, real
 Docker/Process sandbox execution, Web APIs, Human Gate lifecycle, Kafka, Redis,
 Kubernetes, LLM planning/policy/risk/selection, P3 quarantine/reconcile
-operations or full Event Sourcing.
+operations, Evidence invalidation workflow, Decision Explain runtime or full
+Event Sourcing.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
@@ -172,6 +173,16 @@ existing P1 Situation, Diagnosis and Planner chain, then proves that final Task
 PASS still requires independent Verification plus Control Plane transition. It
 does not implement Human Gate UX, production Worker process management, real
 Docker/Process sandbox execution or P3 replay/quarantine reconciliation.
+
+P3-0 is contract-only documentation. It defines the next operational governance
+authorities in
+[`docs/specs/Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md)
+and tracks them in
+[`docs/P3_OPERATIONAL_GOVERNANCE_ACCEPTANCE_MATRIX.md`](../docs/P3_OPERATIONAL_GOVERNANCE_ACCEPTANCE_MATRIX.md).
+It adds ADR-0053 through ADR-0059 for Human Gate, Project waiting/resume,
+checkpoint/replay/reconcile, quarantine adoption/redrive, Evidence
+invalidation, Decision Explain/audit/trace and production execution boundaries.
+No P3 runtime code, SQL migration or tests are included in P3-0.
 
 ## Authority boundary
 
@@ -299,10 +310,11 @@ Policy, Risk, Selection, Capability/Context/Sandbox, Relay, Consumer, Redrive,
 Worker and read-only access. A production deployment MUST create distinct login
 credentials and grant each process only its matching capability role.
 
-The current regression suite discovers 341 tests. On 2026-08-13 the complete
-PostgreSQL 16-backed suite passed 341/341 with zero skips. A PostgreSQL-backed
+The P2-5 regression baseline discovers 350 tests when project dependencies are
+installed. On 2026-08-14 the complete PostgreSQL-backed P2 suite passed on both
+PostgreSQL 14 and PostgreSQL 16 during the P2 merge flow. A PostgreSQL-backed
 run is required to validate migrations, concurrency and permissions; discovery
-without `HERMES_TEST_DATABASE_URL` skips those checks and is not phase
+without project dependencies or without `HERMES_TEST_DATABASE_URL` is not phase
 acceptance.
 
 ## Run pure domain tests

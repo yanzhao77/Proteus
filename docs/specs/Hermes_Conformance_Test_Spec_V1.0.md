@@ -128,6 +128,11 @@ Suggested levels: `UNIT` (pure domain), `PG` (PostgreSQL integration), `MULTI` (
 - **Event / Outbox:** optional `human_gate.rejected`; no `human_gate.opened`.
 - **Forbidden:** OPEN Gate with null/broken context.
 - **Level / gate / phase:** PG; yes; P3.
+- **P3-0 contract expansion:** See
+  [`Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md §7.1`](Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md#71-ct-009-human-gate-requires-resume-context)
+  for the complete preconditions, actors, commands, expected state,
+  Event/Outbox, rejection codes, concurrency, expiry, crash, replay and
+  authority-boundary requirements.
 
 ### CT-010 — Exhausted strategy Gate is complete
 
@@ -140,6 +145,10 @@ Suggested levels: `UNIT` (pure domain), `PG` (PostgreSQL integration), `MULTI` (
 - **Event / Outbox:** `human_gate.opened` with refs, not secret/full logs.
 - **Forbidden:** omitted failed attempt, empty options, generic “AI cannot continue”.
 - **Level / gate / phase:** UNIT+E2E; yes; P3.
+- **P3-0 contract expansion:** See
+  [`Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md §7.2`](Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md#72-ct-010-exhausted-strategy-gate-is-complete)
+  for the full attempt-ledger, Gate Decision, expiry, self-approval and replay
+  contract.
 
 ## 4. Fault-injection scenarios
 
@@ -286,6 +295,11 @@ Suggested levels: `UNIT` (pure domain), `PG` (PostgreSQL integration), `MULTI` (
 - **Event / Outbox:** `recovery.reconciled` and specific correction Events.
 - **Forbidden:** fold-based blind replacement of newer state.
 - **Level / gate / phase:** E2E; yes; P3.
+- **P3-0 contract expansion:** See
+  [`Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md §7.3`](Hermes_P3_Operational_Governance_Normative_Spec_V1.0.md#73-fi-12-control-plane-restart-with-checkpointreplayreconcile)
+  for FI-12A through FI-12G: checkpoint damaged, checkpoint lost, duplicate,
+  gap, dry-run reconcile, crash-safe reconcile apply and authoritative state
+  protection.
 
 ### FI-13 — Verification Artifact hash mismatch
 
