@@ -115,15 +115,17 @@ FAILED ExecutionResult
 ```
 
 It does not yet provide an external Worker process manager/spawn service, real
-Docker/Process sandbox execution, Web APIs, Human Gate lifecycle, Kafka, Redis,
-Kubernetes, LLM planning/policy/risk/selection, P3 quarantine/reconcile
-operations, Evidence invalidation workflow, Decision Explain runtime or full
-Event Sourcing.
+Docker/Process sandbox execution, Web APIs, Human Gate UI, production IdP
+integration, Kafka, Redis, Kubernetes, LLM planning/policy/risk/selection, P3
+quarantine/reconcile operations, Evidence invalidation workflow, Decision
+Explain runtime or full Event Sourcing.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
-structured Feedback emission and bounded autonomous recovery loop entry. Full P3
-Human Gate lifecycle, quarantine operations and reconcile remain future work.
+structured Feedback emission and bounded autonomous recovery loop entry. P3-1
+closes the database-backed Human Gate lifecycle and Project waiting/resume
+authority. Human Gate UI, production IdP integration, quarantine operations and
+reconcile remain future work.
 
 P2 execution contracts are specified and tracked in
 [`docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
@@ -183,6 +185,20 @@ It adds ADR-0053 through ADR-0059 for Human Gate, Project waiting/resume,
 checkpoint/replay/reconcile, quarantine adoption/redrive, Evidence
 invalidation, Decision Explain/audit/trace and production execution boundaries.
 No P3 runtime code, SQL migration or tests are included in P3-0.
+
+P3-1 implements the PostgreSQL Human Gate and Project waiting/resume authority.
+Migration `0018_human_gate_waiting_resume.sql` separates Gate Request, Gate
+Decision and Decision Application records, and binds typed Project waiting
+records to immutable ResumeContext hashes. Main Hermes/Recovery may request a
+Gate, authorized humans/operators may decide, and only Control Plane may apply an
+approved Decision after rechecking current Gate, Decision, Waiting,
+ResumeContext, Project version, approver authorization, Evidence, Policy and
+Budget facts. The P3-1 runtime adds `HumanGateAuthority` and
+`PostgresHumanGateStore`, with six pure domain tests, nine PostgreSQL
+integration/concurrency/fault tests and four permission tests. PostgreSQL 14 and
+PostgreSQL 16 full regression both discovered 369 tests and passed on
+2026-08-14; no-DB discovery also found 369 tests and passed with database tests
+skipped.
 
 ## Authority boundary
 
@@ -296,6 +312,17 @@ No P3 runtime code, SQL migration or tests are included in P3-0.
 - Terminal Result admission commits Result, CompletionClaim link,
   settlement/release link, Request/Queue/Run terminal state, Lease/lock release,
   Events, Outbox and CommandReceipt in one PostgreSQL transaction.
+- `hermes_gate_request_runtime` can only request Human Gates with immutable
+  ResumeContext bindings; it cannot approve or apply Decisions.
+- `hermes_gate_decision_runtime` can only submit scoped authorized human/operator
+  Decisions; it cannot mutate Project, Task, Waiting or Application state.
+- `hermes_control_plane_runtime` enters Project waiting and applies/expires/
+  cancels/supersedes Gate requests through guarded semantic functions; it cannot
+  forge Human Decisions.
+- Human Decision approval never directly resumes a Project. Application rechecks
+  current Gate, Decision, Waiting, ResumeContext hash, Project version, approver
+  authorization, Evidence, Policy and Budget before committing
+  `human_gate.decision_applied` and `project.resumed`.
 
 Only `ControlPlane` receives a `PostgresRuntimeStore`. Accounting uses
 `ResourceAccounting` with a `PostgresResourceAccountingStore`; Selection uses
@@ -304,17 +331,19 @@ freeze objects use `ExecutionPreparationAuthority` with a
 `PostgresCapabilityStore`; P2-2 request preparation uses
 `ExecutionPreparation` with a `PostgresExecutionStore`; P2-3 scheduling uses
 `ExecutionScheduler` with a `PostgresSchedulerStore`; P2-4 Worker execution uses
-`WorkerExecution` with a `PostgresWorkerExecutionStore`. The migrations define and test separate NOLOGIN
-capability roles for authority, Accounting, Situation, Diagnosis, Planner,
-Policy, Risk, Selection, Capability/Context/Sandbox, Relay, Consumer, Redrive,
-Worker and read-only access. A production deployment MUST create distinct login
-credentials and grant each process only its matching capability role.
+`WorkerExecution` with a `PostgresWorkerExecutionStore`; P3-1 Human Gate uses
+`HumanGateAuthority` with a `PostgresHumanGateStore`. The migrations define and
+test separate NOLOGIN capability roles for authority, Accounting, Situation,
+Diagnosis, Planner, Policy, Risk, Selection, Capability/Context/Sandbox, Relay,
+Consumer, Redrive, Worker, Human Gate request/decision and read-only access. A
+production deployment MUST create distinct login credentials and grant each
+process only its matching capability role.
 
-The P2-5 regression baseline discovers 350 tests when project dependencies are
-installed. On 2026-08-14 the complete PostgreSQL-backed P2 suite passed on both
-PostgreSQL 14 and PostgreSQL 16 during the P2 merge flow. A PostgreSQL-backed
-run is required to validate migrations, concurrency and permissions; discovery
-without project dependencies or without `HERMES_TEST_DATABASE_URL` is not phase
+The P3-1 regression baseline discovers 369 tests when project dependencies are
+installed. On 2026-08-14 the complete PostgreSQL-backed suite passed on both
+PostgreSQL 14 and PostgreSQL 16 during the P3-1 flow. A PostgreSQL-backed run is
+required to validate migrations, concurrency and permissions; discovery without
+project dependencies or without `HERMES_TEST_DATABASE_URL` is not phase
 acceptance.
 
 ## Run pure domain tests

@@ -86,6 +86,7 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0057 | P3 Evidence Invalidation and Re-verification Authority | ACCEPTED | P3-0/P3-3 | P3 Governance §9 | [ADR-0057](docs/adr/ADR-0057-p3-evidence-invalidation.md) | — |
 | ADR-0058 | P3 Immutable Decision Explain, Audit and Trace | ACCEPTED | P3-0/P3-4 | P3 Governance §10 | [ADR-0058](docs/adr/ADR-0058-p3-decision-explain-audit-trace.md) | — |
 | ADR-0059 | P3 Production Execution Adapter and External Side-effect Boundary | ACCEPTED | P3-0/P3-5 | P3 Governance §11 | [ADR-0059](docs/adr/ADR-0059-p3-production-execution-boundary.md) | — |
+| ADR-0060 | P3-1 PostgreSQL Human Gate Runtime Authority | ACCEPTED | P3-1 | P3 Governance §§4-5/7 | [ADR-0060](docs/adr/ADR-0060-p3-human-gate-runtime-authority.md) | ADR-0053/0054 implementation detail |
 
 ## Migrated decisions
 
