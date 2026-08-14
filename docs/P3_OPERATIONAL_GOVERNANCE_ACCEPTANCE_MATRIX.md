@@ -1,13 +1,13 @@
 # Hermes Runtime V1.2 P3 Operational Governance Acceptance Matrix
 
-Status: P3-5 IMPLEMENTED FOR PRODUCTION DOCKER EXECUTION
-Phase: P3-5 Production Docker Execution Adapter
+Status: P3-6 END-TO-END HARDENING COMPLETE
+Phase: P3-6 End-to-End Hardening and Completion
 Date: 2026-08-14
 
 This matrix is a contract for P3-1 and later implementation. P3-1 closes the
 Human Gate and Project waiting/resume rows. P3-2 closes Checkpoint, Replay,
 Reconcile and FI-12A through FI-12G rows with PostgreSQL 14/16 regression.
-P3-3 closes quarantine operations and Evidence invalidation rows with PostgreSQL 14/16 regression. P3-4 closes immutable Decision Explain, Audit and Trace rows with PostgreSQL authority, permission, concurrency and fault-injection evidence. P3-5 closes Docker target 1.0 and side-effect receipt rows with PostgreSQL 14/16 and real Docker evidence. P3-6 completion hardening remains `PLANNED`.
+P3-3 closes quarantine operations and Evidence invalidation rows with PostgreSQL 14/16 regression. P3-4 closes immutable Decision Explain, Audit and Trace rows with PostgreSQL authority, permission, concurrency and fault-injection evidence. P3-5 closes Docker target 1.0 and side-effect receipt rows with PostgreSQL 14/16 and real Docker evidence. P3-6 closes end-to-end completion with cross-slice regression and [`Hermes_P3_COMPLETION_SUMMARY.md`](Hermes_P3_COMPLETION_SUMMARY.md).
 
 Allowed status values follow the existing repository vocabulary:
 `SPECIFIED`, `PLANNED`, `PARTIAL`, `PASS`, `BLOCKED`.
@@ -60,5 +60,6 @@ Allowed status values follow the existing repository vocabulary:
 | CT-007/P3 Evidence invalidation | P3-EVID-001, P3-EVID-002 | P3-3 | PASS | P3-3 invalidation is append-only, preserves Evidence/VerificationResult history, emits stale dependency/reverification facts and blocks invalidated Evidence in Gate decision/resume paths. |
 | P3-4 Decision Explain/Audit | P3-EXPL-001, P3-EXPL-002 | P3-4 | PASS | P3-4 captures immutable source-bound explain snapshots and audit trace records through migration `0021`; late facts do not mutate historical snapshots, missing links remain explicit, query scope is authorized, and runtime/metrics roles cannot write explain authority. |
 | P3-5 Docker production execution | P3-PROD-001, P3-PROD-002, FI-17 partial external side-effect boundary | P3-5 | PASS | P3-5 compiles structured Docker run plans, runs real containers with deny-by-default isolation, records process lifecycle and side-effect receipts through migration `0022`, rejects stale fencing and irreversible effects without Gate, and surfaces effect-before-receipt uncertainty as reconcile findings. |
+| P3-6 E2E hardening | P3-GATE/P3-WAIT/P3-REC/P3-QUAR/P3-EVID/P3-EXPL/P3-PROD | P3-6 | PASS | `test_p3_end_to_end_hardening.py` links Human Gate authorization refs, Docker process facts, side-effect receipts, Explain/Audit traces, stale Quarantine adoption rejection and side-effect uncertainty without allowing Worker/Docker/Explain to mutate Task PASS authority. |
 
 No unexplained P3 GAP is intentionally hidden by this matrix.

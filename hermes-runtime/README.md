@@ -412,6 +412,9 @@ The P3-5 runtime adds Docker target 1.0 with deterministic run plans,
 deny-by-default network, read-only root filesystem, non-root user, cap drop,
 no-new-privileges, bounded output, declared artifact export and side-effect
 receipt/reconcile facts in `0022_production_docker_execution.sql`.
+P3-6 adds cross-slice E2E hardening tests and
+`docs/Hermes_P3_COMPLETION_SUMMARY.md`; it does not introduce a new durable
+authority migration.
 A PostgreSQL-backed run is required to validate migrations, concurrency and
 permissions; discovery without project dependencies or without
 `HERMES_TEST_DATABASE_URL` is not phase acceptance.
