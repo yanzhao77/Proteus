@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import Any, Mapping, Optional
 
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -71,6 +72,10 @@ def create_app(
         allow_methods=["GET", "POST"],
         allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
     )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, _exc: RequestValidationError):
+        return _error("VALIDATION_FAILED", 400, request.headers.get("X-Request-ID", "req-missing"), "request rejected")
 
     @app.middleware("http")
     async def request_bounds_and_errors(request: Request, call_next):
