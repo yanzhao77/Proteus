@@ -89,6 +89,8 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0060 | P3-1 PostgreSQL Human Gate Runtime Authority | ACCEPTED | P3-1 | P3 Governance §§4-5/7 | [ADR-0060](docs/adr/ADR-0060-p3-human-gate-runtime-authority.md) | ADR-0053/0054 implementation detail |
 | ADR-0061 | P3-2 PostgreSQL Checkpoint Replay and Reconcile Runtime Authority | ACCEPTED | P3-2 | P3 Governance §§6-7 | [ADR-0061](docs/adr/ADR-0061-p3-checkpoint-replay-reconcile-runtime-authority.md) | ADR-0055 implementation detail |
 | ADR-0062 | P3-3 PostgreSQL Quarantine and Evidence Invalidation Runtime Authority | ACCEPTED | P3-3 | P3 Governance §§8-9 | [ADR-0062](docs/adr/ADR-0062-p3-quarantine-evidence-runtime-authority.md) | ADR-0056/0057 implementation detail |
+| ADR-0063 | P3-4 PostgreSQL Decision Explain Audit and Trace Runtime Authority | ACCEPTED | P3-4 | P3 Governance §10 | [ADR-0063](docs/adr/ADR-0063-p3-decision-explain-audit-runtime-authority.md) | ADR-0058 implementation detail |
+| ADR-0064 | P3-5 Production Docker Execution Runtime Authority | ACCEPTED | P3-5 | P3 Governance §11 | [ADR-0064](docs/adr/ADR-0064-p3-production-docker-execution-runtime-authority.md) | ADR-0059 implementation detail |
 
 ## Migrated decisions
 
@@ -107,7 +109,6 @@ The following remain OPEN and require separate evidence-backed ADRs before being
 - production PostgreSQL version beyond the PostgreSQL 14+ conformance baseline;
 - dependency management tool;
 - JSON Schema, Pydantic or another payload validator;
-- Docker versus restricted Process Adapter priority for P3-5, using the decision gate in [ADR-0059](docs/adr/ADR-0059-p3-production-execution-boundary.md);
 - Kafka, Redis or another broker/cache;
 - Artifact object store and Human Gate identity provider.
 

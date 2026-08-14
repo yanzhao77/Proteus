@@ -397,19 +397,32 @@ freeze objects use `ExecutionPreparationAuthority` with a
 uses `ReplayReconcileAuthority` with a `PostgresReplayReconcileStore`; P3-3
 quarantine operations use `QuarantineAuthority` with a
 `PostgresQuarantineStore`; Evidence invalidation uses
-`EvidenceInvalidationAuthority` with a `PostgresEvidenceInvalidationStore`. The
+`EvidenceInvalidationAuthority` with a `PostgresEvidenceInvalidationStore`;
+P3-4 Decision Explain/Audit/Trace uses `DecisionExplainAuthority` with a
+`PostgresExplainStore`; P3-5 production Docker execution uses
+`ProductionExecutionAuthority`, `PostgresProductionExecutionStore` and
+`DockerExecutionAdapter`. The
 migrations define and test separate NOLOGIN capability roles for authority,
 Accounting, Situation, Diagnosis, Planner, Policy, Risk, Selection,
 Capability/Context/Sandbox, Relay, Consumer, Redrive, Worker, Human Gate
 request/decision, Replay/Reconcile, Quarantine review/adoption/redrive,
-Evidence invalidation and read-only access. A production deployment MUST create
-distinct login credentials and grant each process only its matching capability
-role.
+Evidence invalidation, Explain capture/query, Docker adapter, side-effect,
+metrics and read-only access. A
+production deployment MUST create distinct login credentials and grant each
+process only its matching capability role.
 
-The P3-3 regression baseline discovers 413 tests when project dependencies are
-installed. On 2026-08-14 the no-DB suite discovered 413 tests and passed with
-272 database tests skipped. The complete PostgreSQL-backed suite discovered 413
-tests and passed on both PostgreSQL 14 and PostgreSQL 16 during the P3-3 flow.
+The P3-4 runtime adds immutable explain snapshots, reference graph nodes/edges
+and audit trace records in `0021_decision_explain_audit_trace.sql`. Historical
+Explain records are not recomputed with newer rules, late facts create new
+captures instead of mutating old snapshots, missing links are explicit
+`MISSING` nodes, and query access is scoped by tenant/project authorization.
+The P3-5 runtime adds Docker target 1.0 with deterministic run plans,
+deny-by-default network, read-only root filesystem, non-root user, cap drop,
+no-new-privileges, bounded output, declared artifact export and side-effect
+receipt/reconcile facts in `0022_production_docker_execution.sql`.
+P3-6 adds cross-slice E2E hardening tests and
+`docs/Hermes_P3_COMPLETION_SUMMARY.md`; it does not introduce a new durable
+authority migration.
 A PostgreSQL-backed run is required to validate migrations, concurrency and
 permissions; discovery without project dependencies or without
 `HERMES_TEST_DATABASE_URL` is not phase acceptance.
