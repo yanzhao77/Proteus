@@ -8,10 +8,10 @@ Status: P5-0 contract closure started; implementation rows remain `PENDING`.
 | --- | --- | --- | --- | --- | --- |
 | P5-CONTRACT-001 | P5 deployment/product boundary is specified before code. | P5 adds product transport/adapters but no second state authority. | P5-0 | SPECIFIED | `docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md`, ADR-0069 through ADR-0072 |
 | P5-CONTRACT-002 | P4 completion summary reflects merged baseline. | P5 starts from `origin/master` after P4 merge, not stale feature branch wording. | P5-0 | SPECIFIED | `docs/Hermes_P4_COMPLETION_SUMMARY.md` |
-| P5-API-001 | FastAPI service exposes only allowlisted semantic routes. | API cannot bypass Control Plane or expose generic mutation. | P5-1 | PENDING | Pending P5-1 implementation/tests |
-| P5-API-002 | Authority-changing endpoints validate command metadata and idempotency. | API preserves command_id/idempotency_key/expected_version/actor/reason. | P5-1 | PENDING | Pending P5-1 implementation/tests |
-| P5-API-003 | Error envelope and redaction prevent secret/internal leakage. | Exceptions/log-like payloads do not become covert secret channels. | P5-1 | PENDING | Pending P5-1 implementation/tests |
-| P5-API-004 | Live/readiness endpoints are health-only. | Health cannot mutate authority or enqueue repairs. | P5-1 | PENDING | Pending P5-1 implementation/tests |
+| P5-API-001 | FastAPI service exposes only allowlisted semantic routes. | API cannot bypass Control Plane or expose generic mutation. | P5-1 | PASS | `fastapi_app.py`, `test_read_routes_are_allowlisted_and_generic_routes_are_absent` |
+| P5-API-002 | Authority-changing endpoints validate command metadata and idempotency. | API preserves command_id/idempotency_key/expected_version/actor/reason. | P5-1 | PASS | `GateDecisionDto`, `test_authority_changing_route_requires_content_type_idempotency_and_metadata` |
+| P5-API-003 | Error envelope and redaction prevent secret/internal leakage. | Exceptions/log-like payloads do not become covert secret channels. | P5-1 | PASS | `test_errors_are_redacted_and_body_size_is_bounded` |
+| P5-API-004 | Live/readiness endpoints are health-only. | Health cannot mutate authority or enqueue repairs. | P5-1 | PASS | `readiness.py`, `/livez`, `/readyz`, `test_livez_readyz_are_health_only` |
 | P5-SERVICE-001 | Runtime supervisor loops are bounded, cancellable and readiness-aware. | Loops orchestrate existing services without duplicating authority logic. | P5-2 | PENDING | Pending P5-2 implementation/tests |
 | P5-SERVICE-002 | Multi-instance safety relies on DB lease/fencing/idempotency. | Process-local locks are not correctness claims. | P5-2 | PENDING | Pending P5-2 implementation/tests |
 | P5-IDP-001 | OIDC/JWT verifier validates signature, issuer, audience, subject, time and algorithm. | Identity assertion is scoped fact, not Project resume authority. | P5-3 | PENDING | Pending P5-3 implementation/tests |

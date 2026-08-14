@@ -78,7 +78,8 @@ flowchart LR
 | P4 Observability/export | P4-4 已完成 | OpenTelemetry-compatible local envelope；redaction；MISSING links；metrics/traces 不授权 |
 | P4 E2E hardening | P4-5 已完成 | API、Gate、Artifact、Secret、Retention、Observability 跨边界回归 |
 | P5 Deployable Product Contract | P5-0 已完成 | 单节点 topology、FastAPI、supervisor、OIDC/UI、S3/Vault/OTLP、deployment/ops 边界规范 |
-| Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
+| P5 FastAPI service host | P5-1 已完成 | 成熟 FastAPI/Pydantic transport；allowlisted semantic routes；health/readiness；redacted error envelope |
+| External broker | 未实现 | Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
 
