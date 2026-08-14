@@ -2,8 +2,7 @@
 
 Date: 2026-08-14
 
-Status: P4-0 contract closure complete; P4-1 through P4-5 pending until their
-implementation commits land.
+Status: P4-0 through P4-5 complete.
 
 | Row | Requirement | Authority invariant | Slice | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
@@ -16,7 +15,7 @@ implementation commits land.
 | P4-SEC-001 | Secret provider returns handles only and rejects leakage into API/Event/log/export/artifact paths. | Secret values never become authority/audit payload. | P4-3 | PASS | `secret_handles.py`, `local_secrets.py`, `test_secret_handle_provider_never_returns_secret_value_to_payloads` |
 | P4-RET-001 | Retention/archive/purge preserves authority metadata and dependency tombstones. | Raw content removal cannot erase Decision/Verification/Gate evidence. | P4-3 | PASS | `test_retention_preserves_tombstone_and_blocks_active_authority_dependency` |
 | P4-OBS-001 | Observability/export is read-only diagnostic surface with redaction. | Metrics/traces cannot authorize actions or fabricate missing links. | P4-4 | PASS | `observability.py`, `local_observability.py`, `test_observability_export_boundary.py` |
-| P4-E2E-001 | P4 end-to-end productization hardening covers API, Gate, Artifact, Secret, Retention and Observability. | Productization does not bypass P0-P3 authority chain. | P4-5 | PENDING | Pending P4-5 tests |
+| P4-E2E-001 | P4 end-to-end productization hardening covers API, Gate, Artifact, Secret, Retention and Observability. | Productization does not bypass P0-P3 authority chain. | P4-5 | PASS | `test_p4_end_to_end_productization.py`, `docs/Hermes_P4_COMPLETION_SUMMARY.md` |
 
 ## Deferred scope
 

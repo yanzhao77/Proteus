@@ -24,6 +24,17 @@ FORBIDDEN_AUTHORITY_FIELDS = {
     "arbitrary_command",
 }
 
+FORBIDDEN_RESPONSE_FIELDS = {
+    "new_state",
+    "mark_passed",
+    "mark_failed",
+    "set_task_passed",
+    "set_task_failed",
+    "update_task_status",
+    "sql",
+    "arbitrary_command",
+}
+
 FORBIDDEN_PATH_FRAGMENTS = {
     "/patch",
     "/sql",
@@ -95,7 +106,7 @@ def reject_forbidden_authority_shape(request: ProductApiRequest) -> None:
 
 
 def ensure_safe_response(payload: Mapping[str, Any]) -> None:
-    forbidden = _find_forbidden_fields(payload)
+    forbidden = _find_keys(payload, FORBIDDEN_RESPONSE_FIELDS)
     secret_refs = _find_secret_values(payload)
     if forbidden:
         raise ProductApiRejected("API_UNSAFE_RESPONSE_FIELD:{}".format(",".join(sorted(forbidden))))
@@ -127,4 +138,17 @@ def _find_secret_values(value: Any) -> set:
     elif isinstance(value, (tuple, list)):
         for item in value:
             found.update(_find_secret_values(item))
+    return found
+
+
+def _find_keys(value: Any, keys: set) -> set:
+    found = set()
+    if isinstance(value, Mapping):
+        for key, nested in value.items():
+            if str(key).lower() in keys:
+                found.add(str(key))
+            found.update(_find_keys(nested, keys))
+    elif isinstance(value, (tuple, list)):
+        for item in value:
+            found.update(_find_keys(item, keys))
     return found
