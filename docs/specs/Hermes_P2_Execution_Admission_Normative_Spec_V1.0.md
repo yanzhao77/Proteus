@@ -555,7 +555,7 @@ reconcile command.
 | Worker crash before result | Yes, if retry policy allows | retain until retry/timeout decision | expired lease and regrant Event |
 | Capability temporarily unavailable | Maybe, if frozen template still valid and retry policy allows | retain bounded or release on preparation failure | `execution.preparation_failed` or retry |
 | Sandbox compile failure from unsupported mandatory constraint | No | release unless a new compatible selection is prepared | fail closed, Situation/Feedback |
-| Business/test failure | No silent retry | settle/release then Feedback/Situation | execution failed + feedback |
+| Business/test failure | No silent retry | settle/release then Feedback/Situation/Diagnosis/Planner/RecoveryAttempt | execution failed + structured feedback + bounded recovery ledger |
 | Cancellation | No | settle known usage, release remainder | cancelled/timed_out |
 | Strategy switch/replan | New Decision/Action | old Reservation settled/released; new P1/P2 chain | new Decision/ExecutionRequest |
 
@@ -587,8 +587,28 @@ ExecutionRequest and related audit records MUST preserve:
 | P2-2 | Execution Admission, Reservation handoff, ExecutionRequest preparation and durable Queue | Lease competition or result admission |
 | P2-3 | Scheduler, atomic Lease, fencing token, heartbeat, renew and takeover | Artifact/Usage final admission |
 | P2-4 | AgentRun execution lifecycle, Worker result/usage/artifact candidate admission, minimal quarantine | full reconcile/adoption operations |
-| P2-5 | Feedback emission from execution outcomes and autonomous recovery loop entry | Human Gate UX, full replay/reconcile |
+| P2-5 | Feedback emission from execution outcomes, deterministic failure taxonomy, RecoveryCycle/Attempt ledger, bounded retry/repair/switch-worker/collaboration/replan protocol and loop entry back through Situation/Diagnosis/Planner | Human Gate UX, full replay/reconcile, quarantine adoption/redrive, production Worker process manager |
 | P3 | Human Gate, checkpoint/replay/reconcile operations, full quarantine retention/adoption/redrive, evidence invalidation workflows | P2 minimal execution safety |
+
+### 20.1 P2-5 implemented recovery boundary
+
+P2-5 Recovery Controller MAY emit structured Feedback only from a failed P2-4
+`ExecutionResult`. It MUST NOT emit Feedback from `SUCCEEDED` execution results
+and MUST NOT retry business/test failures inside the Scheduler path.
+
+Recovery Controller owns `execution_feedback_records`, `recovery_cycles`,
+`recovery_attempts` and minimal collaboration request records. It does not own
+Task verdict authority, Verification authority, Worker result authority,
+Accounting settlement authority or Queue/Lease authority.
+
+Each autonomous RecoveryCycle MUST have a bounded `max_attempts`. When attempts
+are exhausted, P2-5 records a blocked `human_gate` attempt and marks the cycle
+`EXHAUSTED`; P3 owns the actual Human Gate lifecycle and resume context.
+
+RecoveryAttempt completion MAY link to a later ExecutionRequest, ExecutionResult
+and VerificationResult, but those links are audit facts only. Task `PASSED` or
+`FAILED` still requires an authoritative VerificationResult and Control Plane
+verified transition.
 
 ## 21. CT/FI ownership
 

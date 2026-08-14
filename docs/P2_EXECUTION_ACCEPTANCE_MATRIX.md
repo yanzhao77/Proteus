@@ -7,12 +7,14 @@ Status vocabulary:
 - `PASS`: runtime code, PostgreSQL authority checks and regression evidence exist for the row's owning slice.
 - `PARTIAL`: a real implemented subset is proven, but the original row includes later-slice responsibilities.
 
-Current checkpoint (2026-08-13): P2-1, P2-2, P2-3 and P2-4 core are implemented
-and tested. P2-4 adds Worker lifecycle, fenced candidate/result/usage admission,
-minimal stale-payload quarantine, CompletionClaim bridge and single-transaction
-settlement/release coupling. Real sandbox execution, external Worker spawn,
-P2-5 feedback/replan and P3 quarantine/reconcile operations remain outside this
-checkpoint.
+Current checkpoint (2026-08-14): P2-1 through P2-5 are implemented and tested.
+P2-4 adds Worker lifecycle, fenced candidate/result/usage admission, minimal
+stale-payload quarantine, CompletionClaim bridge and single-transaction
+settlement/release coupling. P2-5 adds structured execution-failure Feedback,
+bounded Recovery cycles/attempts and the autonomous loop entry back through
+Situation, Diagnosis, Planner, execution and independent Verification. Real
+sandbox execution, external Worker spawn, Human Gate lifecycle and P3
+quarantine/reconcile operations remain outside this checkpoint.
 
 | ID | Invariant | Authority/actor | Preconditions | Command/input | Expected authoritative state | Expected Event/Outbox | Rejection reason code | Concurrency case | Crash/fault point | Owning slice | Status | Source trace |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -37,7 +39,8 @@ checkpoint.
 | P2-RESULT-001 | Worker writes require current owner/token | Worker narrow command + Control Plane admission | RUNNING request with current token | result/usage/artifact candidate command | current authority updated only if token/run match | candidate/result/terminal Events + Outbox | `FENCING_TOKEN_STALE`, `AGENT_RUN_NOT_ACTIVE`, `LEASE_NOT_CURRENT` | two current Results produce one terminal result/settlement | result/candidate/settlement pre-commit points | P2-4 | PASS | CT-003; FI-09/FI-10; ADR-0046; `test_worker_execution_postgres.py`; `test_worker_execution_permissions.py` |
 | P2-QUAR-001 | Stale result is durably quarantined | Result admission/quarantine authority | submitted token is stale or owner mismatched | result/candidate payload + token | append-only quarantine row; current request/artifact/settlement unchanged | `execution.result_quarantined` + Outbox | `FENCING_TOKEN_STALE`, `AGENT_RUN_NOT_ACTIVE`, `LEASE_NOT_CURRENT` | old token after takeover | event/quarantine/receipt pre-commit points | P2-4 core, P3 full | PARTIAL | CT-003 core PASS; FI-09 PASS; P3 review/adoption/redrive/retention still PLANNED; P2 Admission Spec §12; ADR-0051; `test_worker_execution_postgres.py`; `test_worker_execution_permissions.py` |
 | P2-USAGE-001 | Run settlement coupling is exactly once | Accounting + result admission | accepted result and usage samples | usage sample + result command | consumed/reserved updated once, samples processed once | `execution.settled` + Outbox | `RESOURCE_ACCOUNT_VERSION_CONFLICT`, `RESOURCE_SETTLEMENT_ALREADY_APPLIED` | duplicate samples and concurrent Results | after settlement before receipt | P2-4 core, P3 full | PARTIAL | FI-17 P2 core PASS; P3 external-side-effect/reconcile still PLANNED; ADR-0014/0051; P2 Admission Spec §18; `test_worker_execution_postgres.py`; `test_worker_execution_permissions.py` |
-| P2-FB-001 | Business failure returns to Situation/Diagnosis/Planner | Control Plane feedback producer | execution failed due to business/test outcome | failure disposition command | feedback/situation event; no hidden scheduler retry | execution failed + feedback event | `EXEC_FAILURE_CLASSIFICATION_REQUIRED` | retry budget exhausted | after execution failed before feedback | P2-5 | PLANNED | Lease Protocol §14; P2 Admission Spec §18 |
+| P2-FB-001 | Business failure returns to Situation/Diagnosis/Planner | Recovery Controller feedback producer | failed P2-4 ExecutionResult due to business/test outcome | `recovery.emit_feedback`, then Situation/Diagnosis/Planner | immutable execution feedback record and recovery cycle; no hidden scheduler retry | `feedback.created`, `recovery.cycle_started` + Outbox | `RECOVERY_FEEDBACK_SOURCE_NOT_FAILED`, `RECOVERY_AUTHORITY_REQUIRED`, `RECOVERY_IDEMPOTENCY_CONFLICT` | retry budget exhausted records blocked Human Gate attempt | recovery event/record/receipt pre-commit points | P2-5 | PASS | Lease Protocol §14; P2 Admission Spec §18; ADR-0052; `test_recovery_domain.py`; `test_recovery_postgres.py`; `test_recovery_permissions.py` |
+| P2-REC-001 | Recovery attempts are bounded and ledgered | Recovery Controller | OPEN RecoveryCycle with structured Feedback | `recovery.plan_attempt`, `recovery.complete_attempt` | immutable attempts with ordinal/action/outcome links; cycle OPEN/COMPLETED/EXHAUSTED/BLOCKED | `recovery.attempt_planned`, `recovery.attempt_succeeded/failed/blocked` + Outbox | `RECOVERY_CYCLE_NOT_OPEN`, `RECOVERY_ATTEMPT_ALREADY_TERMINAL`, `RECOVERY_ATTEMPT_OUTCOME_INVALID` | exhaustion after max attempts produces blocked `human_gate` attempt | after attempt event before receipt | P2-5 | PASS | ADR-0052; `test_recovery_postgres.py`; `test_recovery_permissions.py` |
 | P3-GATE-001 | Human Gate resume context is complete | Human Gate authority | policy or exhaustion requires Gate | gate open command | OPEN Gate with resume context | `human_gate.opened` | `HUMAN_GATE_RESUME_CONTEXT_MISSING` | project changes during gate open | after gate row before event | P3 | PLANNED | CT-009/CT-010; Runtime Spec RT-INV-006 |
 | P3-REC-001 | Replay/reconcile does not overwrite authority | Recovery service | checkpoint/replay detects orphan/stale/unsettled | reconcile command | explicit correction commands only | `recovery.reconciled` and correction events | `RECOVERY_REPLAY_AUTHORITY_OVERWRITE_FORBIDDEN` | restart with active lease | after replay view before command | P3 | PLANNED | FI-12; Command/Event §15; Runtime Spec §18 |
 
@@ -54,8 +57,14 @@ checkpoint.
 | FI-11 | P2-LEASE-001, P2-LEASE-002 | P2-3 | PARTIAL: Scheduler/Lease crash rollback and takeover PASS; Worker/P3 reconcile remains later if required by original FI scope |
 | FI-16 Execution coupling | P2-RES-001, P2-RES-002, P2-REQ-001, P2-REQ-002 | P2-2 | PASS |
 | FI-17 Run/Settlement coupling | P2-USAGE-001 | P2-4 core, P3 full | PARTIAL: atomic P2 settlement PASS; P3 reconcile PLANNED |
+| P2-5 feedback/recovery loop | P2-FB-001, P2-REC-001 | P2-5 | PASS: failed execution emits structured Feedback, enters Situation/Diagnosis/Planner, plans bounded recovery attempt, then proves PASS only through independent Verification + Control Plane |
 | CT-009 | P3-GATE-001 | P3 | PLANNED |
 | CT-010 | P3-GATE-001 | P3 | PLANNED |
 | FI-12 | P3-REC-001 | P3 | PLANNED |
 
-P2-1 freeze objects, P2-2 admission/enqueue, P2-3 Scheduler/Lease/Fencing/Lock and the P2-4 Worker execution core claim PASS where backed by domain, PostgreSQL, permission, concurrency and fault-injection evidence. Real sandbox execution, external Worker spawn, P2-5 feedback, Human Gate and P3 quarantine/reconcile operations remain future work. P0/P1 PASS evidence remains in the P0/P1 acceptance matrices.
+P2-1 freeze objects, P2-2 admission/enqueue, P2-3 Scheduler/Lease/Fencing/Lock,
+P2-4 Worker execution core and P2-5 bounded Feedback/Recovery loop claim PASS
+where backed by domain, PostgreSQL, permission, concurrency and fault-injection
+evidence. Real sandbox execution, external Worker spawn, Human Gate and P3
+quarantine/reconcile operations remain future work. P0/P1 PASS evidence remains
+in the P0/P1 acceptance matrices.

@@ -77,6 +77,7 @@ Allowed ADR statuses: `PROPOSED`, `ACCEPTED`, `SUPERSEDED`, `REJECTED`.
 | ADR-0049 | P2 ExecutionRequest Preparation and Durable Queue Enqueue | ACCEPTED | P2-2 | Runtime §§15-18/26/30; P2 Admission §§5-8/14-17 | [ADR-0049](docs/adr/ADR-0049-p2-execution-request-queue-preparation.md) | — |
 | ADR-0050 | P2 Scheduler Lease, Fencing and Lock Authority | ACCEPTED | P2-3 | Runtime §§15-18/26/30; Lease §§6-16; P2 Admission §§11-13 | [ADR-0050](docs/adr/ADR-0050-p2-scheduler-lease-fencing-lock-authority.md) | — |
 | ADR-0051 | P2 Worker Lifecycle, Fenced Result Admission and Settlement Coupling | ACCEPTED | P2-4 | Runtime §§14-17/26/30; Lease §§7-17; P2 Admission §§11-12/15/17-21 | [ADR-0051](docs/adr/ADR-0051-p2-worker-lifecycle-fenced-result-admission.md) | — |
+| ADR-0052 | P2 Feedback and Bounded Autonomous Recovery Loop | ACCEPTED | P2-5 | Runtime §§21/25-26/30; Lease §14; P2 Admission §§18/20-21 | [ADR-0052](docs/adr/ADR-0052-p2-feedback-autonomous-recovery-loop.md) | — |
 
 ## Migrated decisions
 
