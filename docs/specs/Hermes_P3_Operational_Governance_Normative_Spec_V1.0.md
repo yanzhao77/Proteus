@@ -1,7 +1,7 @@
 # Hermes P3 Operational Governance Normative Specification V1.0
 
-Status: SPECIFIED; P3-2 CHECKPOINT / REPLAY / RECONCILE RUNTIME IMPLEMENTED
-Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume; P3-2 Checkpoint + Replay + Reconcile
+Status: SPECIFIED; P3-3 QUARANTINE / EVIDENCE INVALIDATION RUNTIME IMPLEMENTED
+Phase: P3-0 contract closure; P3-1 Human Gate + Project Waiting/Resume; P3-2 Checkpoint + Replay + Reconcile; P3-3 Quarantine + Evidence Invalidation
 Date: 2026-08-14
 
 This specification closes the P3 operational governance contracts for Hermes
@@ -16,8 +16,13 @@ P3-2 implements the Checkpoint, Replay and Reconcile runtime boundary in
 [`ReplayReconcileAuthority`](../../hermes-runtime/src/hermes_runtime/application/replay_reconcile.py)
 and the PostgreSQL/domain/permission tests listed in the P3 acceptance matrix.
 It does not implement Human Gate UI, production IdP/OIDC/SAML integration,
-P3-3 quarantine adoption/redrive/Evidence invalidation, P3-4 explain/audit
-query runtime or production sandbox adapters.
+P3-3 implements quarantine review/adoption/redrive and Evidence invalidation in
+[`0020_quarantine_evidence_invalidation.sql`](../../hermes-runtime/migrations/0020_quarantine_evidence_invalidation.sql),
+[`QuarantineAuthority`](../../hermes-runtime/src/hermes_runtime/application/quarantine.py)
+and
+[`EvidenceInvalidationAuthority`](../../hermes-runtime/src/hermes_runtime/application/evidence_invalidation.py).
+It does not implement P3-4 explain/audit query runtime, P3-5 production sandbox
+adapters or production Human Gate UI/IdP integration.
 
 Normative priority remains:
 
@@ -447,6 +452,13 @@ preserving original causation. Discarded/expired records retain audit summaries.
 Secret and Artifact bodies remain protected; only handles/hashes may enter
 operational Events.
 
+P3-3 implementation note: runtime operations are stored as an overlay on top of
+P2 minimal quarantine. `execution_quarantine_records` remains the immutable
+source of the original envelope/hash/fencing/run/request references.
+`quarantine_current_states` is only the expected-version lifecycle pointer;
+`quarantine_operations`, adoption requests and redrive requests are append-only
+facts linked to CommandReceipt, Event Log and Outbox.
+
 ## 9. Evidence invalidation
 
 Evidence invalidation is append-only and fail-closed.
@@ -476,6 +488,13 @@ Rules:
 Already `PASSED` Tasks enter a current Guard workflow: mark current evidence
 dependency stale, require re-verification, and let Control Plane decide whether
 the Project enters `WAITING` or `RECOVERY` through explicit Commands.
+
+P3-3 implementation note: `evidence_current_states` is the expected-version
+validity pointer. `evidence_invalidation_records`,
+`evidence_dependency_stale_records` and `reverification_requirements` are
+append-only. Human Gate Decision insertion and Decision Application reject
+invalidated Evidence with `GATE_EVIDENCE_INVALID`; no invalidation command
+updates Evidence, VerificationResult or Task terminal state directly.
 
 ## 10. Decision Explain, audit and trace
 

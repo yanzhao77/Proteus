@@ -125,19 +125,19 @@ Checkpoint / Inbox / Event Log
 
 It does not yet provide an external Worker process manager/spawn service, real
 Docker/Process sandbox execution, Web APIs, Human Gate UI, production IdP
-integration, Kafka, Redis, Kubernetes, LLM planning/policy/risk/selection, P3
-quarantine review/adoption/redrive, Evidence invalidation workflow, Decision
-Explain runtime, external irreversible side-effect reconciliation or full Event
-Sourcing.
+integration, Kafka, Redis, Kubernetes, LLM planning/policy/risk/selection,
+Decision Explain runtime, external irreversible side-effect reconciliation or
+full Event Sourcing.
 FI-16 is closed for ExecutionRequest/Queue/Reservation handoff. CT-002 and
 P2-LOCK-001 are closed by P2-3. P2-4 closes CT-003 core, FI-09 core, FI-10
 Worker stale-token isolation and FI-17 P2 run/settlement coupling. P2-5 closes
 structured Feedback emission and bounded autonomous recovery loop entry. P3-1
 closes the database-backed Human Gate lifecycle and Project waiting/resume
 authority. P3-2 closes checkpoint/replay/reconcile runtime authority and
-FI-12A through FI-12G. Human Gate UI, production IdP integration, quarantine
-operations, Evidence invalidation, Decision Explain and production sandbox/
-external side-effect reconciliation remain future work.
+FI-12A through FI-12G. P3-3 closes quarantine review/adoption/redrive and
+Evidence invalidation runtime authority. Human Gate UI, production IdP
+integration, Decision Explain and production sandbox/external side-effect
+reconciliation remain future work.
 
 P2 execution contracts are specified and tracked in
 [`docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md`](../docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md)
@@ -224,9 +224,23 @@ observe, finding, dry-run/apply plan and authorized apply; the implemented
 repair path advances a checkpoint only when existing Inbox and effect records
 prove contiguous committed work. Replay/Reconcile cannot rebuild or patch
 Project, Task, Accounting, Lease, Worker, Verification or Event Log authority.
-P3-3 stale Result quarantine adoption/redrive, Evidence invalidation
-propagation, P3-4 explain/query runtime and P3-5 production sandbox/external
-side-effect reconciliation remain outside this slice.
+P3-3 quarantine operations, Evidence invalidation propagation, P3-4
+explain/query runtime and P3-5 production sandbox/external side-effect
+reconciliation remain outside this slice.
+
+P3-3 implements Quarantine Operations and Evidence Invalidation authority as a
+PostgreSQL overlay. Migration `0020_quarantine_evidence_invalidation.sql` keeps
+the original P2 quarantine envelope immutable, adds expected-version lifecycle
+pointers plus append-only operation/adoption/redrive ledgers, and ensures
+adoption only records a guarded semantic command shell instead of passing a
+Task. Redrive requires a new command/idempotency identity while preserving
+original causation. The same migration adds append-only Evidence invalidation,
+stale dependency and re-verification requirement ledgers; it does not delete
+Evidence, rewrite historical VerificationResults or flip `PASSED` Tasks to
+`FAILED`. Human Gate Decision insertion and Decision Application fail closed
+when referenced Evidence has been invalidated. P3-3 adds pure domain,
+PostgreSQL integration/concurrency/fault-injection and permission tests for
+both authorities.
 
 ## Authority boundary
 
@@ -372,19 +386,24 @@ freeze objects use `ExecutionPreparationAuthority` with a
 `ExecutionScheduler` with a `PostgresSchedulerStore`; P2-4 Worker execution uses
 `WorkerExecution` with a `PostgresWorkerExecutionStore`; P3-1 Human Gate uses
 `HumanGateAuthority` with a `PostgresHumanGateStore`; P3-2 Replay/Reconcile
-uses `ReplayReconcileAuthority` with a `PostgresReplayReconcileStore`. The migrations define and
-test separate NOLOGIN capability roles for authority, Accounting, Situation,
-Diagnosis, Planner, Policy, Risk, Selection, Capability/Context/Sandbox, Relay,
-Consumer, Redrive, Worker, Human Gate request/decision, Replay/Reconcile and
-read-only access. A production deployment MUST create distinct login credentials
-and grant each process only its matching capability role.
+uses `ReplayReconcileAuthority` with a `PostgresReplayReconcileStore`; P3-3
+quarantine operations use `QuarantineAuthority` with a
+`PostgresQuarantineStore`; Evidence invalidation uses
+`EvidenceInvalidationAuthority` with a `PostgresEvidenceInvalidationStore`. The
+migrations define and test separate NOLOGIN capability roles for authority,
+Accounting, Situation, Diagnosis, Planner, Policy, Risk, Selection,
+Capability/Context/Sandbox, Relay, Consumer, Redrive, Worker, Human Gate
+request/decision, Replay/Reconcile, Quarantine review/adoption/redrive,
+Evidence invalidation and read-only access. A production deployment MUST create
+distinct login credentials and grant each process only its matching capability
+role.
 
-The P3-2 regression baseline discovers 382 tests when project dependencies are
-installed. On 2026-08-14 the no-DB suite discovered 382 tests and passed with
-database tests skipped. The complete PostgreSQL-backed suite also discovered
-382 tests and passed on both PostgreSQL 14 and PostgreSQL 16 during the P3-2
-flow. A PostgreSQL-backed run is required to validate migrations, concurrency
-and permissions; discovery without project dependencies or without
+The P3-3 regression baseline discovers 413 tests when project dependencies are
+installed. On 2026-08-14 the no-DB suite discovered 413 tests and passed with
+272 database tests skipped. The complete PostgreSQL-backed suite discovered 413
+tests and passed on both PostgreSQL 14 and PostgreSQL 16 during the P3-3 flow.
+A PostgreSQL-backed run is required to validate migrations, concurrency and
+permissions; discovery without project dependencies or without
 `HERMES_TEST_DATABASE_URL` is not phase acceptance.
 
 ## Run pure domain tests

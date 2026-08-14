@@ -45,7 +45,7 @@ flowchart LR
     V -. "FAIL feedback" .-> E
 ```
 
-实线部分是已经完成并具备测试证据的 P0、P1 和 P2 Slice 1-3 权威链；从 Worker 启动开始的虚线部分属于正在开发的 P2 Slice 4 及后续反馈闭环。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
+实线部分已经覆盖 P0、P1、P2 以及 P3-1/P3-2/P3-3 的数据库 authority slices；生产 UI、真实 sandbox 和 explain/query runtime 仍在后续 P3 切片内。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
 
 ## 当前实现
 
@@ -66,8 +66,10 @@ flowchart LR
 | Capability / Context / Sandbox | P2-1 已完成 | 版本化 WorkerTemplate、确定性匹配、不可变 Context Bundle、fail-closed SandboxProfile 编译 |
 | ExecutionRequest / Queue | P2-2 已完成 | admission fail-closed、P1 Reservation 单次交接、冻结输入、同事务 Queue/Event/Outbox/Receipt |
 | Scheduler / Lease / Fencing | P2-3 已完成 | PostgreSQL 原子 claim、单调 token、续租/过期接管/重排队、执行锁与权限隔离 |
-| Worker lifecycle / Result admission | P2-4 核心已实现 | AgentRun、current-token candidate/result、quarantine、settlement 和 19 项专项测试；真实 sandbox/外部 Worker 与 P3 运维仍待完成 |
-| Human Gate / Recovery | P3 待实现 | Gate lifecycle、resume、checkpoint、reconcile、late-result quarantine |
+| Worker lifecycle / Result admission | P2 已完成 | AgentRun、current-token candidate/result、minimal quarantine、settlement；真实 sandbox/外部 Worker 仍待 P3-5 |
+| Human Gate / Waiting / Resume | P3-1 已完成 | Gate Request/Decision/Application 分离；ResumeContext 当前 guard 重检 |
+| Checkpoint / Replay / Reconcile | P3-2 已完成 | replay shadow generation、checkpoint/reconcile finding/plan、无 authority fold/patch |
+| Quarantine / Evidence invalidation | P3-3 已完成 | append-only review/adoption/redrive；Evidence invalidation 不删证据、不改 VerificationResult、阻断 stale Gate resume |
 | Web API / external broker | 未实现 | FastAPI、Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
@@ -126,7 +128,7 @@ HERMES_TEST_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_te
 
 如果没有显式设置 `HERMES_TEST_DATABASE_URL`，测试发现仍可运行，但 PostgreSQL 集成测试会被跳过；SQLite 或 mock 不被视为 PostgreSQL authority/concurrency 语义的有效证明。
 
-当前 P0-P2 回归基线共发现 **341 项测试**。2026-08-13 在 PostgreSQL 16 上执行完整套件为 **341/341 通过、0 跳过**，其中包括 5 个 P2-4 领域测试、8 个 PostgreSQL 集成/并发/故障注入测试和 6 个权限测试。阶段验收不能把跳过的数据库、并发或权限测试计为通过。
+当前 P0-P3-3 回归基线共发现 **413 项测试**。2026-08-14 在 PostgreSQL 16 和 PostgreSQL 14 上执行完整套件均为 **413/413 通过**；no-DB discovery 同样发现 413 项，其中 272 个数据库相关测试按预期跳过。阶段验收不能把跳过的数据库、并发或权限测试计为通过。
 
 ### 执行一次 Outbox Relay
 
