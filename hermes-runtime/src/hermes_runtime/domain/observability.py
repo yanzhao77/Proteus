@@ -1,4 +1,6 @@
+import hashlib
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Mapping, Tuple
 
 
@@ -101,3 +103,92 @@ def _find_keys(value: Any, keys: set) -> set:
         for item in value:
             found.update(_find_keys(item, keys))
     return found
+
+
+def _fixed_bytes(value: Any, size: int) -> bytes:
+    """Return a deterministic byte slice usable for OTLP trace/span identifiers."""
+    text = str(value)
+    try:
+        if len(text) == size * 2:
+            raw = bytes.fromhex(text)
+            if len(raw) == size:
+                return raw
+    except ValueError:
+        pass
+    return hashlib.sha256(text.encode("utf-8")).digest()[:size]
+
+
+def _timestamp_nanos(value: Any) -> int:
+    text = str(value).strip()
+    if not text:
+        return 0
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return int(parsed.timestamp() * 1_000_000_000)
+    except ValueError:
+        return 0
+
+
+def _otlp_attributes(mapping: Mapping[str, Any]) -> list:
+    result = []
+    for key, value in redact_observability_payload(mapping).items():
+        result.append({"key": str(key), "value": {"stringValue": str(value)}})
+    return result
+
+
+def to_otlp_json_envelope(record: ObservabilityRecord) -> Mapping[str, Any]:
+    """Build an OTLP/HTTP JSON ExportTraceServiceRequest accepted by a real collector.
+
+    The local P4 envelope (`to_export_envelope`) remains unchanged; this function
+    emits the wire-compatible proto3 JSON mapping with hex trace/span IDs,
+    nanosecond timestamps and string attributes. Secret and authority fields are
+    redacted before serialization. The OpenTelemetry Collector's JSON unmarshaler
+    expects hex-encoded trace/span IDs rather than base64.
+    """
+    validate_observability_record(record)
+    missing_attributes = [
+        {
+            "key": "missing_link.{}".format(link.ref_type),
+            "value": {"stringValue": "{} ({})".format(link.ref_id, link.reason)},
+        }
+        for link in record.missing_links
+    ]
+    events = [
+        {
+            "timeUnixNano": str(_timestamp_nanos(event.get("timestamp", ""))),
+            "name": str(event.get("name", "event")),
+            "attributes": _otlp_attributes(event.get("attributes", {})),
+        }
+        for event in record.events
+    ]
+    span = {
+        "traceId": _fixed_bytes(record.trace_id, 16).hex(),
+        "spanId": _fixed_bytes(record.span_id, 8).hex(),
+        "parentSpanId": _fixed_bytes(record.parent_span_id, 8).hex() if record.parent_span_id else "",
+        "name": record.name,
+        "kind": 1,
+        "startTimeUnixNano": str(_timestamp_nanos(record.timestamp)),
+        "endTimeUnixNano": str(_timestamp_nanos(record.timestamp)),
+        "attributes": _otlp_attributes(record.attributes) + missing_attributes,
+        "events": events,
+        "status": {"code": 1},
+    }
+    return {
+        "resourceSpans": [
+            {
+                "resource": {
+                    "attributes": [
+                        {"key": "service.name", "value": {"stringValue": "hermes-runtime"}},
+                    ]
+                },
+                "scopeSpans": [
+                    {
+                        "scope": {"name": "hermes.p5", "version": "1.0"},
+                        "spans": [span],
+                    }
+                ],
+            }
+        ]
+    }

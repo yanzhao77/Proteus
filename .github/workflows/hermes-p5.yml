@@ -37,3 +37,34 @@ jobs:
           python-version: "3.11"
       - run: python -m pip install -r hermes-runtime/requirements.txt
       - run: HERMES_TEST_DATABASE_URL=postgresql://postgres:hermes@127.0.0.1:55432/hermes_test PYTHONPATH=hermes-runtime/src python -m unittest discover -s hermes-runtime/tests
+
+  external-adapters:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r hermes-runtime/requirements.txt
+      - name: Start external adapter containers
+        run: |
+          docker run -d --name hermes-ci-minio \
+            -e MINIO_ROOT_USER=hermesminio -e MINIO_ROOT_PASSWORD=hermesminio-secret \
+            -p 19000:9000 minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e server /data
+          docker run -d --name hermes-ci-vault --cap-add IPC_LOCK \
+            -e VAULT_DEV_ROOT_TOKEN_ID=hermes-vault-dev-token \
+            -p 18200:8200 hashicorp/vault:1.17
+          docker run -d --name hermes-ci-otel \
+            -p 14318:4318 otel/opentelemetry-collector:0.104.0
+      - name: Run external adapter integration tests
+        env:
+          HERMES_TEST_S3_URL: http://127.0.0.1:19000
+          HERMES_TEST_S3_ACCESS_KEY: hermesminio
+          HERMES_TEST_S3_SECRET_KEY: hermesminio-secret
+          HERMES_TEST_VAULT_URL: http://127.0.0.1:18200
+          HERMES_TEST_VAULT_TOKEN: hermes-vault-dev-token
+          HERMES_TEST_OTLP_ENDPOINT: http://127.0.0.1:14318/v1/traces
+        run: PYTHONPATH=hermes-runtime/src python -m unittest discover -s hermes-runtime/tests
+      - name: Clean up test containers
+        if: always()
+        run: docker rm -f hermes-ci-minio hermes-ci-vault hermes-ci-otel || true
