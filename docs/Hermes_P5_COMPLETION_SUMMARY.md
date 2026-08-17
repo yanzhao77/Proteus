@@ -1,10 +1,10 @@
 # Hermes Runtime V1.2 P5 Deployable Product Completion Summary
 
-Date: 2026-08-14
+Date: 2026-08-17
 
-Status: implementation commits prepared on branch
-`codex/p5-deployable-single-node`; formal P5 completion is blocked by external
-smoke evidence gaps listed below.
+Status: complete. P5 implementation commits are merged into `master`
+(`3e67ba0`); the external acceptance evidence described below is delivered on
+branch `codex/p5-external-acceptance` and validated on 2026-08-17.
 
 ## Implemented objective
 
@@ -35,10 +35,14 @@ authority runtime:
 - Vault adapter exposes handles/metadata to product layers; secret value
   resolution is execution-boundary only.
 - OTLP backend failure is drop/failure accounting, not recovery or authorization.
+- The P4 `otel-compatible-local/1.0` envelope remains unchanged; P5 adds
+  `to_otlp_json_envelope` + `OtlpHttpJsonExporter` emitting the OTLP/HTTP proto3
+  JSON wire format (hex trace/span IDs) so a real OpenTelemetry Collector
+  accepts and validates exported spans.
 
 ## Validation evidence
 
-Validated successfully on 2026-08-14:
+Validated successfully on 2026-08-14 (implementation baseline):
 
 - P5 focused no-DB/unit/E2E tests:
   `Ran 27 tests in 0.479s — OK`.
@@ -58,25 +62,54 @@ Validated successfully on 2026-08-14:
   `docker compose -f deploy/p5/docker-compose.single-node.yml config --quiet`
   passed.
 
-Blocked / not counted as PASS:
+External acceptance evidence verified on 2026-08-17:
 
-- Docker image build: attempted twice with
-  `docker build --label hermes.task=p5 --tag hermes-p5-smoke:20260814
-  hermes-runtime`; both attempts failed while loading Docker Hub metadata for
-  `python:3.11-slim` with `DeadlineExceeded`.
-- Real MinIO integration: adapter implemented and local contract tests pass, but
-  no real MinIO container PASS is claimed.
-- Real Vault integration: adapter implemented and local contract tests pass, but
-  no real Vault container PASS is claimed.
-- Real OTLP backend integration: exporter implemented and local contract tests
-  pass, but no real OTLP collector PASS is claimed.
-- Browser/Playwright UI screenshots: UI routes and HTML contract tests pass, but
-  no browser screenshot evidence is claimed.
+- Docker image build: `docker build --label hermes.task=p5-external-acceptance
+  --tag hermes-p5-smoke:20260817 hermes-runtime` succeeded after the Docker Hub
+  network recovered (python:3.11-slim pulled, all requirements installed);
+  in-image smoke `python -c "import hermes_runtime.api_main"` returned
+  `API-IMPORT-OK`.
+- Compose fix: `docker-compose.single-node.yml` referenced a MinIO tag that does
+  not exist on Docker Hub; the image is now pinned to a verified digest
+  `minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e`.
+- Real MinIO integration: container `hermes-p5-minio-20260817`
+  (`minio/minio@sha256:14cea...`, port 19000); `test_s3_artifact_integration.py`
+  ran 4 tests PASS (content-addressed put/read, idempotent duplicate, tampered
+  object hash mismatch fail-closed, tombstone preservation).
+- Real Vault integration: container `hermes-p5-vault-20260817`
+  (`hashicorp/vault:1.17` dev, port 18200); `test_vault_secret_integration.py`
+  ran 1 test PASS (register/metadata/authorized+unauthorized resolve; canary
+  secret absent from handle repr and metadata payload).
+- Real OTLP Collector integration: container `hermes-p5-otel-20260817`
+  (`otel/opentelemetry-collector:0.104.0`, port 14318); the new
+  `OtlpHttpJsonExporter` exported a redacted span (HTTP 200, `EXPORTED`), and a
+  payload with an invalid-length trace ID was rejected with HTTP 400, proving
+  the backend validates real OTLP/HTTP JSON.
+- Browser/Playwright UI screenshots: `capture_p5_ui_screenshots.py` used the
+  locally installed Google Chrome (channel "chrome", no browser download) and
+  saved `docs/evidence/p5-ui/human-gate-inbox-desktop.png` (1440x900),
+  `human-gate-detail-desktop.png` (1440x900) and
+  `human-gate-detail-mobile.png` (780x1688); the script asserted inbox/detail
+  content and absence of `apply_resume`/`project_state`/`task_status`.
+- Full regression on this branch: no-DB discovery
+  `Ran 497 tests in 0.699s — OK (skipped=298)`; PostgreSQL 16 + external
+  adapters full regression on dedicated container `hermes-p5-ext-pg16-20260817`
+  `Ran 497 tests in 163.655s — OK (skipped=5)`; `compileall` and
+  `git diff --check` pass; migrations remain `0001`-`0022` continuous with no
+  new migration.
+- CI: `.github/workflows/hermes-p5.yml` gains an `external-adapters` job that
+  starts MinIO/Vault/OTLP Collector containers and runs the full discovery with
+  `HERMES_TEST_S3_URL`, `HERMES_TEST_VAULT_URL`/`HERMES_TEST_VAULT_TOKEN` and
+  `HERMES_TEST_OTLP_ENDPOINT` set.
 
 The P5-6 local focused E2E tests cover authenticated API/Gate/UI,
 Artifact/Secret/OTLP, Explain query, duplicate/stale/failure behavior and secret
-canary redaction. They are not a substitute for the blocked external-container
-and browser acceptance evidence.
+canary redaction, and are now complemented by the real external-container and
+browser evidence above.
+
+Note: PostgreSQL 14 full regression passed on the prior P5 baseline
+(`Ran 490 tests in 173.709s — OK`); this evidence branch adds no migration or
+schema changes, only Python-level adapters/tests/CI and the Compose image pin.
 
 ## Deferred scope
 

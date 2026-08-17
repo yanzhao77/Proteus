@@ -1,8 +1,10 @@
 # Hermes P5 Deployable Product Acceptance Matrix
 
-Date: 2026-08-14
+Date: 2026-08-17
 
-Status: P5-0 contract closure started; implementation rows remain `PENDING`.
+Status: P5-0 through P5-6 complete; external acceptance evidence verified on
+2026-08-17 against real Docker, MinIO, Vault, OpenTelemetry Collector and Chrome
+browser runs.
 
 | Row | Requirement | Authority invariant | Slice | Status | Evidence |
 | --- | --- | --- | --- | --- | --- |
@@ -16,13 +18,13 @@ Status: P5-0 contract closure started; implementation rows remain `PENDING`.
 | P5-SERVICE-002 | Multi-instance safety relies on DB lease/fencing/idempotency. | Process-local locks are not correctness claims. | P5-2 | PASS | `test_multi_instance_roles_declare_database_fencing_not_local_lock_correctness`, P2/P3 PostgreSQL lease/fencing regression |
 | P5-IDP-001 | OIDC/JWT verifier validates signature, issuer, audience, subject, time and algorithm. | Identity assertion is scoped fact, not Project resume authority. | P5-3 | PASS | `oidc.py`, `test_oidc_valid_token_maps_to_actor_and_gate_assertion`, `test_oidc_negative_security_cases_fail_closed` |
 | P5-IDP-002 | Production profile disables local/test issuer. | Test identity cannot become production bypass. | P5-3 | PASS | `test_production_profile_rejects_local_test_issuer` |
-| P5-UI-001 | Human Gate UI presents inbox/detail/evidence/risk/reason/decision/status/explain. | UI can submit Gate Decision only. | P5-3 | PARTIAL | `human_gate_ui.py`, `/ui/human-gates`, `test_human_gate_ui_contains_required_controls_but_no_resume_or_generic_editor`; Playwright/browser screenshot evidence not available in this run |
-| P5-UI-002 | UI has no generic editor or direct resume/status controls. | UI cannot mutate Project/Task authority directly. | P5-3 | PARTIAL | `test_human_gate_ui_contains_required_controls_but_no_resume_or_generic_editor`, `test_ui_rejects_secret_payload`; browser evidence pending |
-| P5-ART-001 | S3-compatible adapter is immutable and content-addressed. | Verification remains bound to exact hash, not URL/path. | P5-4 | PARTIAL | `s3_artifact_store.py`, local adapter contract tests pass; real MinIO integration not completed in this run |
-| P5-SECRET-001 | Secret Manager adapter exposes handle metadata and resolves only at execution boundary. | Secret values do not enter API/UI/Event/Outbox/log/trace/artifact. | P5-4 | PARTIAL | `vault_secrets.py`, local adapter contract tests pass; real Vault integration not completed in this run |
-| P5-OBS-001 | OTLP-compatible exporter redacts and bounds backend failure behavior. | Observability cannot authorize, recover, PASS/FAIL or advance checkpoint. | P5-4 | PARTIAL | `otlp_exporter.py`, local exporter contract tests pass; real OTLP backend integration not completed in this run |
-| P5-DEPLOY-001 | Single-node deployment baseline defines entrypoints, Compose and hardened container posture. | Deployment roles preserve least privilege and separate migration/bootstrap. | P5-5 | PARTIAL | `Dockerfile`, `docker-compose.single-node.yml`, `api_main.py`, `supervisor_main.py`, `migration_bootstrap.py`, `test_deployment_baseline.py`; Docker build blocked by Docker Hub metadata timeout |
+| P5-UI-001 | Human Gate UI presents inbox/detail/evidence/risk/reason/decision/status/explain. | UI can submit Gate Decision only. | P5-3 | PASS | `human_gate_ui.py`, `/ui/human-gates`, `test_human_gate_ui_contains_required_controls_but_no_resume_or_generic_editor`, `hermes-runtime/scripts/capture_p5_ui_screenshots.py`, `docs/evidence/p5-ui/human-gate-inbox-desktop.png`, `docs/evidence/p5-ui/human-gate-detail-desktop.png`, `docs/evidence/p5-ui/human-gate-detail-mobile.png` |
+| P5-UI-002 | UI has no generic editor or direct resume/status controls. | UI cannot mutate Project/Task authority directly. | P5-3 | PASS | `test_human_gate_ui_contains_required_controls_but_no_resume_or_generic_editor`, `test_ui_rejects_secret_payload`, browser screenshots above; screenshot script asserts no `apply_resume`/`project_state`/`task_status` |
+| P5-ART-001 | S3-compatible adapter is immutable and content-addressed. | Verification remains bound to exact hash, not URL/path. | P5-4 | PASS | `s3_artifact_store.py`, `test_s3_artifact_integration.py` against real MinIO container `hermes-p5-minio-20260817` (4 tests PASS: put/read, idempotent duplicate, tamper hash mismatch, tombstone) |
+| P5-SECRET-001 | Secret Manager adapter exposes handle metadata and resolves only at execution boundary. | Secret values do not enter API/UI/Event/Outbox/log/trace/artifact. | P5-4 | PASS | `vault_secrets.py`, `test_vault_secret_integration.py` against real Vault dev container `hermes-p5-vault-20260817` (register/metadata/authorized+unauthorized resolve; canary absent from handles and metadata) |
+| P5-OBS-001 | OTLP-compatible exporter redacts and bounds backend failure behavior. | Observability cannot authorize, recover, PASS/FAIL or advance checkpoint. | P5-4 | PASS | `otlp_exporter.py` `OtlpHttpJsonExporter`, `to_otlp_json_envelope` (wire OTLP/HTTP JSON), `test_otlp_collector_integration.py` against real collector `hermes-p5-otel-20260817` (export PASS + invalid-length ID rejected 400) |
+| P5-DEPLOY-001 | Single-node deployment baseline defines entrypoints, Compose and hardened container posture. | Deployment roles preserve least privilege and separate migration/bootstrap. | P5-5 | PASS | `Dockerfile`, `docker-compose.single-node.yml` (MinIO image digest pinned to verified sha256), `api_main.py`, `supervisor_main.py`, `migration_bootstrap.py`, `test_deployment_baseline.py`, `docker build` success `hermes-p5-smoke:20260817` + in-image `API-IMPORT-OK` smoke |
 | P5-DEPLOY-002 | Operations runbook covers readiness, backup/restore, migrations, rotation and rollback. | Ops repair does not become generic authority patch. | P5-5 | PASS | `docs/operations/P5_SINGLE_NODE_RUNBOOK.md`, `.github/workflows/hermes-p5.yml`, `test_runbook_covers_backup_restore_rotation_and_forbidden_repairs` |
-| P5-E2E-001 | Full P5 E2E/fault-injection hardening passes. | API/OIDC/UI/supervisor/adapters/observability preserve P0-P4 invariants. | P5-6 | PARTIAL | `test_p5_end_to_end_product_hardening.py`, `docs/Hermes_P5_COMPLETION_SUMMARY.md`; full external-container/browser E2E remains blocked |
+| P5-E2E-001 | Full P5 E2E/fault-injection hardening passes. | API/OIDC/UI/supervisor/adapters/observability preserve P0-P4 invariants. | P5-6 | PASS | `test_p5_end_to_end_product_hardening.py`, full PostgreSQL 16 + external adapters regression `Ran 497 tests ... OK (skipped=5)` on `hermes-p5-ext-pg16-20260817`, real MinIO/Vault/OTLP containers, browser screenshots, `docs/Hermes_P5_COMPLETION_SUMMARY.md` |
 
 Skipped or mocked external checks MUST NOT be counted as PASS.
