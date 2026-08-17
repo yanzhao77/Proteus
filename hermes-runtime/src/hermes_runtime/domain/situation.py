@@ -54,6 +54,11 @@ class SituationClassification:
 TRIGGER_EVENT_CATALOG = {
     "verification.recorded",
     "task.readiness_recomputed",
+    # P6 (ADR-0073): the work graph patch records authoritative readiness
+    # changes (a fresh task with no dependencies becomes READY at patch time,
+    # so no separate task.readiness_recomputed event ever fires). The analyzer
+    # classifies the patch event's readiness changes as work_available.
+    "work_graph.patch.applied",
     "budget.reserved",
     "budget.settled",
     "budget.released",
@@ -86,7 +91,9 @@ def classify_trigger(fact: TriggerFact) -> Optional[SituationClassification]:
             _strings(payload.get("evidence_refs") or payload.get("verification_id")),
             _strings(payload.get("constraints")),
         )
-    if fact.event_type == "task.readiness_recomputed":
+    if fact.event_type in {
+        "task.readiness_recomputed", "work_graph.patch.applied",
+    }:
         changes = payload.get("ready_state_changes") or payload.get("readiness_changes")
         ready_tasks = _ready_task_ids(changes)
         if fact.task_id is not None:

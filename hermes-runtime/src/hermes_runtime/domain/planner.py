@@ -6,6 +6,13 @@ from typing import Mapping, Optional, Tuple
 
 
 REGISTRY_VERSION = "action-registry/1.0"
+# P6 (ADR-0073): versioned registry extension. The 1.0 registry stays frozen
+# (P1 contract); 1.1 adds the worker-executable 'implement' action so fresh
+# implementation work can start through the real planner. P0-P5 could never
+# start a first execution: the planner only emitted worker-executable
+# candidates for verification_failed situations (P2/P3 tests seeded a candidate
+# via raw SQL). P6 closes that entry-point gap without touching 1.0.
+P6_REGISTRY_VERSION = "action-registry/1.1"
 PLANNER_RULE_VERSION = "planner-rules/1.0"
 RESOURCE_ESTIMATOR_VERSION = "resource-estimator/1.0"
 
@@ -28,6 +35,13 @@ class ActionType(str, Enum):
     REQUEST_RESOURCE = "request_resource"
     PAUSE = "pause"
     HUMAN_GATE = "human_gate"
+    # P6 registry extension (ADR-0073): worker-executable implementation action.
+    # The P0-P5 planner only emitted worker-executable candidates for
+    # verification_failed situations, so fresh implementation work could never
+    # start through the real authority path (P2/P3 tests seeded a candidate via
+    # raw SQL). This versioned extension lets the planner propose an
+    # implementation execution for work_available tasks.
+    IMPLEMENT = "implement"
 
 
 class DiagnosisRequirement(str, Enum):
@@ -137,6 +151,17 @@ class PlanningRunResult:
     single_candidate_reason_code: Optional[str]
 
 
+P6_REGISTRY: Tuple[RegistryEntry, ...] = (
+    RegistryEntry(ActionType.IMPLEMENT, ("work_available",), ("NONE",),
+                  DiagnosisRequirement.FORBIDDEN, ("software_builder",),
+                  "action-params/implement/1.0",
+                  ("artifact_candidate", "verification_plan"),
+                  ("task_state_ready", "verify_before_apply"), 4000,
+                  "resource-estimator/implement/1.0", "progress_ready_work",
+                  "ready_task", True),
+)
+
+
 REGISTRY: Tuple[RegistryEntry, ...] = (
     RegistryEntry(ActionType.RUN_DEEPER_TEST, ("verification_failed",),
                   ("UNKNOWN", "PROBABLE", "CONFIRMED"),
@@ -207,12 +232,12 @@ REPAIR_ROOT_CAUSES = {
 }
 
 
-def registry_entry(action_type: str) -> RegistryEntry:
+def registry_entry(action_type: str, registry: Tuple[RegistryEntry, ...] = REGISTRY) -> RegistryEntry:
     try:
         parsed = ActionType(action_type)
     except ValueError:
         raise PlannerRejected("PLANNER_ACTION_TYPE_UNSUPPORTED")
-    for entry in REGISTRY:
+    for entry in registry:
         if entry.action_type is parsed:
             if not entry.enabled:
                 raise PlannerRejected("PLANNER_ACTION_TYPE_UNSUPPORTED")
@@ -231,7 +256,7 @@ def diagnosis_requirement_for(situation_type: str) -> DiagnosisRequirement:
 
 
 def generate_planning_run(inputs: PlanningInput) -> PlanningRunResult:
-    if inputs.registry_version != REGISTRY_VERSION:
+    if inputs.registry_version not in {REGISTRY_VERSION, P6_REGISTRY_VERSION}:
         raise PlannerRejected("PLANNER_REGISTRY_VERSION_UNSUPPORTED")
     requirement = diagnosis_requirement_for(inputs.situation_type)
     if requirement is DiagnosisRequirement.REQUIRED and not inputs.diagnosis_id:
@@ -242,7 +267,8 @@ def generate_planning_run(inputs: PlanningInput) -> PlanningRunResult:
     normalized = _normalize_input(inputs)
     input_hash = compute_input_hash(normalized)
     planning_run_id = "planrun-" + _hash({"input_hash": input_hash})[:32]
-    candidates = _candidate_specs(normalized)
+    registry = P6_REGISTRY if normalized.registry_version == P6_REGISTRY_VERSION else REGISTRY
+    candidates = _candidate_specs(normalized, registry)
     if not candidates:
         raise PlannerRejected("PLANNER_NO_VALID_CANDIDATE")
 
@@ -345,17 +371,17 @@ def _candidate(planning_run_id: str, inputs: PlanningInput, spec, ordinal: int) 
     )
 
 
-def _candidate_specs(inputs: PlanningInput):
+def _candidate_specs(inputs: PlanningInput, registry: Tuple[RegistryEntry, ...] = REGISTRY):
     if inputs.situation_type == "verification_failed":
-        return _verification_failed_specs(inputs)
+        return _verification_failed_specs(inputs, registry)
     if inputs.situation_type == "work_available":
-        return _work_available_specs(inputs)
+        return _work_available_specs(inputs, registry)
     if inputs.situation_type == "budget_pressure":
-        return _budget_pressure_specs(inputs)
+        return _budget_pressure_specs(inputs, registry)
     raise PlannerRejected("PLANNER_NO_VALID_CANDIDATE")
 
 
-def _verification_failed_specs(inputs: PlanningInput):
+def _verification_failed_specs(inputs: PlanningInput, registry: Tuple[RegistryEntry, ...] = REGISTRY):
     status = inputs.root_cause_status
     if status not in {"UNKNOWN", "PROBABLE", "CONFIRMED"}:
         raise PlannerRejected("PLANNER_DIAGNOSIS_INPUT_MISMATCH")
@@ -428,9 +454,19 @@ def _verification_failed_specs(inputs: PlanningInput):
     return specs
 
 
-def _work_available_specs(inputs: PlanningInput):
+def _work_available_specs(inputs: PlanningInput, registry: Tuple[RegistryEntry, ...] = REGISTRY):
     if inputs.task_state != "READY":
         raise PlannerRejected("PLANNER_TARGET_STALE")
+    if inputs.registry_version == P6_REGISTRY_VERSION:
+        return [_spec(
+            ActionType.IMPLEMENT,
+            "implement_authoritative_ready_task",
+            (inputs.task_id or inputs.situation_id,),
+            {"task_id": inputs.task_id, "graph_version_ref": inputs.graph_version_ref,
+             "creates_execution_request": True,
+             "requires_verification_before_apply": True},
+            8500, 8000, 1000, registry,
+        )]
     return [_spec(
         ActionType.SCHEDULE_READY_TASK,
         "schedule_authoritative_ready_task",
@@ -441,7 +477,7 @@ def _work_available_specs(inputs: PlanningInput):
     )]
 
 
-def _budget_pressure_specs(inputs: PlanningInput):
+def _budget_pressure_specs(inputs: PlanningInput, registry: Tuple[RegistryEntry, ...] = REGISTRY):
     status = inputs.budget_threshold_status
     if status not in {"WARN", "GATE", "HARD_STOP"}:
         raise PlannerRejected("PLANNER_NO_VALID_CANDIDATE")
@@ -472,8 +508,9 @@ def _budget_pressure_specs(inputs: PlanningInput):
 
 
 def _spec(action_type: ActionType, reason_code: str, target_refs, parameters,
-          confidence: int, progress: int, evidence_gain: int):
-    entry = registry_entry(action_type.value)
+          confidence: int, progress: int, evidence_gain: int,
+          registry: Tuple[RegistryEntry, ...] = REGISTRY):
+    entry = registry_entry(action_type.value, registry)
     _validate_parameters(entry, parameters)
     return {
         "type": action_type.value,
@@ -505,6 +542,9 @@ def _estimate(action_type: ActionType) -> ResourceEstimate:
         ActionType.SWITCH_STRATEGY: {"agent_runs": 1, "execution_time_ms": 180000,
                                      "cpu_time_ms": 30000},
         ActionType.SCHEDULE_READY_TASK: {"agent_runs": 1, "execution_time_ms": 0},
+        ActionType.IMPLEMENT: {"agent_runs": 1, "execution_time_ms": 600000,
+                               "cpu_time_ms": 300000, "docker_runtime_ms": 300000,
+                               "storage_bytes": 1048576},
         ActionType.REQUEST_RESOURCE: {"human_attention_requests": 1},
         ActionType.PAUSE: {},
     }
@@ -542,6 +582,13 @@ def _validate_parameters(entry: RegistryEntry, parameters: Mapping[str, object])
     if entry.action_type is ActionType.REQUEST_RESOURCE:
         if parameters.get("approval_not_granted") is not True:
             raise PlannerRejected("PLANNER_ACTION_PARAMETERS_INVALID")
+    if entry.action_type is ActionType.IMPLEMENT:
+        if not parameters.get("task_id"):
+            raise PlannerRejected("PLANNER_ACTION_PARAMETERS_INVALID")
+        if parameters.get("creates_execution_request") is not True:
+            raise PlannerRejected("PLANNER_ACTION_PARAMETERS_INVALID")
+        if parameters.get("requires_verification_before_apply") is not True:
+            raise PlannerRejected("PLANNER_ACTION_PARAMETERS_INVALID")
 
 
 def _normalize_input(inputs: PlanningInput) -> PlanningInput:
@@ -566,7 +613,8 @@ def _normalize_input(inputs: PlanningInput) -> PlanningInput:
 def _action_priority(action_type: str) -> int:
     order = [
         "run_deeper_test", "diagnose", "repair", "retry",
-        "switch_strategy", "schedule_ready_task", "request_resource", "pause",
+        "switch_strategy", "schedule_ready_task", "implement",
+        "request_resource", "pause",
     ]
     return order.index(action_type) if action_type in order else 999
 

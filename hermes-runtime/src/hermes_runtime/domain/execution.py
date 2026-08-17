@@ -17,6 +17,9 @@ MAX_QUEUE_PRIORITY = 1000
 
 WORKER_EXECUTABLE_ACTION_TYPES = (
     "diagnose", "run_deeper_test", "deeper_test", "repair", "retry",
+    # P6 (ADR-0073): worker-executable implementation action so a fresh
+    # implementation task can be executed through the real authority chain.
+    "implement",
 )
 CONTROL_PLANE_ACTION_TYPES = (
     "pause", "resume", "cancel", "transition_project", "recompute_readiness",
