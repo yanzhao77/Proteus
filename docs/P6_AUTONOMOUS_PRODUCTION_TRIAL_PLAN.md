@@ -1,6 +1,6 @@
 # Proteus P6 Autonomous Production Trial — Execution Plan
 
-Status: ACTIVE (living plan)
+Status: **COMPLETE** — Overall verdict PASS (all acceptance rows PASS, evidence in docs/evidence/p6, report in docs/P6_REPORT.md)
 Branch: `codex/p6-autonomous-production-trial`
 Baseline: `master` @ `24f7f75` (P5 complete, 497 tests, PostgreSQL 16 regression green)
 
