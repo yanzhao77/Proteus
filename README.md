@@ -202,6 +202,7 @@ Proteus/
 | [P5 Deployable Product Specification](docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md) | P5 单节点可部署产品、服务拓扑与运维边界 |
 | [P5 Deployable Product Acceptance Matrix](docs/P5_DEPLOYABLE_PRODUCT_ACCEPTANCE_MATRIX.md) | P5 单节点产品化切片验收状态 |
 | [P5 Completion Summary](docs/Hermes_P5_COMPLETION_SUMMARY.md) | P5 单节点产品完成范围、边界和验证摘要 |
+| [开发搭建操作手册](docs/DEVELOPER_GUIDE.md) | 从零搭建开发环境的完整操作手册（安装/迁移/测试/启动/部署/开发流程/FAQ） |
 | [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 规范优先级、ADR 状态与待决问题 |
 
 当文档之间出现冲突时，请遵循 [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) 中定义的 authority order，而不是依据文件名或版本号自行推断。
