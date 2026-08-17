@@ -565,6 +565,76 @@ class ProjectPermissionTests(unittest.TestCase):
             },
         )
 
+    def test_worker_and_reader_cannot_execute_guard_fact_producers(self):
+        for function_name, signature in (
+            (
+                "hermes_record_project_evidence_fact_authority",
+                "TEXT, TEXT, BIGINT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT",
+            ),
+            (
+                "hermes_record_project_policy_fact_authority",
+                "TEXT, TEXT, BIGINT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT",
+            ),
+        ):
+            for role in ("worker", "reader"):
+                with self.subTest(function=function_name, role=role):
+                    # EXECUTE is not granted to worker/reader runtime roles.
+                    with psycopg.connect(DATABASE_URL) as connection:
+                        can_execute = connection.execute(
+                            """
+                            SELECT has_function_privilege(
+                                %s, p.oid, 'EXECUTE')
+                            FROM pg_proc p
+                            JOIN pg_namespace n ON n.oid = p.pronamespace
+                            WHERE n.nspname = 'public' AND p.proname = %s
+                            """,
+                            (self.roles[role], function_name),
+                        ).fetchone()[0]
+                        self.assertFalse(can_execute, function_name)
+                    # A direct invocation must fail closed as a privilege denial.
+                    placeholders = ",".join(["%s"] * (signature.count(",") + 1))
+                    args = ("x", "x", 0, "x", "x", "x", "x", "x", "x")
+                    if function_name.endswith("policy_fact_authority"):
+                        args = ("x", "x", 0, "x", "x", "x", "x", "x", "x", "x", "x")
+                    with self.assertRaises(psycopg.errors.InsufficientPrivilege):
+                        with self.connect_as(role) as connection:
+                            connection.execute(
+                                "SELECT public.{}({})".format(
+                                    function_name, placeholders
+                                ),
+                                args,
+                            )
+                    with psycopg.connect(DATABASE_URL) as connection:
+                        owner = connection.execute(
+                            """
+                            SELECT pg_get_userbyid(proowner)
+                            FROM pg_proc p
+                            JOIN pg_namespace n ON n.oid = p.pronamespace
+                            WHERE n.nspname = 'public' AND p.proname = %s
+                            """,
+                            (function_name,),
+                        ).fetchone()[0]
+                        self.assertEqual("hermes_authority_owner", owner)
+
+    def test_guard_fact_producers_are_revoked_from_public(self):
+        with psycopg.connect(DATABASE_URL) as connection:
+            for function_name in (
+                "hermes_record_project_evidence_fact_authority",
+                "hermes_record_project_policy_fact_authority",
+            ):
+                has_public = connection.execute(
+                    """
+                    SELECT EXISTS (
+                        SELECT 1 FROM pg_proc p
+                        JOIN pg_namespace n ON n.oid = p.pronamespace
+                        WHERE n.nspname = 'public' AND p.proname = %s
+                          AND has_function_privilege('public', p.oid, 'EXECUTE')
+                    )
+                    """,
+                    (function_name,),
+                ).fetchone()[0]
+                self.assertFalse(has_public, function_name)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -174,3 +174,25 @@ class IssueProjectBudgetFact:
     project_version: int
     from_state: str
     to_state: str
+
+
+@dataclass(frozen=True)
+class RecordProjectEvidenceFact:
+    envelope: CommandEnvelope
+    evidence_fact_id: str
+    project_version: int
+    from_state: str
+    to_state: str
+    subject_ref: str
+
+
+@dataclass(frozen=True)
+class RecordProjectPolicyFact:
+    envelope: CommandEnvelope
+    policy_decision_id: str
+    project_version: int
+    from_state: str
+    to_state: str
+    result: str
+    policy_bundle_version: str
+    input_hash: str

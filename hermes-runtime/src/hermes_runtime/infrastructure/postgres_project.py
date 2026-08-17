@@ -6,6 +6,8 @@ from hermes_runtime.application.commands import (
     CancelProject,
     CreateProject,
     PauseProject,
+    RecordProjectEvidenceFact,
+    RecordProjectPolicyFact,
     RequestProjectTransition,
     ResumeProject,
 )
@@ -626,6 +628,110 @@ class PostgresProjectStore(PostgresGraphStore):
             },
         )
 
+    def record_evidence_fact(self, command: RecordProjectEvidenceFact) -> CommandReceipt:
+        return self._record_guard_fact(
+            command,
+            command_type="project.record_evidence_fact",
+            event_type="project.evidence_fact_recorded",
+            call=(
+                "SELECT public.hermes_record_project_evidence_fact_authority("
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            ),
+            args=(
+                command.evidence_fact_id,
+                command.envelope.project_id,
+                command.project_version,
+                command.from_state,
+                command.to_state,
+                command.subject_ref,
+                command.envelope.command_id,
+                command.envelope.actor.actor_type.value,
+                command.envelope.reason,
+            ),
+        )
+
+    def record_policy_fact(self, command: RecordProjectPolicyFact) -> CommandReceipt:
+        return self._record_guard_fact(
+            command,
+            command_type="project.record_policy_fact",
+            event_type="project.policy_fact_recorded",
+            call=(
+                "SELECT public.hermes_record_project_policy_fact_authority("
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            ),
+            args=(
+                command.policy_decision_id,
+                command.envelope.project_id,
+                command.project_version,
+                command.from_state,
+                command.to_state,
+                command.result,
+                command.policy_bundle_version,
+                command.input_hash,
+                command.envelope.command_id,
+                command.envelope.actor.actor_type.value,
+                command.envelope.reason,
+            ),
+        )
+
+    def _record_guard_fact(
+        self,
+        command: Any,
+        *,
+        command_type: str,
+        event_type: str,
+        call: str,
+        args: Tuple[Any, ...],
+    ) -> CommandReceipt:
+        request_hash = self._command_hash(command)
+        try:
+            with self._connect() as connection:
+                existing = self._begin_command(
+                    connection, command.envelope, request_hash
+                )
+                if existing:
+                    return existing
+                connection.execute(call, args)
+                event_id = self._append_event_and_outbox(
+                    connection,
+                    command.envelope,
+                    event_type,
+                    {
+                        "project_id": command.envelope.project_id,
+                        "project_version": command.project_version,
+                        "from_state": command.from_state,
+                        "to_state": command.to_state,
+                        "actor": self._actor_dict(command.envelope.actor),
+                        "reason": command.envelope.reason,
+                        "command_id": command.envelope.command_id,
+                    },
+                )
+                receipt = CommandReceipt(
+                    command.envelope.command_id,
+                    "APPLIED",
+                    "PROJECT_GUARD_FACT_RECORDED",
+                    command.project_version,
+                    (event_id,),
+                    {
+                        "project_id": command.envelope.project_id,
+                        "project_version": command.project_version,
+                        "from_state": command.from_state,
+                        "to_state": command.to_state,
+                    },
+                )
+                self._complete_command(connection, command.envelope, receipt)
+                return receipt
+        except CommandRejected as exc:
+            self._persist_rejection(
+                command.envelope, request_hash, exc.code, exc.detail
+            )
+            raise
+        except psycopg.errors.RaiseException as exc:
+            code = exc.diag.message_primary
+            rejected = CommandRejected(code)
+            self._persist_rejection(command.envelope, request_hash, code, "")
+            raise rejected
+
     def _command_hash(self, command: Any) -> str:
         if isinstance(command, CreateProject):
             body: Dict[str, Any] = {
@@ -643,6 +749,20 @@ class PostgresProjectStore(PostgresGraphStore):
                 "requested_by": self._actor_dict(command.requested_by),
                 "authorization_ref": command.authorization_ref,
             }
+        elif isinstance(command, (RecordProjectEvidenceFact, RecordProjectPolicyFact)):
+            body = {
+                "project_version": command.project_version,
+                "from_state": command.from_state,
+                "to_state": command.to_state,
+            }
+            if isinstance(command, RecordProjectEvidenceFact):
+                body["evidence_fact_id"] = command.evidence_fact_id
+                body["subject_ref"] = command.subject_ref
+            else:
+                body["policy_decision_id"] = command.policy_decision_id
+                body["result"] = command.result
+                body["policy_bundle_version"] = command.policy_bundle_version
+                body["input_hash"] = command.input_hash
         else:
             return super()._command_hash(command)
         envelope = command.envelope
