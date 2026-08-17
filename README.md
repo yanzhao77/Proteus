@@ -12,6 +12,15 @@
 
 ---
 
+> 🚀 **新手上路？从这里开始**
+>
+> 完整的分步操作手册见 [**开发搭建操作手册**](docs/DEVELOPER_GUIDE.md)：
+> 环境准备 → 安装依赖 → 启动 PostgreSQL → 执行迁移 → 运行测试（领域 / PG / 外部适配器）
+> → 启动 API / Supervisor → 单节点 Compose 部署 → 开发新能力标准流程 → 故障排查 FAQ。
+> 手册中的所有命令均在当前 master 上实测，输出可直接对照。
+
+---
+
 ## Proteus 是什么
 
 Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时仓库。它关注的不是“让 Agent 多写一点代码”，而是如何把多个不可靠、可重试的执行单元组织成一个可靠的软件交付系统：
@@ -89,6 +98,9 @@ flowchart LR
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
 
 ## 快速开始
+
+> 💡 本节省略了细节，**完整的分步搭建流程（含所有命令、预期输出、常见错误）请参阅**
+> [开发搭建操作手册](docs/DEVELOPER_GUIDE.md)。下面只给出最快路径。
 
 ### 环境要求
 
