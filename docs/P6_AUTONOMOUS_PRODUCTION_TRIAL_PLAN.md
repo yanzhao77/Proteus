@@ -286,3 +286,59 @@ really ran; final delivery succeeded; evidence complete; acceptance matrix all
 PASS; report done; CI done; P0-P5 regression PASS; compileall PASS; diff check
 PASS; migration continuity PASS; no authority bypass; no secret leakage; no
 fake PASS; no undocumented workaround.
+
+---
+
+## 9. Execution status (updated during P6-1..P6-11)
+
+All slices are implemented on branch `codex/p6-autonomous-production-trial`:
+
+| Slice | Status | Evidence |
+| --- | --- | --- |
+| P6-0 | DONE | this plan |
+| P6-1 | DONE | `hermes_runtime/trial/{driver,scenarios,harness}.py`, `scripts/autonomous_run.py`, `tests/test_p6_autonomous_trial.py` |
+| P6-2 | DONE | `examples/golden-todo` (pytest 9/9, compose up verified) |
+| P6-3 | DONE | happy path runs: Request -> Situation -> Planning -> Policy/Risk -> Selection -> Capability -> Execution -> genuine FAIL -> Diagnosis -> Repair -> Recovery -> independent PASS -> ACCEPTED; `docs/evidence/p6/run-*` |
+| P6-4 | DONE | initial implementation genuinely fails (real pytest) and is recovered |
+| P6-5 | DONE | worker SIGKILLed mid-run; lease relinquished, request requeued, re-acquired, re-run (attempt 2), PASS |
+| P6-6 | DONE | same command + idempotency key -> identical receipt, one row |
+| P6-7 | DONE | produced artifact mutated on disk; verifier fails closed ARTIFACT_HASH_MISMATCH; task FAILED |
+| P6-8 | DONE | policy-required human gate: project WAITING_FOR_HUMAN -> human decision -> resumed (real commands + guard facts) |
+| P6-9 | DONE | harness assertions per scenario (real outcomes, no mocks) |
+| P6-10 | DONE | `docs/evidence/p6/run-*/{request,situation,diagnosis,planning,policy,selection,execution,verification,delivery}.json` + events/artifacts + run-report |
+| P6-11 | DONE | `docs/evidence/p6/acceptance-matrix.md` all PASS |
+| P6-12 | DONE | P6 report + full regression + compileall + diff check + migration continuity (0001..0024) |
+
+### Runtime gap closures implemented (minimal, authority-conforming, ADR-0073)
+
+The P6 trial proved that the P0-P5 runtime could not start fresh implementation
+work through the real authority path. The following gaps were closed with the
+smallest possible, fully documented changes; every P0-P5 test still passes:
+
+1. **Entry-point deadlock**: the planner only emitted worker-executable
+   candidates for `verification_failed` situations, so no fresh execution could
+   ever start (P2/P3 tests seeded a candidate via raw SQL). Closed by a
+   versioned registry extension `action-registry/1.1` adding the worker-executable
+   `implement` action (`domain/planner.py` `P6_REGISTRY`, routing, SQL whitelist,
+   candidate type CHECK, policy rule). `action-registry/1.0` is untouched (P1
+   contract).
+2. **Recovery task re-entry**: a task whose execution failed could never return
+   to the ready pool (P2-5 tests raw-SQLed the transition). `hermes_emit_execution_feedback`
+   now performs task re-entry inside the recovery authority transaction.
+3. **Readiness trigger for dependency-free tasks**: a single fresh task becomes
+   READY at patch time and no `task.readiness_recomputed` event fires. The
+   analyzer now classifies `work_graph.patch.applied` readiness changes as
+   `work_available` (migration 0024).
+4. **Consumer liveness on unimplemented rules**: `policy.evaluated` /
+   `agent.stalled` / `resource.missing` events crashed the situation consumer
+   (classifier still fails closed, P1-pinned); the consumer now quarantines them
+   and advances, so later events are still processed.
+5. **Secret-guard false positive**: deterministic authority ids such as
+   `risk-<hex>` matched the `sk-[A-Za-z0-9]{12,}` API-key pattern. The pattern
+   now requires `sk-` not preceded by an alphanumeric (Python capability guard
+   and all SQL guards tightened in migration 0024); real API keys still fail
+   closed.
+
+No P0-P5 acceptance criterion, authority invariant, or API contract was
+changed; migration continuity is 0001..0024.
+

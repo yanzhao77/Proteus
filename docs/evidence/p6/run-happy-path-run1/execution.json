@@ -1,0 +1,122 @@
+{
+  "implement": {
+    "action": "implement",
+    "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+    "fencing_token": 1,
+    "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66"
+  },
+  "repair": {
+    "action": "repair",
+    "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+    "fencing_token": 1,
+    "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8"
+  },
+  "worker_implement": {
+    "outcome": "FAILED_PERMANENT",
+    "pytest": {
+      "passed": false,
+      "returncode": 1,
+      "stderr_tail": "",
+      "stdout_tail": "nd)\n.venv/lib/python3.9/site-packages/starlette/_exception_handler.py:53: in wrapped_app\n    raise exc\n.venv/lib/python3.9/site-packages/starlette/_exception_handler.py:42: in wrapped_app\n    await app(scope, receive, sender)\n.venv/lib/python3.9/site-packages/starlette/routing.py:73: in app\n    response = await f(request)\n.venv/lib/python3.9/site-packages/fastapi/routing.py:301: in app\n    raw_response = await run_endpoint_function(\n.venv/lib/python3.9/site-packages/fastapi/routing.py:214: in run_endpoint_function\n    return await run_in_threadpool(dependant.call, **values)\n.venv/lib/python3.9/site-packages/starlette/concurrency.py:39: in run_in_threadpool\n    return await anyio.to_thread.run_sync(func, *args)\n.venv/lib/python3.9/site-packages/anyio/to_thread.py:63: in run_sync\n    return await get_async_backend().run_sync_in_worker_thread(\n.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py:2502: in run_sync_in_worker_thread\n    return await future\n.venv/lib/python3.9/site-packages/anyio/_backends/_asyncio.py:986: in run\n    result = context.run(func, *args)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nbody = RegisterIn(username='nobody', password='wrong-password-999')\ndb = <sqlalchemy.orm.session.Session object at 0x109e049d0>\n\n    @app.post(\"/auth/login\", response_model=TokenOut)\n    def login(body: RegisterIn, db: Session = Depends(get_db)):\n>       from . import security\nE       ImportError: cannot import name 'security' from 'app' (/Users/sjw/Documents/GitHub/Proteus/hermes-runtime/.p6-workspaces/happy-path-run1/app/__init__.py)\n\napp/main.py:103: ImportError\n=========================== short test summary info ============================\nFAILED tests/test_api.py::test_bad_credentials_rejected - ImportError: cannot...\nERROR tests/test_api.py::test_register_login_and_authed_crud_roundtrip - Impo...\nERROR tests/test_api.py::test_todos_are_owner_scoped - ImportError: cannot im...\n1 failed, 6 passed, 2 errors in 0.72s\n"
+    },
+    "result_id": "result-happy-path-run1-implement"
+  },
+  "worker_repair": {
+    "manifest": [
+      {
+        "content_hash": "sha256:6a2077d4d8ee16ba03241653e20d5d93fdac307b2394b253ee95c72b54970707",
+        "path": ".env.example",
+        "size_bytes": 179
+      },
+      {
+        "content_hash": "sha256:76296321b0d21099a84e359d798926db9951f073ef696f9fa9acfc03f6b71e6b",
+        "path": ".github/workflows/ci.yml",
+        "size_bytes": 1014
+      },
+      {
+        "content_hash": "sha256:0180eb3fe10e1f2decab37a3ea90065ea27564731b900226dfdbafab6571d0f2",
+        "path": ".gitignore",
+        "size_bytes": 46
+      },
+      {
+        "content_hash": "sha256:8bc5ab83eb50250f262ebb04541486fca5631a0c3108ff5eade5962a5abb9d77",
+        "path": "Dockerfile",
+        "size_bytes": 229
+      },
+      {
+        "content_hash": "sha256:5ddd6c26d01312b3f909610f13610f0adfdf0a88510d38779677888cb9592a23",
+        "path": "README.md",
+        "size_bytes": 2112
+      },
+      {
+        "content_hash": "sha256:ac678c9c8c0cf12988e0dbfafd588bcc9cad9accbef350c48efd7684d1094eba",
+        "path": "app/__init__.py",
+        "size_bytes": 39
+      },
+      {
+        "content_hash": "sha256:3b45380721a620d7c780c1d27f2e0b682537c827021a0f314bfbd637451e5fef",
+        "path": "app/main.py",
+        "size_bytes": 5321
+      },
+      {
+        "content_hash": "sha256:e933563da6011c58747b8a1db04ef23d0f66643b823cb20eed2be7c38369dae6",
+        "path": "app/models.py",
+        "size_bytes": 655
+      },
+      {
+        "content_hash": "sha256:9af7155704dc3c00169a7906f7df532b9aa8fee17ffdba0d10f61d2ea4b46de2",
+        "path": "app/security.py",
+        "size_bytes": 799
+      },
+      {
+        "content_hash": "sha256:013009a21fd141e7d05f850d322fadaa30cc3265a85b3bcd7aa56ddca65968d2",
+        "path": "compose.yml",
+        "size_bytes": 596
+      },
+      {
+        "content_hash": "sha256:e8c4628ed8f1f109ed9455dff39a67374c0711c7e24e6a5114517abe41fb61db",
+        "path": "pyproject.toml",
+        "size_bytes": 67
+      },
+      {
+        "content_hash": "sha256:dd7a76043acdb0eb981442ab50013a0cc89221ed061fa8ad21835fd070f8b58b",
+        "path": "requirements.txt",
+        "size_bytes": 167
+      },
+      {
+        "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "path": "tests/__init__.py",
+        "size_bytes": 0
+      },
+      {
+        "content_hash": "sha256:e01f6986ef52ef695d09ad17d83766a5648ba6f5f19ceaa6002af447f88513da",
+        "path": "tests/conftest.py",
+        "size_bytes": 1917
+      },
+      {
+        "content_hash": "sha256:5ac4c7babb1cfd8c544818cd6e2d765b9a5783261616747a59c818ee207f4c26",
+        "path": "tests/test_api.py",
+        "size_bytes": 3022
+      },
+      {
+        "content_hash": "sha256:5bb44dc0cc63fc0e6dda719583f13712fc8eb8b20612e998d77dd09e65a1f7f3",
+        "path": "worker-context-implement.json",
+        "size_bytes": 589
+      },
+      {
+        "content_hash": "sha256:ca8f5869eadaf5cc74e699847970021907cf31b0a5acd52bdebb0908bf7c25af",
+        "path": "worker-context-repair.json",
+        "size_bytes": 576
+      },
+      {
+        "content_hash": "sha256:cf185b23340b79e51b7278fa60ce1051e426d52af31c6b112c856c1810212e22",
+        "path": "worker-result-implement.json",
+        "size_bytes": 5066
+      }
+    ],
+    "outcome": "SUCCEEDED",
+    "primary_artifact_id": "artifact-artifact-cand-d71bc7ff81b24082b2eef1a6f3416e02",
+    "primary_hash": "sha256:6a2077d4d8ee16ba03241653e20d5d93fdac307b2394b253ee95c72b54970707",
+    "result_id": "result-happy-path-run1-repair"
+  }
+}

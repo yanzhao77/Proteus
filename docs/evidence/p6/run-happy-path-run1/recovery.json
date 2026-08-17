@@ -1,0 +1,19 @@
+{
+  "attempt": {
+    "action_type": "repair",
+    "attempt_id": "attempt-happy-path-run1",
+    "result_code": "RECOVERY_ATTEMPT_PLANNED"
+  },
+  "complete": {
+    "result_code": "RECOVERY_ATTEMPT_COMPLETED"
+  },
+  "feedback": {
+    "cycle_id": "cycle-feedback-happy-path-run1",
+    "event_ids": [
+      "evt-4ad06eac-15e8-406d-b5f8-104b9d3c3d6e",
+      "evt-b3c69dcc-e189-43fd-97c0-f57ec826bffd"
+    ],
+    "failure_type": "test_assertion_failure",
+    "recovery_level": "L1_REPAIR"
+  }
+}

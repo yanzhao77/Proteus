@@ -90,6 +90,7 @@ from hermes_runtime.application.scheduling import (
     AcquireExecutionLease,
     ExecutionScheduler,
     RegisterScheduler,
+    RenewExecutionLease,
 )
 from hermes_runtime.application.selections import (
     ActionSelection,
@@ -221,6 +222,7 @@ class AutonomousRunDriver:
         self.records: Dict[str, Any] = {}
         self.workspace: Optional[Path] = None
         self._project_id: Optional[str] = None
+        self._scenario_patch_event_ids: Dict[str, str] = {}
 
     # ------------------------------------------------------------------ helpers
 
@@ -266,6 +268,67 @@ class AutonomousRunDriver:
                WHERE execution_request_id=%s""",
             (execution_request_id,),
         ))
+
+    def _refresh_binding(self, binding: WorkerLeaseBinding) -> WorkerLeaseBinding:
+        """Re-read the current request version and lease version after the
+        worker run (start_run bumps the request version; scheduler renewal
+        bumps the lease version). Worker admissions validate both."""
+        request_version = self._request_version(binding.execution_request_id)
+        lease_version = int(self._scalar(
+            """SELECT lease_version FROM execution_leases WHERE lease_id=%s""",
+            (binding.lease_id,),
+        ))
+        return WorkerLeaseBinding(
+            project_id=binding.project_id,
+            execution_request_id=binding.execution_request_id,
+            execution_attempt=binding.execution_attempt,
+            run_id=binding.run_id,
+            lease_id=binding.lease_id,
+            lease_version=lease_version,
+            fencing_token=binding.fencing_token,
+            scheduler_id=binding.scheduler_id,
+            scheduler_session_id=binding.scheduler_session_id,
+            worker_agent_identity=binding.worker_agent_identity,
+            context_identity=binding.context_identity,
+            observed_request_version=request_version,
+        )
+
+    def _renewer(
+        self, execution_request_id: str, lease_id: str, scheduler_id: str,
+        session: str, fencing_token: int, stop_event,
+    ) -> None:
+        """Real scheduler behavior: renew the lease while a long-running
+        worker executes (default lease TTL is 30s; golden builds take minutes).
+        Runs on a daemon thread with its own idempotency key per renewal."""
+        import threading
+        import time
+        lease_version = int(self._scalar(
+            """SELECT lease_version FROM execution_leases WHERE lease_id=%s""",
+            (lease_id,),
+        ))
+        renewals = 0
+        while not stop_event.is_set() and renewals < 60:
+            time.sleep(10)
+            if stop_event.is_set():
+                return
+            try:
+                result = self.scheduler.renew(RenewExecutionLease(
+                    command_id=_uuid("cmd-renew"),
+                    idempotency_key=_uuid("key-renew"),
+                    project_id=self._project_id,
+                    execution_request_id=execution_request_id,
+                    lease_id=lease_id,
+                    scheduler_id=scheduler_id,
+                    scheduler_session_id=session,
+                    fencing_token=fencing_token,
+                    expected_lease_version=lease_version,
+                ))
+                lease_version = int(result.get("lease_version", lease_version + 1))
+                renewals += 1
+            except Exception:
+                # A failed renewal surfaces at submit time (LEASE_EXPIRED);
+                # do not mask the real worker result with renewer noise.
+                pass
 
     def _read_candidate(self, planning_run_id: str, action_type: str) -> Dict[str, Any]:
         with self._connect() as connection:
@@ -323,7 +386,14 @@ class AutonomousRunDriver:
         return target
 
     def _ensure_verifier(self, verifier_id: str) -> None:
-        self.runtime.seed_verifier(verifier_id)
+        # verifier_identities is a configuration table (not an authority table);
+        # the insert is idempotent so multiple scenarios can share one database.
+        with self._connect() as connection:
+            connection.execute(
+                "INSERT INTO verifier_identities(verifier_id, active) "
+                "VALUES (%s, true) ON CONFLICT (verifier_id) DO NOTHING",
+                (verifier_id,),
+            )
 
     def _seed_worker_template(self, project_id: str) -> Dict[str, Any]:
         """Register the golden builder capability schemas and worker template
@@ -369,32 +439,50 @@ class AutonomousRunDriver:
             },
             concurrency_capacity=1,
         )
-        created = self.capability.create_worker_template_revision(
-            CreateWorkerTemplateRevision(
-                command_id=_uuid("cmd-template-rev"),
-                idempotency_key=_uuid("key-template-rev"),
-                project_id=project_id,
-                template=template,
-                expected_version=0,
+        # The worker template is global (project_id=None): register it once and
+        # reuse it across scenarios sharing one database.
+        with self._connect() as connection:
+            existing = connection.execute(
+                """SELECT content_hash FROM worker_template_revisions
+                   WHERE template_id=%s AND revision=%s""",
+                (WORKER_TEMPLATE_ID, WORKER_TEMPLATE_REVISION),
+            ).fetchone()
+        if existing is None:
+            created = self.capability.create_worker_template_revision(
+                CreateWorkerTemplateRevision(
+                    command_id=_uuid("cmd-template-rev"),
+                    idempotency_key=_uuid("key-template-rev"),
+                    project_id=project_id,
+                    template=template,
+                    expected_version=0,
+                )
             )
-        )
-        availability_version = int(created.get("availability_version", 1))
-        activated = self.capability.change_worker_template_availability(
-            ChangeWorkerTemplateAvailability(
-                command_id=_uuid("cmd-template-avail"),
-                idempotency_key=_uuid("key-template-avail"),
-                project_id=project_id,
-                template_id=WORKER_TEMPLATE_ID,
-                revision=WORKER_TEMPLATE_REVISION,
-                availability_status="AVAILABLE",
-                admission_status="ADMISSIBLE",
-                expected_version=availability_version,
+            content_hash = created["content_hash"]
+            availability_version = int(created.get("availability_version", 1))
+            activated = self.capability.change_worker_template_availability(
+                ChangeWorkerTemplateAvailability(
+                    command_id=_uuid("cmd-template-avail"),
+                    idempotency_key=_uuid("key-template-avail"),
+                    project_id=project_id,
+                    template_id=WORKER_TEMPLATE_ID,
+                    revision=WORKER_TEMPLATE_REVISION,
+                    availability_status="AVAILABLE",
+                    admission_status="ADMISSIBLE",
+                    expected_version=availability_version,
+                )
             )
-        )
+            availability_version = int(activated.get("availability_version", 2))
+        else:
+            content_hash = existing[0]
+            availability_version = int(self._scalar(
+                """SELECT availability_version FROM worker_template_availability
+                   WHERE template_id=%s AND revision=%s""",
+                (WORKER_TEMPLATE_ID, WORKER_TEMPLATE_REVISION),
+            ))
         return {
             "template": template,
-            "content_hash": created["content_hash"],
-            "availability_version": int(activated.get("availability_version", 2)),
+            "content_hash": content_hash,
+            "availability_version": availability_version,
         }
 
     def _evaluate_action(
@@ -668,12 +756,15 @@ class AutonomousRunDriver:
             context_identity=binding.context_identity,
             observed_request_version=current_version,
         )
-        return lease, binding
+        return dict(lease, scheduler_id=scheduler_id,
+                    scheduler_session_id="session-" + tag), binding
 
     def _run_golden_worker(
         self, task_id: str, execution_request_id: str, run_id: str,
         summary: str, fault_mode: str, prepare_venv: bool, tag: str,
+        renewal: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+        import threading
         workspace = self.workspace
         context_path = workspace / ("worker-context-" + tag + ".json")
         result_path = workspace / ("worker-result-" + tag + ".json")
@@ -689,11 +780,27 @@ class AutonomousRunDriver:
             "result_path": str(result_path),
         }
         context_path.write_text(json.dumps(context, sort_keys=True))
-        completed = subprocess.run(
-            [sys.executable, "-m", "hermes_runtime.trial.golden_worker",
-             str(context_path)],
-            capture_output=True, text=True, timeout=900,
-        )
+        stop_event = threading.Event()
+        renewer = None
+        if renewal:
+            renewer = threading.Thread(
+                target=self._renewer,
+                args=(renewal["execution_request_id"], renewal["lease_id"],
+                      renewal["scheduler_id"], renewal["session"],
+                      renewal["fencing_token"], stop_event),
+                daemon=True,
+            )
+            renewer.start()
+        try:
+            completed = subprocess.run(
+                [sys.executable, "-m", "hermes_runtime.trial.golden_worker",
+                 str(context_path)],
+                capture_output=True, text=True, timeout=1500,
+            )
+        finally:
+            stop_event.set()
+            if renewer:
+                renewer.join(timeout=5)
         if not result_path.exists():
             raise TrialError(
                 "golden worker produced no result: " + completed.stderr[-2000:]
@@ -704,6 +811,7 @@ class AutonomousRunDriver:
 
     def _verify_workspace(
         self, run_id: str, expected_manifest: List[Dict[str, Any]],
+        task_id: str = "",
     ) -> Dict[str, Any]:
         context_path = self.workspace / ("verifier-context-" + run_id + ".json")
         result_path = self.workspace / ("verifier-result-" + run_id + ".json")
@@ -711,7 +819,7 @@ class AutonomousRunDriver:
             "workspace": str(self.workspace),
             "expected_manifest": expected_manifest,
             "project_id": self._project_id,
-            "task_id": self.records["task_id"],
+            "task_id": task_id or self.records.get("task_id", ""),
             "verification_plan_id": "plan-" + run_id,
             "test_database_url": self.test_database_url,
             "result_path": str(result_path),
@@ -732,8 +840,16 @@ class AutonomousRunDriver:
 
     # ------------------------------------------------------------------ lifecycle
 
-    def run_happy_path(self, request: Mapping[str, Any], run_id: str) -> Dict[str, Any]:
-        """Execute the full autonomous happy path and return collected records."""
+    def run_happy_path(
+        self, request: Mapping[str, Any], run_id: str,
+        first_fault: str = WorkerFaultMode.BROKEN_TEST,
+    ) -> Dict[str, Any]:
+        """Execute the full autonomous happy path and return collected records.
+
+        first_fault selects the REAL defect injected into the first
+        implementation execution (BROKEN_TEST or MISSING_FEATURE); the
+        autonomous loop then diagnoses and repairs it either way.
+        """
         project_id = "project-" + run_id
         task_id = "task-" + run_id
         summary = str(request.get("summary") or request.get("request") or "Build a Todo API")
@@ -889,12 +1005,20 @@ class AutonomousRunDriver:
         # --- execution 1: golden worker builds a DEFECTIVE project -> pytest FAILS
         worker1 = self._run_golden_worker(
             task_id, prepared_impl["execution_request_id"], run_id, summary,
-            WorkerFaultMode.BROKEN_TEST, prepare_venv=True, tag="implement",
+            first_fault, prepare_venv=True, tag="implement",
+            renewal={
+                "execution_request_id": prepared_impl["execution_request_id"],
+                "lease_id": lease_impl["lease_id"],
+                "scheduler_id": lease_impl["scheduler_id"],
+                "session": lease_impl["scheduler_session_id"],
+                "fencing_token": lease_impl["fencing_token"],
+            },
         )
         if worker1["pytest"]["passed"]:
             raise TrialError("expected the broken-test worker to fail pytest")
         result1_id = "result-" + run_id + "-implement"
         account_after_selection = self._account_version(account_id)
+        binding_impl = self._refresh_binding(binding_impl)
         result1 = self.worker.submit_result(SubmitExecutionResult(
             command_id=_uuid("cmd-result"),
             idempotency_key=_uuid("key-result-implement"),
@@ -1034,10 +1158,18 @@ class AutonomousRunDriver:
         worker2 = self._run_golden_worker(
             task_id, prepared_repair["execution_request_id"], run_id, summary,
             WorkerFaultMode.NONE, prepare_venv=False, tag="repair",
+            renewal={
+                "execution_request_id": prepared_repair["execution_request_id"],
+                "lease_id": lease_repair["lease_id"],
+                "scheduler_id": lease_repair["scheduler_id"],
+                "session": lease_repair["scheduler_session_id"],
+                "fencing_token": lease_repair["fencing_token"],
+            },
         )
         if not worker2["pytest"]["passed"]:
             raise TrialError("expected the repaired worker to pass pytest")
         manifest = worker2["manifest"]
+        binding_repair = self._refresh_binding(binding_repair)
 
         # record artifact candidates from the real worker manifest
         artifact_candidate_ids = []
@@ -1209,6 +1341,57 @@ class AutonomousRunDriver:
             "manifest": manifest,
         }
         return self.records
+
+    def _scenario_project(self, run_id: str, summary: str, task_id: str):
+        """Shared intake for scenario runs: project + task graph + readiness."""
+        project_id = "project-" + run_id
+        self._project_id = project_id
+        self.workspace = self.workspace_root / run_id
+        self.workspace.mkdir(parents=True, exist_ok=True)
+        self._ensure_verifier(VERIFIER_IDENTITY)
+        self.control_plane.create_project(CreateProject(
+            self._envelope("project.create", "key-create-" + run_id, 0,
+                           self.control, project_id, "autonomous software request"),
+            summary,
+            self.user,
+        ))
+        patch_receipt = self.control_plane.apply_work_graph_patch(ApplyWorkGraphPatch(
+            self._envelope("work_graph.apply_patch", "key-graph-" + run_id, 0,
+                           self.control, project_id, "create golden todo task"),
+            GraphPatch(
+                base_graph_version=0,
+                decision_id="decision-graph-" + run_id,
+                operations=(CreateTask(GraphTask(task_id, "implement", summary)),),
+            ),
+        ))
+        self._scenario_patch_event_ids[run_id] = patch_receipt.event_ids[0]
+        return project_id, patch_receipt
+
+    def _scenario_verification_plan(self, project_id: str, task_id: str, run_id: str) -> str:
+        plan_id = "plan-" + run_id
+        task_version = self._task_version(task_id, project_id)
+        self.control_plane.create_verification_plan(CreateVerificationPlan(
+            self._envelope("verification_plan.create", "key-plan-verif-" + run_id,
+                           task_version, self.control, project_id,
+                           "create pytest verification plan"),
+            VerificationPlan(
+                verification_plan_id=plan_id,
+                task_id=task_id,
+                project_id=project_id,
+                version=1,
+                status="ACTIVE",
+                artifact_selectors=("workspace",),
+                aggregation_rule="all_required_pass",
+                independence="worker_context_excluded",
+                created_by=self.control,
+                checks=(VerificationPlanCheck(
+                    check_id="pytest", check_type="integration_test",
+                    runner_profile="pytest", required=True, timeout_seconds=300,
+                    pass_condition="exit_code == 0", evidence_level="E2", ordinal=0,
+                ),),
+            ),
+        ))
+        return plan_id
 
     # ------------------------------------------------------------------ delivery
 

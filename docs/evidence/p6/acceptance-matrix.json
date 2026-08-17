@@ -1,0 +1,53 @@
+{
+  "rows": [
+    {
+      "detail": "",
+      "key": "happy-path-autonomous-run",
+      "label": "Happy path: Request->Situation->Planning->Policy/Risk->Selection->Capability->Execution->Failure->Diagnosis->Repair->Recovery->Verification PASS->Delivery ACCEPTED",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "happy path: worker pytest FAIL -> feedback -> diagnosis -> repair -> PASS",
+      "key": "verification-failure-recovered",
+      "label": "Initial implementation genuinely fails and is recovered",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "",
+      "key": "worker-crash-recovered",
+      "label": "Worker SIGKILLed mid-run; lease relinquished, request requeued and re-run; independent verification PASS",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "",
+      "key": "duplicate-execution-deduplicated",
+      "label": "Same project.create command + idempotency key -> identical receipt, one row",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "",
+      "key": "artifact-tampering-fail-closed",
+      "label": "Produced artifact mutated on disk; independent verifier fails it closed (ARTIFACT_HASH_MISMATCH); task FAILED",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "",
+      "key": "human-gate-paused-resumed",
+      "label": "Policy-required human gate pauses project (WAITING_FOR_HUMAN); authorized human decision resumes it",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "emit_execution_feedback + plan_recovery_attempt + complete_recovery_attempt on happy path",
+      "key": "recovery-replan-ran",
+      "label": "RecoveryController emit/plan/complete all ran",
+      "outcome": "PASS"
+    },
+    {
+      "detail": "project evidence/policy/budget guard facts produced by real authority commands",
+      "key": "final-delivery-succeeded",
+      "label": "Project reached ACCEPTED with real guard facts",
+      "outcome": "PASS"
+    }
+  ],
+  "verdict": "PASS"
+}

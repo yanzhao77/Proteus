@@ -74,6 +74,10 @@ def build_workspace(workspace: Path, fault_mode: str = WorkerFaultMode.NONE) -> 
                 b'assert response.json()["status"] == "LIVE"',
                 b'assert response.json()["status"] == "NOT_LIVE"',
             )
+        if fault_mode == WorkerFaultMode.MISSING_FEATURE and rel == "app/security.py":
+            # Omit the security module: app.main imports it, so the build is
+            # genuinely broken (ImportError) and pytest really fails.
+            continue
         target.write_bytes(payload)
 
     manifest = _manifest(workspace)
