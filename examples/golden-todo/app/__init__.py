@@ -1,0 +1,1 @@
+"""Golden Todo application package."""

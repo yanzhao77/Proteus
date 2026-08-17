@@ -86,7 +86,16 @@ class PostgresSituationStore(PostgresRuntimeStore):
         except CommandRejected:
             raise
         except SituationRejected as exc:
-            raise CommandRejected(str(exc))
+            if str(exc) != "SITUATION_CLASSIFICATION_UNSUPPORTED":
+                raise CommandRejected(str(exc))
+            # P6 (ADR-0073): catalog events whose classification rule is not
+            # yet implemented (policy.evaluated, agent.stalled,
+            # resource.missing) are quarantine-and-continue: the classifier
+            # still fails closed (pure function), but the consumer must not
+            # die and stall the partition. Treating them as non-triggers
+            # advances the consumer checkpoint so later events (e.g.
+            # feedback.created) can still be processed.
+            classification = None
 
         if classification is None:
             parameters = self._parameters(

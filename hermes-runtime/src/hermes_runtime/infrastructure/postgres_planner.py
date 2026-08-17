@@ -10,6 +10,7 @@ from psycopg.types.json import Jsonb
 from hermes_runtime.application.errors import CommandRejected
 from hermes_runtime.application.planning import PlanCandidates
 from hermes_runtime.domain.planner import (
+    P6_REGISTRY_VERSION,
     REGISTRY_VERSION,
     RESOURCE_ESTIMATOR_VERSION,
     EvidenceRequestRef,
@@ -147,7 +148,7 @@ class PostgresPlannerStore(PostgresRuntimeStore):
         raise CommandRejected("COMMAND_IN_PROGRESS")
 
     def _load_inputs(self, connection, command):
-        if command.registry_version != REGISTRY_VERSION:
+        if command.registry_version not in {REGISTRY_VERSION, P6_REGISTRY_VERSION}:
             raise CommandRejected("PLANNER_REGISTRY_VERSION_UNSUPPORTED")
         situation = connection.execute(
             """SELECT * FROM situations WHERE situation_id=%s AND project_id=%s""",

@@ -165,6 +165,19 @@ POLICY_RULES: Tuple[PolicyRule, ...] = (
         },
         ("bounded_code_repair_allowed",),
     ),
+    PolicyRule(
+        "policy.system.implement.safe_code.allow.v1", "system", "*", 100,
+        PolicyEffect.ALLOW, ("implement",), ("dev", "test"),
+        {
+            "network_access": "disabled",
+            "filesystem_write": "workspace_only",
+            "production_access": "denied",
+            "secret_access": "denied",
+            "max_risk_level": "HIGH",
+            "required_mitigations": ("verification_before_apply",),
+        },
+        ("bounded_implementation_allowed",),
+    ),
 )
 
 

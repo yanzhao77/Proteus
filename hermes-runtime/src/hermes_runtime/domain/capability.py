@@ -876,7 +876,14 @@ def _reject_secret_values(value: Any) -> None:
         for item in value:
             _reject_secret_values(item)
     elif isinstance(value, str):
-        if re.search(r"(sk-[A-Za-z0-9]{12,}|BEGIN [A-Z ]*PRIVATE KEY|password=)", value):
+        # Tightened (P6, ADR-0073): the bare sk- pattern false-positived on
+        # deterministic authority ids like "risk-<hex>" (any id ending in
+        # "sk-"). Requiring sk- to NOT be preceded by an alphanumeric keeps
+        # real API keys detected without rejecting legitimate ids.
+        if re.search(
+            r"(?<![A-Za-z0-9])sk-[A-Za-z0-9]{12,}|BEGIN [A-Z ]*PRIVATE KEY|password=",
+            value,
+        ):
             raise CapabilityRejected("SECRET_VALUE_FORBIDDEN")
 
 

@@ -1,0 +1,1948 @@
+{
+  "events": [
+    {
+      "event_id": "evt-9ea817a7-2c94-419d-9367-904b4af9a681",
+      "event_type": "project.created",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-7c0ffa9ff6a446279daea1cd8cf607dd",
+        "guard_fact_refs": [],
+        "new_state": "CREATED",
+        "previous_state": null,
+        "project_id": "project-happy-path-run1",
+        "project_version": 0,
+        "reason": "autonomous software request",
+        "requested_by": {
+          "id": "trial-user",
+          "type": "user"
+        },
+        "supporting_refs": []
+      },
+      "sequence": 1
+    },
+    {
+      "event_id": "evt-13f5eb67-d5c9-45da-a029-ed2ae7350339",
+      "event_type": "work_graph.patch.applied",
+      "payload": {
+        "affected_task_ids": [
+          "task-happy-path-run1"
+        ],
+        "base_graph_version": 0,
+        "decision_id": "decision-graph-happy-path-run1",
+        "graph_version": 1,
+        "operation_count": 1,
+        "readiness_changes": [
+          {
+            "from_state": "NEW",
+            "task_id": "task-happy-path-run1",
+            "to_state": "READY"
+          }
+        ]
+      },
+      "sequence": 2
+    },
+    {
+      "event_id": "evt-57d34884-ce1e-4d42-8e54-ac4a558bb5ee",
+      "event_type": "situation.detected",
+      "payload": {
+        "analysis_context_id": "ctx-04b48132-f4c9-4094-8d45-0ae83b49245b",
+        "fingerprint": "sha256:5a43296239398505e43251cfcb5d4b37db68f6cd4b73efa77e653ac8a950c423",
+        "situation_id": "sit-ee711530-1673-444b-a460-51d48be137db",
+        "situation_type": "work_available",
+        "source_event_id": "evt-13f5eb67-d5c9-45da-a029-ed2ae7350339",
+        "superseded_situation_id": null
+      },
+      "sequence": 3
+    },
+    {
+      "event_id": "evt-5964d961-0361-4066-9405-315f450a00e7",
+      "event_type": "action.candidates_planned",
+      "payload": {
+        "analysis_context_id": "ctx-04b48132-f4c9-4094-8d45-0ae83b49245b",
+        "candidate_action_ids": [
+          "act-73459a59519b2aba64dcc88dc5d66123"
+        ],
+        "candidate_count": 1,
+        "diagnosis_id": null,
+        "input_hash": "sha256:4bf10955a56578db694045d1fc5fa5b180c5432a1f6f7772f9c59606bd7dddb8",
+        "planner_rule_version": "planner-rules/1.0",
+        "planning_run_id": "planrun-eedbdba0c3b4cc96d50b572a4feec813",
+        "registry_version": "action-registry/1.1",
+        "situation_id": "sit-ee711530-1673-444b-a460-51d48be137db",
+        "situation_version": 1
+      },
+      "sequence": 4
+    },
+    {
+      "event_id": "evt-720890b0-1baa-48f2-98dd-e1d6b66337f9",
+      "event_type": "verification_plan.created",
+      "payload": {
+        "entity_version": 2,
+        "plan_version": 1,
+        "task_id": "task-happy-path-run1",
+        "verification_plan_id": "plan-happy-path-run1"
+      },
+      "sequence": 5
+    },
+    {
+      "event_id": "evt-f429d78a-3b21-4baa-a45c-c751afc6c3e7",
+      "event_type": "budget.account_created",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "entity_version": 0
+      },
+      "sequence": 6
+    },
+    {
+      "event_id": "evt-9c3dcd1e-addd-4a36-8b29-5c8dede733c8",
+      "event_type": "capability.schema_registered",
+      "payload": {
+        "capability_name": "software-builder",
+        "content_hash": "sha256:0f379989d8eb413a3f6e7a891858d5d7be54ba4c939919b8c99a2f1587acaa67",
+        "entity_version": 1,
+        "schema_version": "capability-schema/1.0"
+      },
+      "sequence": 7
+    },
+    {
+      "event_id": "evt-db80bdcf-d24a-4004-8880-55245a75b5cf",
+      "event_type": "capability.schema_registered",
+      "payload": {
+        "capability_name": "code-modification",
+        "content_hash": "sha256:4f85bdd34db0f662653950bfbe2f47c05a23bddfd1da8b7c4f9bd42c025da4fd",
+        "entity_version": 1,
+        "schema_version": "capability-schema/1.0"
+      },
+      "sequence": 8
+    },
+    {
+      "event_id": "evt-6faa2ae8-771b-4d50-9bae-95eee5c11896",
+      "event_type": "worker_template.revision_created",
+      "payload": {
+        "availability_version": 1,
+        "content_hash": "sha256:eec2fc13cea44d036e0089963fa40ceed690d8bca80f87544da31d5b6d7f0c76",
+        "entity_version": 1,
+        "revision": 1,
+        "template_id": "template-golden"
+      },
+      "sequence": 9
+    },
+    {
+      "event_id": "evt-c5ec620c-6092-43ab-92c6-63df0759bd7a",
+      "event_type": "worker_template.availability_changed",
+      "payload": {
+        "admission_status": "ADMISSIBLE",
+        "availability_status": "AVAILABLE",
+        "availability_version": 2,
+        "entity_version": 2,
+        "revision": 1,
+        "template_id": "template-golden"
+      },
+      "sequence": 10
+    },
+    {
+      "event_id": "evt-3796a2bf-a22d-467f-aef9-2f617c43b6cd",
+      "event_type": "policy.evaluated",
+      "payload": {
+        "action_content_hash": "sha256:4ed1a303e4476128ea26b0d1f7430c2610ee6b8a552f0bc0a09b2bb7790297c1",
+        "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+        "planning_run_id": "planrun-eedbdba0c3b4cc96d50b572a4feec813",
+        "policy_bundle_version": "policy-bundle/1.0",
+        "policy_decision_id": "policy-7193ab948394a8413f452b2212aaf02e",
+        "policy_input_hash": "sha256:89dbfd411801fa42e7a18d7888882484ab4c39b11f61c771d061b7ec29581e17",
+        "result": "ALLOW"
+      },
+      "sequence": 11
+    },
+    {
+      "event_id": "evt-abd09b80-09ca-4c26-b1cf-8221544e113e",
+      "event_type": "risk.assessed",
+      "payload": {
+        "action_content_hash": "sha256:4ed1a303e4476128ea26b0d1f7430c2610ee6b8a552f0bc0a09b2bb7790297c1",
+        "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+        "planning_run_id": "planrun-eedbdba0c3b4cc96d50b572a4feec813",
+        "risk_assessment_id": "risk-953b95fba529a68310528f49c3c79254",
+        "risk_input_hash": "sha256:74508a41e6822ead83db5cf4c6927ff2b443ba238b6f4db4374b0fee76d35ec8",
+        "risk_level": "MEDIUM",
+        "risk_model_version": "risk-model/1.0",
+        "risk_score_basis_points": 2894
+      },
+      "sequence": 12
+    },
+    {
+      "event_id": "evt-77799a74-fb4f-432d-8aba-d70cc5604e6c",
+      "event_type": "budget.reserved",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+        "amounts": {
+          "agent_runs": 1,
+          "cpu_time_ms": 300000,
+          "docker_runtime_ms": 300000,
+          "execution_time_ms": 600000,
+          "storage_bytes": 1048576
+        },
+        "decision_id": "decision-391631d87133b29cc0462d563c9039ea",
+        "entity_version": 1,
+        "reservation_id": "reservation-a96d26f69e1f3ba8143900f4936c557f",
+        "selection_command_id": "cmd-selection-be82ab5be26542b39965f886d3c82ff9"
+      },
+      "sequence": 13
+    },
+    {
+      "event_id": "evt-e8a2675d-ee26-4709-9a1d-78eded5cb55d",
+      "event_type": "decision.recorded",
+      "payload": {
+        "decision_id": "decision-391631d87133b29cc0462d563c9039ea",
+        "eligible_action_ids": [
+          "act-73459a59519b2aba64dcc88dc5d66123"
+        ],
+        "entity_version": 1,
+        "input_snapshot_hash": "sha256:fedb66b56ecbc57eb310d1121e33fcbee6081edfb904b89b3b35e69909f90909",
+        "planning_run_id": "planrun-eedbdba0c3b4cc96d50b572a4feec813",
+        "rejection_summary": {
+          "act-73459a59519b2aba64dcc88dc5d66123": [
+            "SELECTED"
+          ]
+        },
+        "reservation_refs": [
+          {
+            "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+            "reservation_id": "reservation-a96d26f69e1f3ba8143900f4936c557f"
+          }
+        ],
+        "score_refs": [
+          {
+            "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+            "score_id": "score-e04327109994e35e02f503257fe25643"
+          }
+        ],
+        "selected_action_ids": [
+          "act-73459a59519b2aba64dcc88dc5d66123"
+        ],
+        "selection_version": 1
+      },
+      "sequence": 14
+    },
+    {
+      "event_id": "evt-d37e3be2-036f-4208-9d85-7cddb9cae656",
+      "event_type": "capability.match_recorded",
+      "payload": {
+        "entity_version": 1,
+        "match_id": "capmatch-f353e9ed8aae1bd7b49485c2c4690263",
+        "reason_code": "MATCHED",
+        "requirements_hash": "sha256:65cb97d6fb5a6e730f49dee6d9432bd5614630dd4cfc6d0364c673bc4f846cbc",
+        "status": "MATCHED",
+        "template_id": "template-golden",
+        "template_revision": "1"
+      },
+      "sequence": 15
+    },
+    {
+      "event_id": "evt-5d6543e3-e308-4613-b304-fc7b2a0654ae",
+      "event_type": "context.bundle_created",
+      "payload": {
+        "builder_version": "context-builder/1.0",
+        "bundle_id": "ctx-4ed3b86815cf380497491e2721f57886",
+        "entity_version": 1,
+        "manifest_hash": "sha256:615d903372d4807849af7713dff9d9a1865fcfe35629dbd80aed757f259eae54",
+        "selector_schema_version": "context-selector/1.0"
+      },
+      "sequence": 16
+    },
+    {
+      "event_id": "evt-06dc6d30-837c-44d1-975e-89b9fc854ced",
+      "event_type": "sandbox.profile_compiled",
+      "payload": {
+        "compiler_version": "sandbox-compiler/1.0",
+        "constraints_hash": "sha256:88658ccf7df8720515a0ff73fb61fca73ed599627284ce669bf683221e1ad38b",
+        "entity_version": 1,
+        "profile_hash": "sha256:dbbf56ea883b5e573642d3b95d0bffbb68cbe8b85b4ede77ae9550104e5f5cca",
+        "profile_id": "sbx-4ebdcefca2ab04ff24e4aa019632f0d7",
+        "target": "contract-only/1.0"
+      },
+      "sequence": 17
+    },
+    {
+      "event_id": "evt-877d8cd9-3e9e-40f0-a58e-08573b62bef4",
+      "event_type": "execution.request_prepared",
+      "payload": {
+        "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+        "decision_id": "decision-391631d87133b29cc0462d563c9039ea",
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "payload_hash": "sha256:8f79a799fded666fe7338621c99eceee68bed74d5624beac07113381c93a0425",
+        "project_id": "project-happy-path-run1",
+        "request_version": 1,
+        "reservation_id": "reservation-a96d26f69e1f3ba8143900f4936c557f",
+        "task_id": "task-happy-path-run1"
+      },
+      "sequence": 18
+    },
+    {
+      "event_id": "evt-799448ba-fd34-4238-96cf-ba28547a6dae",
+      "event_type": "execution.queued",
+      "payload": {
+        "action_id": "act-73459a59519b2aba64dcc88dc5d66123",
+        "decision_id": "decision-391631d87133b29cc0462d563c9039ea",
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "payload_hash": "sha256:8f79a799fded666fe7338621c99eceee68bed74d5624beac07113381c93a0425",
+        "project_id": "project-happy-path-run1",
+        "queue_item_id": "queue-846e9a5e9b1cdfdadc80fa26ecb810ad",
+        "queue_state": "PENDING",
+        "request_version": 1,
+        "reservation_id": "reservation-a96d26f69e1f3ba8143900f4936c557f",
+        "task_id": "task-happy-path-run1"
+      },
+      "sequence": 19
+    },
+    {
+      "event_id": "evt-4b2ce55e-3a35-4a88-b2ec-c7a9c2755fa5",
+      "event_type": "execution.lease_acquired",
+      "payload": {
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "expires_at": "2026-08-17T09:01:35.707806+00:00",
+        "fencing_token": 1,
+        "granted_at": "2026-08-17T09:01:05.707806+00:00",
+        "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66",
+        "lease_version": 1,
+        "lock_refs": [
+          "workspace:project-happy-path-run1"
+        ],
+        "previous_lease_id": null,
+        "profile_id": "p2-default",
+        "profile_version": 1,
+        "queue_item_id": "queue-846e9a5e9b1cdfdadc80fa26ecb810ad",
+        "reason": "acquire execution lease",
+        "request_version": 2,
+        "scheduler_id": "scheduler-implement",
+        "scheduler_session_id": "session-implement"
+      },
+      "sequence": 20
+    },
+    {
+      "event_id": "evt-52a37b9b-6059-4189-8055-daf507ca31ec",
+      "event_type": "execution.running",
+      "payload": {
+        "context_identity": "worker-context-implement",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "fencing_token": 1,
+        "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66",
+        "lease_version": 1,
+        "request_version": 3,
+        "run_id": "run-implement",
+        "worker_agent_identity": "worker-golden"
+      },
+      "sequence": 21
+    },
+    {
+      "event_id": "evt-c8ab6304-9a33-494d-b29b-565ea9b8a3b3",
+      "event_type": "execution.lease_renewed",
+      "payload": {
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "expires_at": "2026-08-17T09:01:45.777597+00:00",
+        "fencing_token": 1,
+        "heartbeat_at": "2026-08-17T09:01:15.777597+00:00",
+        "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66",
+        "lease_version": 2,
+        "reason": "renew execution lease",
+        "scheduler_id": "scheduler-implement",
+        "scheduler_session_id": "session-implement"
+      },
+      "sequence": 22
+    },
+    {
+      "event_id": "evt-c42f1929-e486-48de-bc88-ca4c3e1d9773",
+      "event_type": "execution.lease_renewed",
+      "payload": {
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "expires_at": "2026-08-17T09:01:55.809445+00:00",
+        "fencing_token": 1,
+        "heartbeat_at": "2026-08-17T09:01:25.809445+00:00",
+        "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66",
+        "lease_version": 3,
+        "reason": "renew execution lease",
+        "scheduler_id": "scheduler-implement",
+        "scheduler_session_id": "session-implement"
+      },
+      "sequence": 23
+    },
+    {
+      "event_id": "evt-cabf150c-f692-4567-986e-675631038283",
+      "event_type": "execution.result_recorded",
+      "payload": {
+        "execution_attempt": 1,
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "fencing_token": 1,
+        "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66",
+        "outcome": "FAILED_PERMANENT",
+        "payload_hash": "sha256:3f42bf4b61df099554b045926b74aed9285bb2f940850cbbdb1e811ac6e8f3ef",
+        "result_id": "result-happy-path-run1-implement",
+        "run_id": "run-implement"
+      },
+      "sequence": 24
+    },
+    {
+      "event_id": "evt-edfb4904-26f8-450b-b711-ad693ea2c72a",
+      "event_type": "execution.settled",
+      "payload": {
+        "reservation_id": "reservation-a96d26f69e1f3ba8143900f4936c557f",
+        "result_id": "result-happy-path-run1-implement",
+        "settlement": {
+          "account_id": "account-happy-path-run1",
+          "account_version": 2,
+          "actual": {},
+          "disposition": "RELEASED",
+          "over_limit": false,
+          "release_command_id": "cmd-result-e5dbf8ff0d364b03932ac51d24feb0b4",
+          "released": {
+            "agent_runs": 1,
+            "cpu_time_ms": 300000,
+            "docker_runtime_ms": 300000,
+            "execution_time_ms": 600000,
+            "storage_bytes": 1048576
+          },
+          "threshold_status": "NORMAL"
+        }
+      },
+      "sequence": 25
+    },
+    {
+      "event_id": "evt-c26979f6-60c5-43e1-8b24-ac9e664be481",
+      "event_type": "execution.run_failed",
+      "payload": {
+        "execution_attempt": 1,
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "fencing_token": 1,
+        "lease_id": "lease-a329fa40-b6c3-400d-b8ea-14fab7877e66",
+        "request_state": "FAILED",
+        "result_id": "result-happy-path-run1-implement",
+        "run_id": "run-implement",
+        "run_status": "FAILED"
+      },
+      "sequence": 26
+    },
+    {
+      "event_id": "evt-746bcab1-0155-48c7-915a-62fea34e8dc8",
+      "event_type": "execution.completed",
+      "payload": {
+        "execution_attempt": 1,
+        "execution_request_id": "exec-3f3245679855e928d592b77f78dc1dff",
+        "request_state": "FAILED",
+        "result_id": "result-happy-path-run1-implement",
+        "verification_required": false
+      },
+      "sequence": 27
+    },
+    {
+      "event_id": "evt-4ad06eac-15e8-406d-b5f8-104b9d3c3d6e",
+      "event_type": "feedback.created",
+      "payload": {
+        "affected_artifact_refs": [],
+        "affected_task_id": "task-happy-path-run1",
+        "base_graph_version": 1,
+        "decision_id": "decision-391631d87133b29cc0462d563c9039ea",
+        "evidence_refs": [],
+        "failure_type": "test_assertion_failure",
+        "feedback_id": "feedback-happy-path-run1",
+        "finding_codes": [
+          "TEST_ASSERTION_FAILURE"
+        ],
+        "project_id": "project-happy-path-run1",
+        "recommended_actions": [
+          "repair",
+          "retry"
+        ],
+        "recovery_level": "L1_REPAIR",
+        "repair_task_id": "task-happy-path-run1",
+        "repair_title": "Recovery repair for feedback-happy-path-run1",
+        "result_id": "result-happy-path-run1-implement",
+        "root_cause": "test_assertion_failure",
+        "severity": "HIGH",
+        "source": {
+          "id": "result-happy-path-run1-implement",
+          "type": "execution_result"
+        },
+        "source_task_id": "task-happy-path-run1",
+        "task_id": "task-happy-path-run1",
+        "verification_id": "execution-result:result-happy-path-run1-implement"
+      },
+      "sequence": 28
+    },
+    {
+      "event_id": "evt-b3c69dcc-e189-43fd-97c0-f57ec826bffd",
+      "event_type": "recovery.cycle_started",
+      "payload": {
+        "cycle_id": "cycle-feedback-happy-path-run1",
+        "feedback_id": "feedback-happy-path-run1",
+        "max_attempts": 2,
+        "policy_version": "recovery-policy/1.0",
+        "source_result_id": "result-happy-path-run1-implement",
+        "strategy_key": "task-happy-path-run1:test_assertion_failure"
+      },
+      "sequence": 29
+    },
+    {
+      "event_id": "evt-509e5150-c2d1-4020-b45b-a7cb6cd17ed0",
+      "event_type": "task.recovery_reentered",
+      "payload": {
+        "task_id": "task-happy-path-run1"
+      },
+      "sequence": 30
+    },
+    {
+      "event_id": "evt-975092ab-ac82-4a35-b529-6cf4755e6f48",
+      "event_type": "situation.detected",
+      "payload": {
+        "analysis_context_id": "ctx-9ba4e2d0-cd32-497f-a791-663d73ffe25e",
+        "fingerprint": "sha256:9507b9d46e4ece7d8e0d0c1fe6a63adfc6413502d2f144b445aeeafc996c0d93",
+        "situation_id": "sit-53ddd632-3837-4d1c-ae9c-eecd5276c567",
+        "situation_type": "verification_failed",
+        "source_event_id": "evt-4ad06eac-15e8-406d-b5f8-104b9d3c3d6e",
+        "superseded_situation_id": null
+      },
+      "sequence": 31
+    },
+    {
+      "event_id": "evt-55ae1de3-fd2f-48fe-a306-dca4b567d0ac",
+      "event_type": "diagnosis.completed",
+      "payload": {
+        "analysis_context_id": "ctx-9ba4e2d0-cd32-497f-a791-663d73ffe25e",
+        "confidence_basis_points": 6500,
+        "contradicting_evidence_refs": [],
+        "diagnosis_id": "diag-f280be14310d16e64c7f0c477da3a956",
+        "diagnosis_rule_set_version": "diagnosis-rules/1.0",
+        "input_hash": "sha256:51854ada48e3f5a18dba9999c63bfc23b5b84a95e1d3c02a0c31c65bb268c3f2",
+        "root_cause_status": "PROBABLE",
+        "situation_id": "sit-53ddd632-3837-4d1c-ae9c-eecd5276c567",
+        "situation_version": 1,
+        "supporting_evidence_refs": []
+      },
+      "sequence": 32
+    },
+    {
+      "event_id": "evt-20ec335c-c469-4e05-9476-5314cffd5a41",
+      "event_type": "action.candidates_planned",
+      "payload": {
+        "analysis_context_id": "ctx-9ba4e2d0-cd32-497f-a791-663d73ffe25e",
+        "candidate_action_ids": [
+          "act-400cd20293b45f8c9961964285879128",
+          "act-2e6b64da2f02e6cae73db1296cc3c7d2",
+          "act-4b95e721ca324034de330a4e2528fab3"
+        ],
+        "candidate_count": 3,
+        "diagnosis_id": "diag-f280be14310d16e64c7f0c477da3a956",
+        "input_hash": "sha256:6690df631e32e1f412a396597ffb8096a3b04b7112692b8a4a602a79ba2b4670",
+        "planner_rule_version": "planner-rules/1.0",
+        "planning_run_id": "planrun-29de0a865e29ca011a9282998a5bf1e7",
+        "registry_version": "action-registry/1.1",
+        "situation_id": "sit-53ddd632-3837-4d1c-ae9c-eecd5276c567",
+        "situation_version": 1
+      },
+      "sequence": 33
+    },
+    {
+      "event_id": "evt-a5d65022-c89d-4ab8-9e90-ba748a3f5b1e",
+      "event_type": "recovery.attempt_planned",
+      "payload": {
+        "action_type": "repair",
+        "attempt_id": "attempt-happy-path-run1",
+        "attempt_ordinal": 1,
+        "cycle_id": "cycle-feedback-happy-path-run1",
+        "reason_code": "RECOVERY_ATTEMPT_PLANNED",
+        "recovery_level": "L1_REPAIR"
+      },
+      "sequence": 34
+    },
+    {
+      "event_id": "evt-34221568-9900-48b2-acf3-1a1846afd718",
+      "event_type": "policy.evaluated",
+      "payload": {
+        "action_content_hash": "sha256:3b6ec1d9657a3f64b81754563f3e8f13a1deaac8dedde9aa1f2a55faa4af0bbd",
+        "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+        "planning_run_id": "planrun-29de0a865e29ca011a9282998a5bf1e7",
+        "policy_bundle_version": "policy-bundle/1.0",
+        "policy_decision_id": "policy-82507ee4d0abd7daa70e39add2e8a0fc",
+        "policy_input_hash": "sha256:9b10836b6241e5d3f5c93ab90453bab5ef0974cc88a38d7c586f0c2ea05d6cd7",
+        "result": "ALLOW"
+      },
+      "sequence": 35
+    },
+    {
+      "event_id": "evt-9b1f7c0a-15a3-4488-87c8-8342ae85f7d4",
+      "event_type": "risk.assessed",
+      "payload": {
+        "action_content_hash": "sha256:3b6ec1d9657a3f64b81754563f3e8f13a1deaac8dedde9aa1f2a55faa4af0bbd",
+        "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+        "planning_run_id": "planrun-29de0a865e29ca011a9282998a5bf1e7",
+        "risk_assessment_id": "risk-4b55ae01c2960bb109fcfd5dbccbb316",
+        "risk_input_hash": "sha256:aa168fe4b66d138b27acc4cc239cc8917db34738871388b6f5302b284b5eeffb",
+        "risk_level": "MEDIUM",
+        "risk_model_version": "risk-model/1.0",
+        "risk_score_basis_points": 4165
+      },
+      "sequence": 36
+    },
+    {
+      "event_id": "evt-ef3012f6-0312-416b-ac81-f367c6824f0d",
+      "event_type": "budget.reserved",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+        "amounts": {
+          "agent_runs": 1,
+          "cpu_time_ms": 300000,
+          "execution_time_ms": 900000,
+          "storage_bytes": 1048576
+        },
+        "decision_id": "decision-f42d46794698b3763a9e7cd4ccf66100",
+        "entity_version": 3,
+        "reservation_id": "reservation-851c649d2f063fd68adc2d0d30b0338e",
+        "selection_command_id": "cmd-selection-6691eed0d6fa4785b5e22d1dd082891e"
+      },
+      "sequence": 37
+    },
+    {
+      "event_id": "evt-f2ba8e1c-96a1-4b8a-af18-d163ce1c5c26",
+      "event_type": "decision.recorded",
+      "payload": {
+        "decision_id": "decision-f42d46794698b3763a9e7cd4ccf66100",
+        "eligible_action_ids": [
+          "act-4b95e721ca324034de330a4e2528fab3"
+        ],
+        "entity_version": 1,
+        "input_snapshot_hash": "sha256:97db155401d3b0315b26997ff94398c948d0fae1aa7bf58dc0a15f49b664d587",
+        "planning_run_id": "planrun-29de0a865e29ca011a9282998a5bf1e7",
+        "rejection_summary": {
+          "act-2e6b64da2f02e6cae73db1296cc3c7d2": [
+            "POLICY_DECISION_MISSING"
+          ],
+          "act-400cd20293b45f8c9961964285879128": [
+            "POLICY_DECISION_MISSING"
+          ],
+          "act-4b95e721ca324034de330a4e2528fab3": [
+            "SELECTED"
+          ]
+        },
+        "reservation_refs": [
+          {
+            "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+            "reservation_id": "reservation-851c649d2f063fd68adc2d0d30b0338e"
+          }
+        ],
+        "score_refs": [
+          {
+            "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+            "score_id": "score-98fd827de71e3f7c78e56e249d501c87"
+          }
+        ],
+        "selected_action_ids": [
+          "act-4b95e721ca324034de330a4e2528fab3"
+        ],
+        "selection_version": 1
+      },
+      "sequence": 38
+    },
+    {
+      "event_id": "evt-d63e57bc-f298-41fd-9504-dc821a5fb7af",
+      "event_type": "capability.match_recorded",
+      "payload": {
+        "entity_version": 1,
+        "match_id": "capmatch-561287eb9bf0094c01c4ec43e5b53840",
+        "reason_code": "MATCHED",
+        "requirements_hash": "sha256:8affb7caaf58832782bb54440842eb35d9ace9f18408aa965db2b0f73921dd47",
+        "status": "MATCHED",
+        "template_id": "template-golden",
+        "template_revision": "1"
+      },
+      "sequence": 39
+    },
+    {
+      "event_id": "evt-66cce34b-0e48-4d01-a46b-9fb36d8605c2",
+      "event_type": "context.bundle_created",
+      "payload": {
+        "builder_version": "context-builder/1.0",
+        "bundle_id": "ctx-d6c40130e49177980ff8d20e6f0c59b2",
+        "entity_version": 1,
+        "manifest_hash": "sha256:5347e8cd0f545768b379ecdda205837c5869ab3c8f4ed45dc90a756255b2c6e5",
+        "selector_schema_version": "context-selector/1.0"
+      },
+      "sequence": 40
+    },
+    {
+      "event_id": "evt-116d814c-a382-4234-a5ed-2bca30492af4",
+      "event_type": "sandbox.profile_compiled",
+      "payload": {
+        "compiler_version": "sandbox-compiler/1.0",
+        "constraints_hash": "sha256:909982dc50632d2930d8540d4b57b38f32775ca66816a80e28b4467dbae94a50",
+        "entity_version": 1,
+        "profile_hash": "sha256:bcd4037b21ed818ee350526648f5c774a95ee159d852371620381d11c9520ef9",
+        "profile_id": "sbx-46618ac05c0cf305ffd79020947d43d7",
+        "target": "contract-only/1.0"
+      },
+      "sequence": 41
+    },
+    {
+      "event_id": "evt-cde3efcc-619b-49e1-97e9-79e9e37c82ec",
+      "event_type": "execution.request_prepared",
+      "payload": {
+        "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+        "decision_id": "decision-f42d46794698b3763a9e7cd4ccf66100",
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "payload_hash": "sha256:0afc3091b6043c98a2c9c9743dbb25b2c67508b68dc14d4224764f742197800f",
+        "project_id": "project-happy-path-run1",
+        "request_version": 1,
+        "reservation_id": "reservation-851c649d2f063fd68adc2d0d30b0338e",
+        "task_id": "task-happy-path-run1"
+      },
+      "sequence": 42
+    },
+    {
+      "event_id": "evt-430b971e-d769-480b-9fdb-ceb8538055ac",
+      "event_type": "execution.queued",
+      "payload": {
+        "action_id": "act-4b95e721ca324034de330a4e2528fab3",
+        "decision_id": "decision-f42d46794698b3763a9e7cd4ccf66100",
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "payload_hash": "sha256:0afc3091b6043c98a2c9c9743dbb25b2c67508b68dc14d4224764f742197800f",
+        "project_id": "project-happy-path-run1",
+        "queue_item_id": "queue-7252ed97a3f8cefe98b300e589099524",
+        "queue_state": "PENDING",
+        "request_version": 1,
+        "reservation_id": "reservation-851c649d2f063fd68adc2d0d30b0338e",
+        "task_id": "task-happy-path-run1"
+      },
+      "sequence": 43
+    },
+    {
+      "event_id": "evt-a2ae6f8c-fe74-498a-b3ae-5f868058128f",
+      "event_type": "execution.lease_acquired",
+      "payload": {
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "expires_at": "2026-08-17T09:02:04.153835+00:00",
+        "fencing_token": 1,
+        "granted_at": "2026-08-17T09:01:34.153835+00:00",
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "lease_version": 1,
+        "lock_refs": [
+          "workspace:project-happy-path-run1"
+        ],
+        "previous_lease_id": null,
+        "profile_id": "p2-default",
+        "profile_version": 1,
+        "queue_item_id": "queue-7252ed97a3f8cefe98b300e589099524",
+        "reason": "acquire execution lease",
+        "request_version": 2,
+        "scheduler_id": "scheduler-repair",
+        "scheduler_session_id": "session-repair"
+      },
+      "sequence": 44
+    },
+    {
+      "event_id": "evt-bb349a25-30a9-485c-8325-85f1ad59f142",
+      "event_type": "execution.running",
+      "payload": {
+        "context_identity": "worker-context-repair",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "lease_version": 1,
+        "request_version": 3,
+        "run_id": "run-repair",
+        "worker_agent_identity": "worker-golden"
+      },
+      "sequence": 45
+    },
+    {
+      "event_id": "evt-56263834-3217-4aee-905d-41242511ed52",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-d71bc7ff81b24082b2eef1a6f3416e02",
+        "content_hash": "sha256:6a2077d4d8ee16ba03241653e20d5d93fdac307b2394b253ee95c72b54970707",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:aa1af44065b10a8078877d09108b1f80bc2e4e69c8404f087909b305450b40f0",
+        "run_id": "run-repair"
+      },
+      "sequence": 46
+    },
+    {
+      "event_id": "evt-d68eb9c8-6bd1-4492-a0b6-1eb603e43fa7",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-127caa433bbb47309860f48158d91ee9",
+        "content_hash": "sha256:76296321b0d21099a84e359d798926db9951f073ef696f9fa9acfc03f6b71e6b",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:12b7f2656a91a59a58aa105375537180a49232e281645f4c5a47bb101644850b",
+        "run_id": "run-repair"
+      },
+      "sequence": 47
+    },
+    {
+      "event_id": "evt-b53d8943-a689-45bf-bce3-1d1de7c0472d",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-f47c225dcf7a4f978ae14c747837e454",
+        "content_hash": "sha256:0180eb3fe10e1f2decab37a3ea90065ea27564731b900226dfdbafab6571d0f2",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:911191cd15833086e440fd9d9cb33168e0106069ae663abd4b0fffd78ea89b95",
+        "run_id": "run-repair"
+      },
+      "sequence": 48
+    },
+    {
+      "event_id": "evt-06fa2ec3-2b92-48d7-a26d-1889a99eedb9",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-34ba8aa85f0a409bbe138d5201bf3acd",
+        "content_hash": "sha256:8bc5ab83eb50250f262ebb04541486fca5631a0c3108ff5eade5962a5abb9d77",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:24e5c6a11a48af2f32fd54b26554c5aadfc43c66b2933e93b6cea09c5091f19e",
+        "run_id": "run-repair"
+      },
+      "sequence": 49
+    },
+    {
+      "event_id": "evt-b596b9f6-6754-444e-8c6c-a3f7fdad1747",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-c6c0f05fb42a452f942735ab26418bce",
+        "content_hash": "sha256:5ddd6c26d01312b3f909610f13610f0adfdf0a88510d38779677888cb9592a23",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:104d9c90fed938d9b9164716a95dac60b16d890aaf5fa41187cef64669b24e34",
+        "run_id": "run-repair"
+      },
+      "sequence": 50
+    },
+    {
+      "event_id": "evt-d3778f7d-a49d-4142-a7cf-f8c5fad27b7d",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-46a59523955c4c3b825d3a76b2cb1bb1",
+        "content_hash": "sha256:ac678c9c8c0cf12988e0dbfafd588bcc9cad9accbef350c48efd7684d1094eba",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:671aaa1ab2138ff989ceabf4d8912f5d9aed80de3d506a0b33f7a26a36411a32",
+        "run_id": "run-repair"
+      },
+      "sequence": 51
+    },
+    {
+      "event_id": "evt-4113a2fd-0f7e-4364-b8ab-ce6ab4165b90",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-ea35880ff91e40cdaca660b9520636f2",
+        "content_hash": "sha256:3b45380721a620d7c780c1d27f2e0b682537c827021a0f314bfbd637451e5fef",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:02ab5e11ca8f0213b1d1728baf301fa975aed425506ef6e221aa4ae10dd95de6",
+        "run_id": "run-repair"
+      },
+      "sequence": 52
+    },
+    {
+      "event_id": "evt-e27c0fa4-bb04-4195-9db2-76ecab023e16",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-61e51d5c2f5148c586512419771f3c73",
+        "content_hash": "sha256:e933563da6011c58747b8a1db04ef23d0f66643b823cb20eed2be7c38369dae6",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:5f1889663f8b0f494f689eb562d8899a96811229496be0dd88c904a2d079e7d2",
+        "run_id": "run-repair"
+      },
+      "sequence": 53
+    },
+    {
+      "event_id": "evt-bd09f900-dacd-4607-85d2-d1d27029d5ba",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-f63e71c3d8584345812b6aeb15ff928e",
+        "content_hash": "sha256:9af7155704dc3c00169a7906f7df532b9aa8fee17ffdba0d10f61d2ea4b46de2",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:5b356594c17a4ece806bd4c6ea48a198822a2d7e85960c36887fe2e884bd90ef",
+        "run_id": "run-repair"
+      },
+      "sequence": 54
+    },
+    {
+      "event_id": "evt-b2a1eb14-8e34-4e43-9bb9-e8d80ea8b8bf",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-3cac738987ae4e7e86bccc8b46f7b21a",
+        "content_hash": "sha256:013009a21fd141e7d05f850d322fadaa30cc3265a85b3bcd7aa56ddca65968d2",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:70e3536f987329ff2c4b0be4c15dcd99b15f641fd72de559bb7a17580394bdea",
+        "run_id": "run-repair"
+      },
+      "sequence": 55
+    },
+    {
+      "event_id": "evt-122b6440-a0c0-4c60-a2a1-22a807c15497",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-ff4d6c18662a4b588e5098bbb4b8a8ad",
+        "content_hash": "sha256:e8c4628ed8f1f109ed9455dff39a67374c0711c7e24e6a5114517abe41fb61db",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:164cc45724e8ba40d4910cba3d65308cd8522b68e424677f342b42e57c7ff36f",
+        "run_id": "run-repair"
+      },
+      "sequence": 56
+    },
+    {
+      "event_id": "evt-8c05487c-8168-4511-9a5e-3f132ec6e1b7",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-d934d338c3d44ddcae528c0d457192a9",
+        "content_hash": "sha256:dd7a76043acdb0eb981442ab50013a0cc89221ed061fa8ad21835fd070f8b58b",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:3d0865c6b0c66815f03ff71bce622fd17249cc1ecfa50229cf3461a08e79e5d5",
+        "run_id": "run-repair"
+      },
+      "sequence": 57
+    },
+    {
+      "event_id": "evt-b9cb42ee-54ad-4e98-a08e-8ed450b79bfd",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-e735e0625a554883a3ff7643ebda4802",
+        "content_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:d705f263cc276f0f06d9583059626bbea987695ce21d580686e7d18d6df41057",
+        "run_id": "run-repair"
+      },
+      "sequence": 58
+    },
+    {
+      "event_id": "evt-4e9df919-3501-4bf5-b463-bc08bace3774",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-f5f5c97aa2ac408ead0fff761a598e45",
+        "content_hash": "sha256:e01f6986ef52ef695d09ad17d83766a5648ba6f5f19ceaa6002af447f88513da",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:592dfa25f6c9c471713977ef9d1bdb1f6f33c70f7f98dd52cfd926fca4d270aa",
+        "run_id": "run-repair"
+      },
+      "sequence": 59
+    },
+    {
+      "event_id": "evt-47871fe1-731f-47d2-a3ae-e8c993ee36d8",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-f68be878fd5b479fa5eb692673e8459c",
+        "content_hash": "sha256:5ac4c7babb1cfd8c544818cd6e2d765b9a5783261616747a59c818ee207f4c26",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:2029274bc036ae8ce41ea216b3de33080b385dca13617fc0b305e01da288a96d",
+        "run_id": "run-repair"
+      },
+      "sequence": 60
+    },
+    {
+      "event_id": "evt-fdb5881c-42fb-46a9-8fc5-9dfd8e122e9a",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-f6f0377b2f4d4986ba43053263f8c6c1",
+        "content_hash": "sha256:5bb44dc0cc63fc0e6dda719583f13712fc8eb8b20612e998d77dd09e65a1f7f3",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:6f687c117e54f136df53948a687f10e5b69050e66b4c16e08fe0bcf16e892add",
+        "run_id": "run-repair"
+      },
+      "sequence": 61
+    },
+    {
+      "event_id": "evt-fed0ce50-ab07-410c-9424-bcdb7acd8167",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-4c29e046843644d595295a8f9864d8da",
+        "content_hash": "sha256:ca8f5869eadaf5cc74e699847970021907cf31b0a5acd52bdebb0908bf7c25af",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:b7527558503b10f7e81decd5d808945f95ffcd0144fe62a69f3f78ab92ebfbf2",
+        "run_id": "run-repair"
+      },
+      "sequence": 62
+    },
+    {
+      "event_id": "evt-67073881-84bf-4b10-be94-5d974b578f82",
+      "event_type": "execution.artifact_candidate_recorded",
+      "payload": {
+        "candidate_id": "artifact-cand-ddc0643228b44dc4987b77b8282c491b",
+        "content_hash": "sha256:cf185b23340b79e51b7278fa60ce1051e426d52af31c6b112c856c1810212e22",
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:099f44a39597e3b669f6f2cd6f07d2ab91e17271fb4b15b78ac3c25e85df8125",
+        "run_id": "run-repair"
+      },
+      "sequence": 63
+    },
+    {
+      "event_id": "evt-2fe05a36-6f0d-420f-8d81-674b9b41fc00",
+      "event_type": "execution.usage_recorded",
+      "payload": {
+        "amounts": {
+          "execution_time_ms": 5000
+        },
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "payload_hash": "sha256:fb6daec4347acbf297ceace549ebbfaea80d704843fee5baeec5a778ff4fc34f",
+        "reservation_id": "reservation-851c649d2f063fd68adc2d0d30b0338e",
+        "run_id": "run-repair",
+        "sample_id": "sample-happy-path-run1",
+        "usage_id": "usage-b14b86097a3a434a946e95752241177a"
+      },
+      "sequence": 64
+    },
+    {
+      "event_id": "evt-b305f418-6306-41c9-9101-cbf7dca1970e",
+      "event_type": "execution.result_recorded",
+      "payload": {
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "outcome": "SUCCEEDED",
+        "payload_hash": "sha256:855ba4ccc25edcb6093047d4e14b964c5c55b61466386989e615ade5c48a9d69",
+        "result_id": "result-happy-path-run1-repair",
+        "run_id": "run-repair"
+      },
+      "sequence": 65
+    },
+    {
+      "event_id": "evt-e952583f-b3c5-4b1a-b0dd-fe04755a39ef",
+      "event_type": "task.completion_claimed",
+      "payload": {
+        "artifact_hash": "sha256:6a2077d4d8ee16ba03241653e20d5d93fdac307b2394b253ee95c72b54970707",
+        "artifact_id": "artifact-artifact-cand-d71bc7ff81b24082b2eef1a6f3416e02",
+        "claim_id": "claim-golden-happy-path-run1",
+        "result_id": "result-happy-path-run1-repair",
+        "run_id": "run-repair"
+      },
+      "sequence": 66
+    },
+    {
+      "event_id": "evt-e1df8fb2-76ec-475f-a977-5a3788135cca",
+      "event_type": "execution.settled",
+      "payload": {
+        "reservation_id": "reservation-851c649d2f063fd68adc2d0d30b0338e",
+        "result_id": "result-happy-path-run1-repair",
+        "settlement": {
+          "account_id": "account-happy-path-run1",
+          "account_version": 4,
+          "actual": {
+            "agent_runs": 0,
+            "cpu_time_ms": 0,
+            "execution_time_ms": 5000,
+            "storage_bytes": 0
+          },
+          "disposition": "SETTLED",
+          "over_limit": false,
+          "released": {
+            "agent_runs": 1,
+            "cpu_time_ms": 300000,
+            "execution_time_ms": 900000,
+            "storage_bytes": 1048576
+          },
+          "settlement_id": "settlement-result-happy-path-run1-repair",
+          "threshold_status": "NORMAL"
+        }
+      },
+      "sequence": 67
+    },
+    {
+      "event_id": "evt-526dccd8-4e5b-4546-a83c-852920a219cb",
+      "event_type": "execution.run_succeeded",
+      "payload": {
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "fencing_token": 1,
+        "lease_id": "lease-dc9962a0-f096-402e-ba71-3cead36e36d8",
+        "request_state": "SUCCEEDED",
+        "result_id": "result-happy-path-run1-repair",
+        "run_id": "run-repair",
+        "run_status": "SUCCEEDED"
+      },
+      "sequence": 68
+    },
+    {
+      "event_id": "evt-0349717a-a70d-4017-8986-724799dbe60c",
+      "event_type": "execution.completed",
+      "payload": {
+        "execution_attempt": 1,
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "request_state": "SUCCEEDED",
+        "result_id": "result-happy-path-run1-repair",
+        "verification_required": true
+      },
+      "sequence": 69
+    },
+    {
+      "event_id": "evt-598b3ad1-8f1a-4568-99aa-1fe384ef131f",
+      "event_type": "agent_run.admitted",
+      "payload": {
+        "entity_version": 1,
+        "run_id": "run-verifier-golden-happy-path-run1",
+        "run_kind": "VERIFIER",
+        "task_id": "task-happy-path-run1"
+      },
+      "sequence": 70
+    },
+    {
+      "event_id": "evt-ec860775-848a-4f01-9603-bbec8658882f",
+      "event_type": "verification.recorded",
+      "payload": {
+        "artifact_hash": "sha256:6a2077d4d8ee16ba03241653e20d5d93fdac307b2394b253ee95c72b54970707",
+        "artifact_id": "artifact-artifact-cand-d71bc7ff81b24082b2eef1a6f3416e02",
+        "evidence_refs": [
+          "evidence-golden-happy-path-run1"
+        ],
+        "plan_version": 1,
+        "task_id": "task-happy-path-run1",
+        "verdict": "PASS",
+        "verification_id": "verification-golden-happy-path-run1",
+        "verification_plan_id": "plan-happy-path-run1",
+        "verifier_run_id": "run-verifier-golden-happy-path-run1"
+      },
+      "sequence": 71
+    },
+    {
+      "event_id": "evt-3aa756bf-9c54-4683-86b0-b5135767c19f",
+      "event_type": "task.passed",
+      "payload": {
+        "artifact_hash": "sha256:6a2077d4d8ee16ba03241653e20d5d93fdac307b2394b253ee95c72b54970707",
+        "entity_version": 7,
+        "from_state": "COMPLETION_CLAIMED",
+        "task_id": "task-happy-path-run1",
+        "to_state": "PASSED",
+        "verification_id": "verification-golden-happy-path-run1"
+      },
+      "sequence": 72
+    },
+    {
+      "event_id": "evt-ba5aa63e-6381-403e-9711-e431555602e6",
+      "event_type": "recovery.attempt_succeeded",
+      "payload": {
+        "attempt_id": "attempt-happy-path-run1",
+        "cycle_id": "cycle-feedback-happy-path-run1",
+        "execution_request_id": "exec-14c46f0c3209f74e9cec43184b3864f1",
+        "outcome": "SUCCEEDED",
+        "result_id": "result-happy-path-run1-repair",
+        "verification_id": "verification-golden-happy-path-run1"
+      },
+      "sequence": 73
+    },
+    {
+      "event_id": "evt-6795147d-f893-450d-a5ed-9da707472173",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-f905cfb7f4ce4fd08aa1f55cbba55aeb",
+        "from_state": "CREATED",
+        "project_id": "project-happy-path-run1",
+        "project_version": 0,
+        "reason": "verification evidence for transition",
+        "to_state": "INTAKE"
+      },
+      "sequence": 74
+    },
+    {
+      "event_id": "evt-90c5e231-dfdb-40c5-9152-fa8b4f9236b9",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-22ebc4e21a1b4aa69db7175130f94e5a",
+        "from_state": "CREATED",
+        "project_id": "project-happy-path-run1",
+        "project_version": 0,
+        "reason": "policy decision for transition",
+        "to_state": "INTAKE"
+      },
+      "sequence": 75
+    },
+    {
+      "event_id": "evt-4188da51-3911-43ab-b698-c845f23356f7",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-0",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 76
+    },
+    {
+      "event_id": "evt-da74526c-4073-4095-8747-54da30dcc7b4",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-3450e7c2b301428caeb0a12bea70b5bc",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-0",
+          "policy-happy-path-run1-0",
+          "budget-happy-path-run1-0"
+        ],
+        "new_state": "INTAKE",
+        "previous_state": "CREATED",
+        "project_id": "project-happy-path-run1",
+        "project_version": 1,
+        "reason": "advance to INTAKE",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-0",
+          "policy-happy-path-run1-0",
+          "budget-happy-path-run1-0"
+        ]
+      },
+      "sequence": 77
+    },
+    {
+      "event_id": "evt-39c033b5-c3ff-4478-a0b5-79453d4a85f3",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-43ba46ed4e5642c9a2c49eedf8a20f5e",
+        "from_state": "INTAKE",
+        "project_id": "project-happy-path-run1",
+        "project_version": 1,
+        "reason": "verification evidence for transition",
+        "to_state": "DISCOVERY"
+      },
+      "sequence": 78
+    },
+    {
+      "event_id": "evt-a2a80865-722b-4842-8f51-33b836c7ff1d",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-21156efeaae94b12963274693b9006e9",
+        "from_state": "INTAKE",
+        "project_id": "project-happy-path-run1",
+        "project_version": 1,
+        "reason": "policy decision for transition",
+        "to_state": "DISCOVERY"
+      },
+      "sequence": 79
+    },
+    {
+      "event_id": "evt-cdc767f8-c7ab-47a7-959a-7b5c890e5c13",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-1",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 80
+    },
+    {
+      "event_id": "evt-293f3329-1acb-45e9-beca-f50fc8022f43",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-208695de438747578c6575f13ff3bf17",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-1",
+          "policy-happy-path-run1-1",
+          "budget-happy-path-run1-1"
+        ],
+        "new_state": "DISCOVERY",
+        "previous_state": "INTAKE",
+        "project_id": "project-happy-path-run1",
+        "project_version": 2,
+        "reason": "advance to DISCOVERY",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-1",
+          "policy-happy-path-run1-1",
+          "budget-happy-path-run1-1"
+        ]
+      },
+      "sequence": 81
+    },
+    {
+      "event_id": "evt-8780337c-c711-401a-a8f9-111b7766eb23",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-6e24416fdc7e4bb48dbfa0fa62088409",
+        "from_state": "DISCOVERY",
+        "project_id": "project-happy-path-run1",
+        "project_version": 2,
+        "reason": "verification evidence for transition",
+        "to_state": "PLANNING"
+      },
+      "sequence": 82
+    },
+    {
+      "event_id": "evt-7c562f94-a5d9-4e81-a508-9bb36db3e51d",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-91654319ab8c4f1bad7118a2aa8d92bf",
+        "from_state": "DISCOVERY",
+        "project_id": "project-happy-path-run1",
+        "project_version": 2,
+        "reason": "policy decision for transition",
+        "to_state": "PLANNING"
+      },
+      "sequence": 83
+    },
+    {
+      "event_id": "evt-4b30f595-5bdb-4ea3-8a24-ad1f07e2aae8",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-2",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 84
+    },
+    {
+      "event_id": "evt-0ededd59-2b42-4423-8662-05a475d7684d",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-7db3cbf025f04b42866fa160d51dbe30",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-2",
+          "policy-happy-path-run1-2",
+          "budget-happy-path-run1-2"
+        ],
+        "new_state": "PLANNING",
+        "previous_state": "DISCOVERY",
+        "project_id": "project-happy-path-run1",
+        "project_version": 3,
+        "reason": "advance to PLANNING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-2",
+          "policy-happy-path-run1-2",
+          "budget-happy-path-run1-2"
+        ]
+      },
+      "sequence": 85
+    },
+    {
+      "event_id": "evt-66f1a7fe-4b59-47ba-a431-bfdcd2f89ac0",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-00c0d5145654441fa62def4ffe67fdb6",
+        "from_state": "PLANNING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 3,
+        "reason": "verification evidence for transition",
+        "to_state": "DESIGNING"
+      },
+      "sequence": 86
+    },
+    {
+      "event_id": "evt-057a07c5-48f4-44c1-a9d3-6d0c6a8fea7f",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-a6c9af63a8774212948179f37dce956b",
+        "from_state": "PLANNING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 3,
+        "reason": "policy decision for transition",
+        "to_state": "DESIGNING"
+      },
+      "sequence": 87
+    },
+    {
+      "event_id": "evt-efcbf775-c061-4f73-a8fe-2909c0ecd4f4",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-3",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 88
+    },
+    {
+      "event_id": "evt-d09d40e1-7f46-42a9-a751-45908f954e6c",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-998c55ab23e24e9c817c58e2cb62afd4",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-3",
+          "policy-happy-path-run1-3",
+          "budget-happy-path-run1-3"
+        ],
+        "new_state": "DESIGNING",
+        "previous_state": "PLANNING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 4,
+        "reason": "advance to DESIGNING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-3",
+          "policy-happy-path-run1-3",
+          "budget-happy-path-run1-3"
+        ]
+      },
+      "sequence": 89
+    },
+    {
+      "event_id": "evt-84b126f7-76c6-4375-8bf9-bbf9b7d21b2a",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-290a093266604cec923f1abc5cf6f583",
+        "from_state": "DESIGNING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 4,
+        "reason": "verification evidence for transition",
+        "to_state": "IMPLEMENTING"
+      },
+      "sequence": 90
+    },
+    {
+      "event_id": "evt-0ce3bacb-b6eb-46d0-83ca-fe14c7d9ad00",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-2be39119e4f64ba391136dd4e83114dc",
+        "from_state": "DESIGNING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 4,
+        "reason": "policy decision for transition",
+        "to_state": "IMPLEMENTING"
+      },
+      "sequence": 91
+    },
+    {
+      "event_id": "evt-fdbe38ac-6884-466a-83ac-91f078856a2d",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-4",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 92
+    },
+    {
+      "event_id": "evt-2db5908c-93c0-4113-b04e-079cc32091b8",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-f4862870ff80498696669506a9fcca2b",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-4",
+          "policy-happy-path-run1-4",
+          "budget-happy-path-run1-4"
+        ],
+        "new_state": "IMPLEMENTING",
+        "previous_state": "DESIGNING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 5,
+        "reason": "advance to IMPLEMENTING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-4",
+          "policy-happy-path-run1-4",
+          "budget-happy-path-run1-4"
+        ]
+      },
+      "sequence": 93
+    },
+    {
+      "event_id": "evt-4e5868e4-1c7a-4eb9-bed8-5824cbe0eb97",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-fb4d78e393d748008952d464cda55344",
+        "from_state": "IMPLEMENTING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 5,
+        "reason": "verification evidence for transition",
+        "to_state": "VERIFYING"
+      },
+      "sequence": 94
+    },
+    {
+      "event_id": "evt-14c7e035-e8f3-481c-8755-ea07aab0c60b",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-75a08f378adb4d18be4ad8d3f1d8d280",
+        "from_state": "IMPLEMENTING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 5,
+        "reason": "policy decision for transition",
+        "to_state": "VERIFYING"
+      },
+      "sequence": 95
+    },
+    {
+      "event_id": "evt-97bc905f-fe4d-475f-98f3-1f349df99ccb",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-5",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 96
+    },
+    {
+      "event_id": "evt-5c377828-d2c1-4997-b4fb-3b21b7f8334f",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-e7ad5b947ec84a52aa9f2fbc25534699",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-5",
+          "policy-happy-path-run1-5",
+          "budget-happy-path-run1-5"
+        ],
+        "new_state": "VERIFYING",
+        "previous_state": "IMPLEMENTING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 6,
+        "reason": "advance to VERIFYING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-5",
+          "policy-happy-path-run1-5",
+          "budget-happy-path-run1-5"
+        ]
+      },
+      "sequence": 97
+    },
+    {
+      "event_id": "evt-04e7e749-9bf6-4c4c-8dac-be6c6a5f52e8",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-35df64be88214c3e9fb1cc1a785ea475",
+        "from_state": "VERIFYING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 6,
+        "reason": "verification evidence for transition",
+        "to_state": "HARDENING"
+      },
+      "sequence": 98
+    },
+    {
+      "event_id": "evt-a4cd09ed-4c53-43e0-8190-e8924aaedd54",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-8720fc3768914179a48d8539e78b3fa2",
+        "from_state": "VERIFYING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 6,
+        "reason": "policy decision for transition",
+        "to_state": "HARDENING"
+      },
+      "sequence": 99
+    },
+    {
+      "event_id": "evt-8cf24309-7608-45d8-b15a-fd09ead33341",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-6",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 100
+    },
+    {
+      "event_id": "evt-5dba5cc4-eec2-4f60-8440-c2d427344eb6",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-28a379a1ad3a4767a7b87034ef8fa433",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-6",
+          "policy-happy-path-run1-6",
+          "budget-happy-path-run1-6"
+        ],
+        "new_state": "HARDENING",
+        "previous_state": "VERIFYING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 7,
+        "reason": "advance to HARDENING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-6",
+          "policy-happy-path-run1-6",
+          "budget-happy-path-run1-6"
+        ]
+      },
+      "sequence": 101
+    },
+    {
+      "event_id": "evt-8c67f43a-0123-4bb2-8574-83fe346e3a88",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-e155ff6622d1459289bdb0d8fdd618d4",
+        "from_state": "HARDENING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 7,
+        "reason": "verification evidence for transition",
+        "to_state": "PACKAGING"
+      },
+      "sequence": 102
+    },
+    {
+      "event_id": "evt-9faf64d6-ee1d-4068-b54a-b8dbc3039b0b",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-458f6a9010934efaa0078185081c7069",
+        "from_state": "HARDENING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 7,
+        "reason": "policy decision for transition",
+        "to_state": "PACKAGING"
+      },
+      "sequence": 103
+    },
+    {
+      "event_id": "evt-3a86e847-5e2e-4d61-bf9b-4dff3e50fd83",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-7",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 104
+    },
+    {
+      "event_id": "evt-d6e85d16-5c7e-41c3-ada8-acfaa6cc3729",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-290824f40e4349178e94b7c4c1649143",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-7",
+          "policy-happy-path-run1-7",
+          "budget-happy-path-run1-7"
+        ],
+        "new_state": "PACKAGING",
+        "previous_state": "HARDENING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 8,
+        "reason": "advance to PACKAGING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-7",
+          "policy-happy-path-run1-7",
+          "budget-happy-path-run1-7"
+        ]
+      },
+      "sequence": 105
+    },
+    {
+      "event_id": "evt-49a29c8e-2a0d-4982-ac7b-d4dfcbbc0ee7",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-a2d0119c9ff041b3a514440442642411",
+        "from_state": "PACKAGING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 8,
+        "reason": "verification evidence for transition",
+        "to_state": "DELIVERING"
+      },
+      "sequence": 106
+    },
+    {
+      "event_id": "evt-bdd2c9f7-1e98-4e0b-a1ee-7b5ca457ee48",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-636a1a48c76a4efeb8cb883317f7ad3f",
+        "from_state": "PACKAGING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 8,
+        "reason": "policy decision for transition",
+        "to_state": "DELIVERING"
+      },
+      "sequence": 107
+    },
+    {
+      "event_id": "evt-ebca73ab-e770-4ac9-b482-f94ad2823e9b",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-8",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 108
+    },
+    {
+      "event_id": "evt-d99ddbee-3a27-47e0-a32e-19cf2384cb8b",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-8b0435c09c6f49698ba44b6130ea574b",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-8",
+          "policy-happy-path-run1-8",
+          "budget-happy-path-run1-8"
+        ],
+        "new_state": "DELIVERING",
+        "previous_state": "PACKAGING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 9,
+        "reason": "advance to DELIVERING",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-8",
+          "policy-happy-path-run1-8",
+          "budget-happy-path-run1-8"
+        ]
+      },
+      "sequence": 109
+    },
+    {
+      "event_id": "evt-42893428-22a0-43d2-b3de-97f938f5e980",
+      "event_type": "project.evidence_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-0d9fce34d2044e4d850614301c79a2a5",
+        "from_state": "DELIVERING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 9,
+        "reason": "verification evidence for transition",
+        "to_state": "ACCEPTED"
+      },
+      "sequence": 110
+    },
+    {
+      "event_id": "evt-4d2145fb-dc72-4011-a455-29ec10450eee",
+      "event_type": "project.policy_fact_recorded",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-80b69ae0598b4e61b5b8ee273025a425",
+        "from_state": "DELIVERING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 9,
+        "reason": "policy decision for transition",
+        "to_state": "ACCEPTED"
+      },
+      "sequence": 111
+    },
+    {
+      "event_id": "evt-85f12a29-cf78-476f-91bb-bb642d2de493",
+      "event_type": "budget.fact_issued",
+      "payload": {
+        "account_id": "account-happy-path-run1",
+        "budget_fact_id": "budget-happy-path-run1-9",
+        "hard_stop": false,
+        "resource_account_version": 4
+      },
+      "sequence": 112
+    },
+    {
+      "event_id": "evt-08400c38-00a5-4e93-92e8-b4de3111c78f",
+      "event_type": "project.state_transition.applied",
+      "payload": {
+        "actor": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "command_id": "cmd-35460c2e1d6444059de63fecfe6748b9",
+        "guard_fact_refs": [
+          "evidence-happy-path-run1-9",
+          "policy-happy-path-run1-9",
+          "budget-happy-path-run1-9"
+        ],
+        "new_state": "ACCEPTED",
+        "previous_state": "DELIVERING",
+        "project_id": "project-happy-path-run1",
+        "project_version": 10,
+        "reason": "advance to ACCEPTED",
+        "requested_by": {
+          "id": "control-plane-1",
+          "type": "control_plane"
+        },
+        "supporting_refs": [
+          "evidence-happy-path-run1-9",
+          "policy-happy-path-run1-9",
+          "budget-happy-path-run1-9"
+        ]
+      },
+      "sequence": 113
+    }
+  ]
+}

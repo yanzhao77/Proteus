@@ -1,0 +1,195 @@
+{
+  "final_state": "ACCEPTED",
+  "steps": [
+    {
+      "from": "CREATED",
+      "receipt": {
+        "command_id": "cmd-3450e7c2b301428caeb0a12bea70b5bc",
+        "event_ids": [
+          "evt-da74526c-4073-4095-8747-54da30dcc7b4"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "INTAKE",
+          "version": 1
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 1
+      },
+      "to": "INTAKE",
+      "version": 0
+    },
+    {
+      "from": "INTAKE",
+      "receipt": {
+        "command_id": "cmd-208695de438747578c6575f13ff3bf17",
+        "event_ids": [
+          "evt-293f3329-1acb-45e9-beca-f50fc8022f43"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "DISCOVERY",
+          "version": 2
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 2
+      },
+      "to": "DISCOVERY",
+      "version": 1
+    },
+    {
+      "from": "DISCOVERY",
+      "receipt": {
+        "command_id": "cmd-7db3cbf025f04b42866fa160d51dbe30",
+        "event_ids": [
+          "evt-0ededd59-2b42-4423-8662-05a475d7684d"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "PLANNING",
+          "version": 3
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 3
+      },
+      "to": "PLANNING",
+      "version": 2
+    },
+    {
+      "from": "PLANNING",
+      "receipt": {
+        "command_id": "cmd-998c55ab23e24e9c817c58e2cb62afd4",
+        "event_ids": [
+          "evt-d09d40e1-7f46-42a9-a751-45908f954e6c"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "DESIGNING",
+          "version": 4
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 4
+      },
+      "to": "DESIGNING",
+      "version": 3
+    },
+    {
+      "from": "DESIGNING",
+      "receipt": {
+        "command_id": "cmd-f4862870ff80498696669506a9fcca2b",
+        "event_ids": [
+          "evt-2db5908c-93c0-4113-b04e-079cc32091b8"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "IMPLEMENTING",
+          "version": 5
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 5
+      },
+      "to": "IMPLEMENTING",
+      "version": 4
+    },
+    {
+      "from": "IMPLEMENTING",
+      "receipt": {
+        "command_id": "cmd-e7ad5b947ec84a52aa9f2fbc25534699",
+        "event_ids": [
+          "evt-5c377828-d2c1-4997-b4fb-3b21b7f8334f"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "VERIFYING",
+          "version": 6
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 6
+      },
+      "to": "VERIFYING",
+      "version": 5
+    },
+    {
+      "from": "VERIFYING",
+      "receipt": {
+        "command_id": "cmd-28a379a1ad3a4767a7b87034ef8fa433",
+        "event_ids": [
+          "evt-5dba5cc4-eec2-4f60-8440-c2d427344eb6"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "HARDENING",
+          "version": 7
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 7
+      },
+      "to": "HARDENING",
+      "version": 6
+    },
+    {
+      "from": "HARDENING",
+      "receipt": {
+        "command_id": "cmd-290824f40e4349178e94b7c4c1649143",
+        "event_ids": [
+          "evt-d6e85d16-5c7e-41c3-ada8-acfaa6cc3729"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "PACKAGING",
+          "version": 8
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 8
+      },
+      "to": "PACKAGING",
+      "version": 7
+    },
+    {
+      "from": "PACKAGING",
+      "receipt": {
+        "command_id": "cmd-8b0435c09c6f49698ba44b6130ea574b",
+        "event_ids": [
+          "evt-d99ddbee-3a27-47e0-a32e-19cf2384cb8b"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "DELIVERING",
+          "version": 9
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 9
+      },
+      "to": "DELIVERING",
+      "version": 8
+    },
+    {
+      "from": "DELIVERING",
+      "receipt": {
+        "command_id": "cmd-35460c2e1d6444059de63fecfe6748b9",
+        "event_ids": [
+          "evt-08400c38-00a5-4e93-92e8-b4de3111c78f"
+        ],
+        "response": {
+          "project_id": "project-happy-path-run1",
+          "state": "ACCEPTED",
+          "version": 10
+        },
+        "result_code": "PROJECT_TRANSITION_APPLIED",
+        "status": "APPLIED",
+        "target_version": 10
+      },
+      "to": "ACCEPTED",
+      "version": 9
+    }
+  ]
+}
