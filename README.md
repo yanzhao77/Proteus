@@ -23,7 +23,7 @@ Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时�
 - **Failure Is Feedback**：失败进入诊断、修复和重规划闭环，而不是直接终止流程。
 - **Everything Is Recoverable**：命令幂等、事件可重放、投递可恢复，进程崩溃不应破坏业务事实。
 
-当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**、**P3 运维治理 runtime**，以及 **P4 产品化边界**；**P5 单节点可部署产品基线**正在补齐生产网络服务、常驻 runtime supervisor、生产 OIDC/Human Gate UI、S3/Vault/OTLP-compatible adapters 和部署运维基线。P4/P5 都不会新增绕过 Control Plane 的状态写入路径。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation、immutable Decision Explain/Audit/Trace、第一个真实 Docker execution target，以及跨切片 E2E hardening。
+当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**、**P3 运维治理 runtime**、**P4 产品化边界**，以及 **P5 单节点可部署产品基线**（FastAPI 服务、常驻 runtime supervisor、生产 OIDC/Human Gate UI、S3/Vault/OTLP-compatible adapters、部署运维基线与真实外部 smoke 证据）。P4/P5 都不会新增绕过 Control Plane 的状态写入路径。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation、immutable Decision Explain/Audit/Trace、第一个真实 Docker execution target，以及跨切片 E2E hardening。
 
 ## 核心闭环
 
@@ -83,7 +83,7 @@ flowchart LR
 | P5 OIDC + Human Gate UI | P5-3 已完成 | PyJWT/cryptography OIDC 验证；production 禁用 local issuer；最小 Gate inbox/detail/decision UI |
 | P5 Production-compatible adapters | P5-4 已完成 | S3-compatible Artifact、Vault KV-v2 Secret、OTLP-compatible telemetry；redaction/bounded failure |
 | P5 Deployment/Ops baseline | P5-5 已完成 | Dockerfile、Compose、API/runtime/migration entrypoints、runbook、CI smoke |
-| P5 E2E hardening | P5-6 实现已完成，外部 smoke 部分阻塞 | authenticated API/Gate/UI、Artifact/Secret/OTLP、Explain、fault injection、secret canary redaction；Docker build/MinIO/Vault/OTLP/browser 真实 smoke 未虚报 PASS |
+| P5 E2E hardening | P5-6 已完成 | authenticated API/Gate/UI、Artifact/Secret/OTLP、Explain、fault injection、secret canary redaction；Docker build、MinIO、Vault、OTLP Collector、浏览器截图真实 smoke 全部通过 |
 | External broker | 未实现 | Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
