@@ -489,3 +489,34 @@ HERMES_DATABASE_URL='postgresql://...' PYTHONPATH=src \
 ```
 
 It uses the durable `PostgresLocalPublisher` adapter. No permanent background loop or external broker is included.
+## Spec command names and SQL guard functions
+
+The specs and ADRs refer to dotted application command names (for example
+`execution.prepare_request`). Authority writes always execute through guarded
+`SECURITY DEFINER` functions owned by a `NOLOGIN` owner role; the table below
+maps each spec command to its guard function and migration. There is no
+unmapped authority path.
+
+| Spec / application command | Guarded SQL function | Migration |
+| --- | --- | --- |
+| `execution.prepare_request` | `hermes_prepare_execution_request` | `0014_execution_request_queue.sql` |
+| `execution.start_run` | `hermes_start_worker_run` | `0016_worker_lifecycle_result_admission.sql` |
+| Worker artifact/evidence/usage submission | `hermes_record_execution_artifact_candidate`, `hermes_record_execution_evidence_candidate`, `hermes_record_execution_usage_sample` | `0016_worker_lifecycle_result_admission.sql` |
+| Worker result submission | `hermes_submit_execution_result` | `0016_worker_lifecycle_result_admission.sql` |
+| `scheduler.register` | `hermes_scheduler_register` | `0015_scheduler_lease_fencing.sql` |
+| `scheduler.acquire_lease` | `hermes_scheduler_acquire_lease` | `0015_scheduler_lease_fencing.sql` |
+| `scheduler.renew_lease` | `hermes_scheduler_renew_lease` | `0015_scheduler_lease_fencing.sql` |
+| `scheduler.relinquish_lease` | `hermes_scheduler_relinquish_lease` | `0015_scheduler_lease_fencing.sql` |
+| `human_gate.apply_decision` | `hermes_apply_human_gate_decision` | `0018_human_gate_waiting_resume.sql` |
+| Diagnosis apply | `hermes_apply_diagnosis` | `0009_diagnosis_engine.sql` |
+| Planning apply | `hermes_apply_planning_run` | `0010_candidate_action_planner.sql` |
+| Selection + reservation bridge | `hermes_apply_selection_decision` | `0012_action_selection.sql` |
+| `hermes_emit_execution_feedback` | `hermes_emit_execution_feedback` | `0017_feedback_recovery_loop.sql` |
+| `hermes_plan_recovery_attempt` | `hermes_plan_recovery_attempt` | `0017_feedback_recovery_loop.sql` |
+| `hermes_complete_recovery_attempt` | `hermes_complete_recovery_attempt` | `0017_feedback_recovery_loop.sql` |
+| Task transition (`ApplyVerifiedTaskTransition`) | application `ControlPlane` command + SQL guards (`hermes_guard_p2_agent_run_update`, `hermes_project_event_invariant`, deferred PASS invariant) | `0001`-`0006` |
+| Replay / reconcile apply | `hermes_activate_replay_generation`, `hermes_apply_reconcile_plan` | `0019_checkpoint_replay_reconcile.sql` |
+| Quarantine adoption / redrive | `hermes_mark_quarantine_adopted`, `hermes_mark_quarantine_redriven` | `0020_quarantine_evidence_invalidation.sql` |
+| Evidence invalidation | `hermes_invalidate_evidence` | `0020_quarantine_evidence_invalidation.sql` |
+| Explain capture / query | `hermes_capture_decision_explain`, `hermes_query_decision_explain` | `0021_decision_explain_audit_trace.sql` |
+| Docker process recording | `hermes_record_docker_process` | `0022_production_docker_execution.sql` |

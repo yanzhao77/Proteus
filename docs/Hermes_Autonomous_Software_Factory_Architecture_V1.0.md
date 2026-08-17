@@ -12,6 +12,16 @@
 
 ---
 
+> **文档状态（Document status）**：本文件是产品愿景与系统全景文档。其中的具体机制集合
+> （Project 状态机状态集、Autonomous Escalation Ladder、Verification 裁决词汇、Worker
+> 生命周期协议等）已在 V1.1 / V1.2 中演进并被 [核心运行时详细设计书 V1.2](Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) 取代；
+> 发生冲突时按 [ARCHITECTURE_DECISIONS.md](../ARCHITECTURE_DECISIONS.md) 定义的 authority order
+> 以 V1.2 Runtime Invariants、规范与 ACCEPTED ADR 为准。主要演进：Project 状态机 14 态 → V1.2 11 态；
+> Escalation Ladder L0–L5 → V1.2 L0–L6（增加 Replan 层级）；Verification 裁决 WARNING →
+> PASS/FAIL/INCONCLUSIVE/ERROR/CANCELLED；Worker 生命周期更名为 REQUESTED→…→LEASED→RUNNING 协议。
+
+---
+
 ## 1. 项目概述
 
 Hermes Autonomous Software Factory 的目标不是构建一个简单的 AI Coding Agent，也不是把多个 Agent 机械地组织成固定团队。它要构建的是一个面向完整软件生命周期的自主生产系统。

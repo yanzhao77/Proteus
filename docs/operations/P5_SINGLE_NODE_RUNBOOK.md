@@ -12,6 +12,44 @@ Production configuration must come from environment variables, secret files or
 secret handles. Do not commit real credentials or `.env` files. The Compose file
 references secret file paths that operators must create outside Git.
 
+### Configuration reference
+
+Ports (single-node Compose topology, `deploy/p5/docker-compose.single-node.yml`):
+
+| Service | Container port | Host port | Purpose |
+| --- | --- | --- | --- |
+| postgres | 5432 | 5432 (default) | sole authority state and concurrency coordinator |
+| api | 8080 | 8080 | FastAPI transport and Human Gate UI |
+| runtime-supervisor | n/a | n/a | bounded runtime loops (no inbound port) |
+| minio | 9000 | 9000 | S3-compatible artifact store |
+| vault | 8200 | 8200 | secret-handle backend |
+| otel-collector | 4318 | 4318 | OTLP/HTTP telemetry export target |
+
+Environment variables (runtime entrypoints):
+
+| Variable | Services | Purpose |
+| --- | --- | --- |
+| `HERMES_DATABASE_URL` | api, runtime-supervisor, migration-bootstrap, relay | PostgreSQL DSN |
+| `HERMES_DATABASE_URL_FILE` | api, runtime-supervisor, migration-bootstrap | path to a secret file containing the DSN (Compose default) |
+| `HERMES_CORS_ORIGINS` | api | comma-separated allowed CORS origins (empty = none) |
+| `HERMES_SERVICE_BATCH_SIZE` | runtime-supervisor | per-loop batch size (default 100) |
+| `HERMES_SERVICE_POLL_SECONDS` | runtime-supervisor | per-loop poll interval (default 1.0) |
+
+Secret files referenced by Compose (operators must create them outside Git,
+see `deploy/p5/secrets/`):
+
+| File | Consumed by |
+| --- | --- |
+| `postgres_bootstrap_password.txt` | postgres (`POSTGRES_PASSWORD_FILE`) |
+| `hermes_database_url.txt` | migration-bootstrap, api, runtime-supervisor |
+| `minio_root_user.txt` / `minio_root_password.txt` | minio |
+| `vault_dev_token.txt` | vault (`VAULT_DEV_ROOT_TOKEN_ID_FILE`) |
+
+Test-only environment variables (`hermes-runtime/tests` and the CI
+`external-adapters` job): `HERMES_TEST_DATABASE_URL`, `HERMES_TEST_S3_URL`,
+`HERMES_TEST_S3_ACCESS_KEY`, `HERMES_TEST_S3_SECRET_KEY`,
+`HERMES_TEST_VAULT_URL`, `HERMES_TEST_VAULT_TOKEN`, `HERMES_TEST_OTLP_ENDPOINT`.
+
 ## Startup
 
 1. Start PostgreSQL.

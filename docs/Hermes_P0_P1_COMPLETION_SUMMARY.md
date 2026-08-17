@@ -247,7 +247,14 @@ Before the P0–P1 implementation commit, the following validation passed:
 No-DB unittest discovery:
 Ran 275 tests
 OK (skipped=182)
+```
 
+> Note: the per-slice acceptance matrices (Situation 175, Diagnosis 200, Planner
+> 226, Policy/Risk 256, Selection 275) record point-in-time regressions as each
+> slice landed; the final P0–P1 suite count is 275. Later phases grow the same
+> suite: P3-1 369, P4 463, P5 497 (see the respective completion summaries).
+
+```text
 PostgreSQL 14 full suite:
 Ran 275 tests
 OK

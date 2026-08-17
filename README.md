@@ -171,7 +171,6 @@ Proteus/
 │   ├── adr/                    # 单项 Architecture Decision Records
 │   ├── specs/                  # 规范性协议与一致性测试要求
 │   └── ...                     # 总体架构、runtime 设计与验收矩阵
-├── py/                         # 独立的 Python 算法示例
 ├── ARCHITECTURE_DECISIONS.md   # ADR 导航及 authority order
 └── README.md
 ```
