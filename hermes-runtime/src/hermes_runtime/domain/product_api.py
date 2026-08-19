@@ -56,6 +56,7 @@ class ProductApiRequest:
     headers: Mapping[str, str]
     body: Mapping[str, Any]
     actor: Actor
+    verified_identity_subject: str = ""
 
 
 @dataclass(frozen=True)
