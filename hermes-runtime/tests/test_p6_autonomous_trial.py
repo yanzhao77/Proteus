@@ -18,6 +18,9 @@ except ImportError:
     psycopg = None
 
 from hermes_runtime.trial.harness import run_trial
+from hermes_runtime.trial.test_database_bootstrap import (
+    create_disposable_todo_database,
+)
 
 
 BASE_URL = os.environ.get("HERMES_TEST_DATABASE_URL")
@@ -46,14 +49,19 @@ class P6AutonomousTrialTests(unittest.TestCase):
             cursor.execute("CREATE DATABASE hermes_p6_ci")
         admin.close()
         cls.database_url = BASE_URL.rsplit("/", 1)[0] + "/hermes_p6_ci"
+        cls.addClassCleanup(cls._drop_control_database)
+        cls.todo_database = create_disposable_todo_database(BASE_URL, TODO_DATABASE_URL)
+        cls.addClassCleanup(cls.todo_database.cleanup)
 
     @classmethod
-    def tearDownClass(cls):
+    def _drop_control_database(cls):
         admin = _admin_connect(BASE_URL)
         admin.autocommit = True
-        with admin.cursor() as cursor:
-            cursor.execute("DROP DATABASE IF EXISTS hermes_p6_ci")
-        admin.close()
+        try:
+            with admin.cursor() as cursor:
+                cursor.execute("DROP DATABASE IF EXISTS hermes_p6_ci")
+        finally:
+            admin.close()
 
     def test_full_autonomous_trial_acceptance_matrix_all_pass(self):
         with tempfile.TemporaryDirectory(prefix="p6-workspaces-") as workspace_tmp, \
@@ -62,7 +70,7 @@ class P6AutonomousTrialTests(unittest.TestCase):
                 self.database_url,
                 Path(workspace_tmp),
                 Path(evidence_tmp),
-                TODO_DATABASE_URL,
+                self.todo_database.runtime_todo_dsn,
             )
         self.assertEqual("PASS", result["verdict"], result)
         failed = [row for row in result["rows"] if row["outcome"] != "PASS"]

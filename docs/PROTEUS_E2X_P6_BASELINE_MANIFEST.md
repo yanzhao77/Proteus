@@ -1,0 +1,175 @@
+# Proteus E2.x/P6 Baseline Manifest — Final Reseal
+
+> **Purpose:** This non-self-referential manifest inventories the E1/E2/E2.x/P6/Golden Todo/frontend files selected for this delivery commit. It SHA-256 hashes only those commit candidates, excludes itself to avoid self-reference, and records unrelated dirty worktree material as an unhashed `REVIEW_REQUIRED` exclusion list.
+
+## 1. Seal Metadata
+
+| Field | Value |
+| --- | --- |
+| Repository HEAD | `a6f2206a6f113f221f3cc42021c12d11f739ddea` |
+| Branch | `codex/p6-autonomous-production-trial` |
+| Generated UTC | `2026-08-19T06:51:13Z` |
+| Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
+| Commit operation | **Not performed.** This is an inventory, not a staging action. |
+
+## 2. Classification Rules
+
+| Classification | Meaning |
+| --- | --- |
+| `THIS_CLOSURE` | Files edited for the strict owner-plus-Create/name-cleanup closure, its validation-statistic reconciliations, and the minimal post-PR CI role bootstrap follow-up. |
+| `INHERITED_DELIVERY_CANDIDATE` | Existing modified or untracked files that compose the known E1/E2/E2.x/P6/frontend delivery surface. They are listed for a later human commit decision, not newly attributed to this closure. |
+| `REVIEW_REQUIRED` | Dirty files excluded from this commit because their relation to the required delivery cannot be proven from pathname and task evidence alone. They are listed without SHA-256 and must not be staged by inference. |
+
+## 3. This Bootstrap Acceptance Closure and CI Follow-up
+
+| SHA-256 | Path | Working-tree state |
+| --- | --- | --- |
+| `4fdcfefdc2101e7e6240f7346abd2a7e86dfa42d870e66c7a43679bebd9dc5a5` | `.github/workflows/hermes-p5.yml` | modified tracked — post-PR Todo role and Golden Todo runtime bootstrap |
+| `852153bb1dda5fcbefaa783e6e54749cdb3686eb935cb188ddf8b8230f81d4c2` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
+| `a073322c50f73bcf5dbecea1f600a7518d5b8242c98a199224d088920148e73f` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
+| `17e84ae952f53e61f62e91dde3673b7d15c0933a5507fc3a81f9bed455ec0947` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DELIVERY_REPORT.md` | untracked |
+| `4fc0c646eb018d64ffd3e29e4dece033684852b8af6fa011ad3f71612a0bdc93` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DESIGN.md` | untracked |
+| `2e51e85e8a4fd0150c1eeaa8564e6a4ae484843af76cab108184116bedd04bc8` | `examples/golden-todo/tests/conftest.py` | modified tracked |
+| `b380c7bcb7908afd3e9f7e342447914b29b7e429210db7a50199a3bceb8d2f81` | `hermes-runtime/src/hermes_runtime/trial/test_database_bootstrap.py` | untracked |
+| `bce79ae84c642fb10c587fe8989df22ef9d0bd9aacc25bf0907fa401c5cab06f` | `hermes-runtime/tests/test_p6_autonomous_trial.py` | modified tracked |
+| `ad0629f57c14b1f05e3679689dfa5f18c86eafd48cbf68839bfca0e5b4ee8dc2` | `hermes-runtime/tests/test_p6_todo_database_bootstrap.py` | untracked |
+
+## 4. Inherited Complete-Delivery Candidates
+
+| SHA-256 | Path | Working-tree state |
+| --- | --- | --- |
+| `1f840f5887135a3624fd9a1af924cd27677b090d7605b44a5d6d9b7c175c486a` | `docs/E1_ENTRY_DRAFT_CORE_DELIVERY_REPORT.md` | untracked |
+| `86352676d847f6b13699513959262d227fb63260a0addb8c8630c704288274a2` | `docs/E1_ENTRY_DRAFT_CORE_RECON_REPORT.md` | untracked |
+| `9fe1a61f11a0d5d6807fc3e3c481981fa4192ae69952556dfe420636dbedabe6` | `docs/E2X_LIVE_PROVIDER_SMOKE_RUNBOOK.md` | untracked |
+| `2d1aff724bbb73ade728ddc2d041d2277e4058df30850ca13b5c01e6576c410d` | `docs/E2X_PRODUCER_INTEGRATION_DESIGN.md` | untracked |
+| `9a0960f19d327d194ec72e7fc129de6af407200091eea9e8b02344b4625858da` | `docs/E2X_PRODUCER_INTEGRATION_IMPLEMENTATION.md` | untracked |
+| `44fc7b34f961f3d306e31b32db958ab23149a8a72a6acf3e6016e3f5c1eee836` | `docs/E2X_PRODUCER_INTEGRATION_RECON_REPORT.md` | untracked |
+| `55c3b7ed3ef486482640e0e7a476d15a608de3dc5175c402022b5bcf9bf41897` | `docs/E2_ENTRY_UNDERSTANDING_DELIVERY_REPORT.md` | untracked |
+| `1c4b6bfc37bee9600e910dd6f545337433668405d19923bcdcfb2a476e700084` | `docs/E2_ENTRY_UNDERSTANDING_IMPLEMENTATION_V1.md` | untracked |
+| `ce367b25c104554225c296f6163e524d9f88e6943e717aaa8f6ebddd891dc792` | `docs/E2_ENTRY_UNDERSTANDING_RECON_REPORT.md` | untracked |
+| `81373a838c00d6a5445100bc3d43b7a53370e99a7c10b161d5ad74f974eadfc5` | `docs/ENTRY_RECON.md` | untracked |
+| `f6d4ba0757fdd37c2b29e0253ed9e4d167e4b60dfd61d652f06e77fc23d50ad5` | `docs/FH1_READ_MODEL_ADAPTER_DELIVERY_REPORT.md` | untracked |
+| `a4c965bac514de12f81fc53528ce82316d51f39d532f38ce2326ac700907b7ee` | `docs/P6_RECOVERY_PERMISSION_DISCREPANCY_RECON.md` | untracked |
+| `be01aa5d89192964691e0177c18ee68a54da093a8d4caaf03d7a8cb558127ba0` | `docs/P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md` | untracked |
+| `e2d3b90f22409541c44e377c0b5e55c974039a2b82bfed634bc2fe4f99ddf9ee` | `docs/P6_RECOVERY_PERMISSION_REPAIR_DESIGN.md` | untracked |
+| `17cb208c0aa88566fa46020ef2069700eaff698d03f2a0917e40f42e9a00ec60` | `docs/PROTEUS_FACTORY_HOME_FRONTEND_ARCHITECTURE_V1.md` | untracked |
+| `7b6fdfe3d39c292521c30a8945c9c8638fab7dae2b137e93735e1d5b32f262c7` | `docs/PROTEUS_FACTORY_HOME_IMPLEMENTATION_V1.md` | untracked |
+| `745a0a0b88ea9a65967d699181daeabff85955fa606d012d8baa20a38f6fa528` | `docs/PROTEUS_FACTORY_HOME_TAILWIND_THEME_V1.md` | untracked |
+| `7820a101fd28c1435b41aeafac3e06ee0f05ed21880b01b454c168b4ffbf4b48` | `docs/PROTEUS_FACTORY_HOME_UI_STYLE_GUIDE_V1.md` | untracked |
+| `39246bea50c4a649e94c8902d64c1ef5705e8f0721fe646c8fa02357803b36a4` | `docs/PROTEUS_LIVE_PRODUCTION_UX_V1.md` | untracked |
+| `674eda7a1c4c2c45e0c12de134387075458a46d7a35348ffab34cd85b9a4e08c` | `docs/PROTEUS_PRODUCTION_ENTRY_ARCHITECTURE_V1.md` | untracked |
+| `344a2b763417662f90ad7037d875aee8bb55af3678cb4e7882a8ddcb8ad76467` | `docs/PROTEUS_PRODUCTION_ENTRY_IMPLEMENTATION_PLAN_V1.md` | untracked |
+| `e4c79b9a5ae16efa6e98ee3776774af0b6f98c33d2551d649029e23228bf9ec7` | `docs/PROTEUS_PRODUCTION_ENTRY_IMPLEMENTATION_READINESS_REPORT.md` | untracked |
+| `dc98f0789a62cd3856fcb058284dae78be9800da942ab2abbc0d727d86d8264c` | `docs/PROTEUS_PRODUCTION_ENTRY_UX_V1.md` | untracked |
+| `e2dbc2438fded488be534a3edb0713172da3d7db28d17f5244e0c758c7b45020` | `frontend/.env.development.example` | untracked |
+| `fe718e7babb14f3cbad2d97f08889b9ce5215ed3fe0e43b2b8cfbfb3b9b844e8` | `frontend/.gitignore` | untracked |
+| `b4d344818a1e1bf43997e4744a9153c8eef770c98b58229cd86363dabb85ded4` | `frontend/.oxlintrc.json` | untracked |
+| `876be87bc223b0ee24de9dc2d0d71b62f78f8cd1e655d77b4ccdea2055370752` | `frontend/README.md` | untracked |
+| `c489ca10e39dee2c944678c7cbe29c05c1464f0d3ad331829be0616dfe292ada` | `frontend/index.html` | untracked |
+| `82fc4d57ff6b34909e6f8ef4f2a60cc2f43f1d330a4615e4f92f9e51441dff7d` | `frontend/package.json` | untracked |
+| `ef2aef367e00b7fdd17d4d64a5752074e987704299bf3e2afca99fd2cd82178e` | `frontend/pnpm-lock.yaml` | untracked |
+| `68fac9e49f1efae93cbcb642ed05fd127f6caf05ecc0686e4aae3be93bbdb1e0` | `frontend/postcss.config.cjs` | untracked |
+| `61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66` | `frontend/public/favicon.svg` | untracked |
+| `b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a` | `frontend/public/icons.svg` | untracked |
+| `8ad2e8af9cd2ca5fcd7511754ff9342b6b2c1de797553041c4a6b632db41f7b1` | `frontend/src/App.test.tsx` | untracked |
+| `e3f0e87ca01f7d05ca1eea655ef1fe54dabb892f9283520e9073bb56cd2e91e1` | `frontend/src/App.tsx` | untracked |
+| `88373435dec7e3b4ff01056626185b23e773bd78994617a26045776fefbdca03` | `frontend/src/api/adapters.test.ts` | untracked |
+| `e78f1eb6cdc8579aeb4a5f45de87f85731ea440e1a6aa5dab9288744dd35e61f` | `frontend/src/api/adapters.ts` | untracked |
+| `02ecc444a2ec142500b971733acfcc1ab8b9c6acd2e30794f54ac251c7188f83` | `frontend/src/api/fixtureAdapters.ts` | untracked |
+| `9aefe1da03909d5bcf8c137edba7414ae610e6f24d1855180a7b7fe181f3c040` | `frontend/src/api/index.ts` | untracked |
+| `d6f3b0d9fbfe65a78e4c290b9830f4f78b4c468a6729565b4a8b16d87a6f8a33` | `frontend/src/api/productApiAdapters.test.ts` | untracked |
+| `854af659bff5e542642379973a9dfbe7884865234532bf66f87b7e0ae63aa466` | `frontend/src/api/productApiAdapters.ts` | untracked |
+| `e8f9b0fc88f1521764d5e7f8fa7392f076d995e686705199a0ef3aac7f0877ee` | `frontend/src/contract.test.ts` | untracked |
+| `2b91f6f3bc360041371947a78c768de59ea45df066a7e6d0ef58b5250e4c7a68` | `frontend/src/main.tsx` | untracked |
+| `e08bb8ff31812fd9381e585ede0e8d3d12885cb18b2f3d9f6c85ee84db438000` | `frontend/src/models.ts` | untracked |
+| `da1071a3487bac26277087bba76e805d123299818fc995439719a5efaa7b9163` | `frontend/src/styles/index.css` | untracked |
+| `91a3c8962a0edcb956206a501d943fe99e1c78c6d4d8b5c9a948a3362c75978c` | `frontend/src/test/setup.ts` | untracked |
+| `437f9333e6dd79f82cf1427cf540cdfab2d18110bf5af6476319cab1cd803df3` | `frontend/src/theme.test.ts` | untracked |
+| `5d9f2ae5892685f9325aaee283404f6b26cd0b9927211596dc6cc2f1e209a8df` | `frontend/tailwind.config.ts` | untracked |
+| `2804b10bdf9413b5f36f9ec640fdbe2a538f802ad60014dd94fd6f8b5f63f07e` | `frontend/tsconfig.app.json` | untracked |
+| `770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808` | `frontend/tsconfig.json` | untracked |
+| `d366cc0827139db39c61815f22491bbfda56c654354a42ad7795143d314e45e8` | `frontend/tsconfig.node.json` | untracked |
+| `f69e48fd28c722ca7c6a48d70ffa66cf263e1635134e4597792787d181a03b4c` | `frontend/vite.config.ts` | untracked |
+| `5d3ef2589190e844ffac1849f7cc47a9a4dea697dc6437bc2eb276ac0fabdad2` | `hermes-runtime/migrations/0025_e1_entry_draft_core.sql` | untracked |
+| `a26032eb08d3979199f4590e4f7832d52c47ea4998947d59ca7636a9abb90970` | `hermes-runtime/migrations/0026_e2_entry_understanding.sql` | untracked |
+| `c71a112e3a5ef4ad0fa4a4af4f846bff7680c2c742fb3240639de5661bafaaa3` | `hermes-runtime/migrations/0027_e2x_producer_provenance.sql` | untracked |
+| `f44cc6f6d20fd7afea583ed967057d9fcda38d2419376b9b86599d1295bea678` | `hermes-runtime/migrations/0028_p6_recovery_runtime_least_privilege.sql` | untracked |
+| `7cf67da42378ed4b252529c1515beb5e3b0c25567cb2df23413751d10bad0d9c` | `hermes-runtime/scripts/e2x_live_provider_smoke.py` | untracked |
+| `0e6470cd2fe9556b72e4aeac39a8e83f318261a67f34ba1ec4a639be53a7df5f` | `hermes-runtime/src/hermes_runtime/api_main.py` | modified tracked |
+| `990163cbdca2608474f1565c10ad9a7d457fc105a1080174c4b407a23a9a5c13` | `hermes-runtime/src/hermes_runtime/application/entry_draft_api.py` | untracked |
+| `adb8e5b2fdac14f1e56bb59c6c3ba3e2a84e60a7be08d209c2ed75886c6ea39b` | `hermes-runtime/src/hermes_runtime/application/entry_understanding_api.py` | untracked |
+| `df692928211b3c02d2076de60aee1a8843a1556219ef166be58b50c0eab53446` | `hermes-runtime/src/hermes_runtime/application/factory_home_read_model.py` | untracked |
+| `75f86464264e680c7ee668cf81fa4b784b163e624f97d44971d979c2ae3eb57a` | `hermes-runtime/src/hermes_runtime/application/factory_workspace_ui.py` | untracked |
+| `c8908d0a9592c3ab60e9c61b4ce1c9b236106211124c1ed8acd4d0caa9c160bf` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | modified tracked |
+| `83d28d70225a94295ea0dc0374e5f765ea04053d95a0ec68c28e69d8f5a59511` | `hermes-runtime/src/hermes_runtime/domain/entry_draft.py` | untracked |
+| `0f99b79473e2a6a9ab848ec497ed0e1e6682789bab86ce1e35f5f5505a11f760` | `hermes-runtime/src/hermes_runtime/domain/entry_understanding.py` | untracked |
+| `5ec2765253592709f2433110a3d70966030a1f187bc97cb926a635dfbb447a88` | `hermes-runtime/src/hermes_runtime/domain/product_api.py` | modified tracked |
+| `bcad28c39ed1879dbc6cc6e9b026a33359f03a6895fedf26aee63f70a916ff16` | `hermes-runtime/src/hermes_runtime/domain/understanding_producer.py` | untracked |
+| `6d5125f90a3c0b7b72173cc38b33adf6a86a904227f1c14d84beb44eeb58248a` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | modified tracked |
+| `0050a8c928fc20fb09ec21f7017e43fbf2d6908e5dafc14b5a454726394f18be` | `hermes-runtime/src/hermes_runtime/infrastructure/openai_compatible_understanding_provider.py` | untracked |
+| `f46c65937ea921a2a66a1f1768cdf98f48448966f529e0b0468b9c28e29d79f1` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_draft.py` | untracked |
+| `043648bc92ce94ec29c6bd5224d4ee9a508e5e3565d75132b551d9f29a23448d` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_understanding.py` | untracked |
+| `7ad704934fc67a8a819154ffa781fcee90afb527dc78fd367090bc54f07d61b9` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_factory_home_read_model.py` | untracked |
+| `5e69fa60309adcc58ddde329bdb08e0cefdc505e945b26a8cd1481d19738b9a3` | `hermes-runtime/src/hermes_runtime/infrastructure/understanding_provider_registry.py` | untracked |
+| `460331a448b1ef367846e1648e0101fdc8a1fc220eefb508ef885018e4d6dd69` | `hermes-runtime/tests/test_e2x_fastapi_error_envelope.py` | untracked |
+| `508e4ecf066c23710dfb4c795033e080ece92343a0406e0128dd09d71063cc40` | `hermes-runtime/tests/test_e2x_live_provider_smoke.py` | untracked |
+| `72c8f13891c93272d10425e51bfc49a8f84f588504943f812d411c5bffe6f3ef` | `hermes-runtime/tests/test_e2x_provider_adapter.py` | untracked |
+| `78b7b8780597766e3d9508a5f7ef56fb12739891d59d5c9c774f78e97f018bc3` | `hermes-runtime/tests/test_entry_draft_core.py` | untracked |
+| `4afac5b15a7de4ac8849f6c1e63ba089b5d4aa2e6c945a51cf0ccd345d847add` | `hermes-runtime/tests/test_entry_understanding_core.py` | untracked |
+| `ec4ed8a8551077170d08a02a0a906a3e9ea79158e1c203171cf956db06c3b7df` | `hermes-runtime/tests/test_factory_home_identity_scope.py` | untracked |
+| `305bc66432b83bdac8ff11ab168235328591611a0cffdfdb93e0a1f5b341ad4d` | `hermes-runtime/tests/test_factory_home_read_model.py` | untracked |
+| `e2d7cc717561dd112641553122d47f34aee88d48e849dc3f426346b1069a211a` | `hermes-runtime/tests/test_factory_workspace_ui.py` | untracked |
+| `d5b89979cb2ece6094f4e36ec944c2860e9a26c43f82f78a30004638e33b7a0b` | `hermes-runtime/tests/test_p6_recovery_runtime_least_privilege.py` | untracked |
+
+## 5. Review-Required Exclusion List
+
+> The following dirty worktree material is **not part of this commit**. It is intentionally retained in place without SHA-256 entries so a clean PR checkout never requires excluded files for manifest verification.
+
+| Path | Working-tree state | Commit treatment |
+| --- | --- | --- |
+| `docs/P6_MINIMUM_IMPLEMENTATION_ROADMAP.md` | untracked | Excluded — review required. |
+| `docs/Proteus Production Entry Implementation Readiness Report.md` | untracked | Excluded — review required. |
+| `docs/assets/authority_flow.png` | untracked | Excluded — review required. |
+| `docs/assets/factory_home_state_machine.png` | untracked | Excluded — review required. |
+| `docs/assets/plan_mutation_flow.png` | untracked | Excluded — review required. |
+| `docs/assets/production_entry_flow.png` | untracked | Excluded — review required. |
+| `docs/ui/proteus_factory_effects.css` | untracked | Excluded — review required. |
+| `docs/ui/proteus_factory_tailwind_theme.ts` | untracked | Excluded — review required. |
+
+## 6. Required Delivery Coverage
+
+| Delivery area | Inventory treatment |
+| --- | --- |
+| E1 Entry Draft | Included as `INHERITED_DELIVERY_CANDIDATE`: migration `0025`, entry-draft application/domain/store/tests and related reconciliation/delivery records. |
+| E2 Understanding | Included as `INHERITED_DELIVERY_CANDIDATE`: migration `0026`, understanding application/domain/store/tests and related records. |
+| E2.x Producer | Included as `INHERITED_DELIVERY_CANDIDATE`: migration `0027`, provider/provenance/smoke implementation/tests and E2.x records; this closure updates only current verification statistics. |
+| P6 least privilege | Included as `INHERITED_DELIVERY_CANDIDATE`: migration `0028`, Recovery repair evidence and runtime-role test. No P6 authority code is modified by this closure. |
+| Golden Todo bootstrap | Included as `THIS_CLOSURE`: helper, fixture, lifecycle, narrow tests, and current design/delivery records. |
+| Frontend delivery | Every untracked `frontend/**` file is listed as `INHERITED_DELIVERY_CANDIDATE`; no frontend file is modified by this closure. |
+
+## 7. Final Verification Baseline
+
+| Check | Current result |
+| --- | --- |
+| Cleanup-authenticity/bootstrap PostgreSQL/Golden Todo | **13/13 PASS** in `2.830 s`; factory-issued, evidence-tamper, OID-replacement and owner-mismatch closure; direct Golden Todo **9/9 PASS**. |
+| P6 permission/runtime-role | **6/6 PASS** in `3.777 s`. |
+| P6 standalone / fresh `0001 → 0028` | **1/1 PASS** in `105.839 s`; fresh control migration path and no-residue Todo cleanup verified. |
+| Focused E1/E2/E2.x/FH-1/FastAPI/OIDC/Product API | **86/86 PASS** in `4.309 s`. |
+| P0–P5 no-DB discovery | **575 run, 333 skipped, 0 failures** in `1.280 s`. |
+| Full Runtime regression | **575 run, 12 skipped, 0 failures** in `293.539 s`. |
+| Frontend Vitest/build/lint | **33/33 PASS** in `1.33 s` / PASS in `342 ms` / `0` warnings and `0` errors. |
+| Live provider smoke | **BLOCKED / NOT RUN**; no external guard, target, API URL, or token-file preconditions. |
+
+## 8. Current-versus-Historical Documentation Matrix
+
+| Document class | Documents | Statistic authority treatment |
+| --- | --- | --- |
+| **Current Verification Authority** | This manifest only | The numbers in Section 7 are the sole repository-wide current E2.x/P6 baseline. |
+| Synchronized current mirrors | `E2X_PRODUCER_INTEGRATION_DESIGN.md`, `E2X_PRODUCER_INTEGRATION_IMPLEMENTATION.md`, `E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md`, `E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md`, `P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DESIGN.md`, `P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DELIVERY_REPORT.md` | These documents explicitly point here and mirror Section 7; they do not establish independent current numbers. |
+| Historical phase-local snapshots | `P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md`, `E1_ENTRY_DRAFT_CORE_DELIVERY_REPORT.md`, `PROTEUS_FACTORY_HOME_IMPLEMENTATION_V1.md`, `PROTEUS_PRODUCTION_ENTRY_IMPLEMENTATION_READINESS_REPORT.md`, `Proteus Production Entry Implementation Readiness Report.md` | Their contemporaneous numbers remain historical phase-local snapshots, **not the current repository baseline**. `P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md` carries this label in-file; this manifest classifies the remaining unmodified historical reports. |
+
+No document is permitted to present a number different from Section 7 as the current repository-wide E2.x/P6 baseline.
+
+## 9. Integrity and Boundary Record
+
+The final seal requires a passing manifest SHA-256 recomputation over all and only the hashed commit candidates, `git diff --check`, scoped secret scan, protected-path audit, and a query proving no `todo_p6_ci_*` database remains. The manifest does not require excluded `REVIEW_REQUIRED` files for clean-checkout verification. This delivery does not include provider credentials or a live provider call.
