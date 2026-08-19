@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `eab57e27c90fce18735c399fbbdbcfa6e50a277e` |
+| Repository HEAD | `a6f2206a6f113f221f3cc42021c12d11f739ddea` |
 | Branch | `codex/p6-autonomous-production-trial` |
-| Generated UTC | `2026-08-19T06:39:11Z` |
+| Generated UTC | `2026-08-19T06:51:13Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -24,7 +24,7 @@
 
 | SHA-256 | Path | Working-tree state |
 | --- | --- | --- |
-| `0d8781c2e051c4ad328fd48dc2a17aa32d703900eb6056ef96545016438d8905` | `.github/workflows/hermes-p5.yml` | modified tracked — post-PR Todo role bootstrap |
+| `4fdcfefdc2101e7e6240f7346abd2a7e86dfa42d870e66c7a43679bebd9dc5a5` | `.github/workflows/hermes-p5.yml` | modified tracked — post-PR Todo role and Golden Todo runtime bootstrap |
 | `852153bb1dda5fcbefaa783e6e54749cdb3686eb935cb188ddf8b8230f81d4c2` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
 | `a073322c50f73bcf5dbecea1f600a7518d5b8242c98a199224d088920148e73f` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
 | `17e84ae952f53e61f62e91dde3673b7d15c0933a5507fc3a81f9bed455ec0947` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DELIVERY_REPORT.md` | untracked |
