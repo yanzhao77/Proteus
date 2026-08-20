@@ -3,6 +3,7 @@ from typing import Any, Mapping, Optional, Protocol
 from hermes_runtime.application.factory_home_read_model import FactoryHomeReadModel, UnavailableFactoryHomeReadModel
 from hermes_runtime.application.entry_understanding_api import UnavailableEntryUnderstandingApi
 from hermes_runtime.application.entry_proposal_master_plan_api import UnavailableEntryProposalMasterPlanApi
+from hermes_runtime.application.entry_approval_bridge import UnavailableEntryApprovalBridgeApi
 from hermes_runtime.application.entry_draft_api import EntryDraftApi, UnavailableEntryDraftApi
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
@@ -48,6 +49,7 @@ class ProductApiFacade:
         entry_draft_api: Optional[EntryDraftApi] = None,
         entry_understanding_api=None,
         entry_proposal_master_plan_api=None,
+        entry_approval_bridge_api=None,
     ) -> None:
         self._read_model = read_model
         self._command_gateway = command_gateway
@@ -55,6 +57,7 @@ class ProductApiFacade:
         self._entry_draft_api = entry_draft_api or UnavailableEntryDraftApi()
         self._entry_understanding_api = entry_understanding_api or UnavailableEntryUnderstandingApi()
         self._entry_proposal_master_plan_api = entry_proposal_master_plan_api or UnavailableEntryProposalMasterPlanApi()
+        self._entry_approval_bridge_api = entry_approval_bridge_api or UnavailableEntryApprovalBridgeApi()
 
     def handle(self, request: ProductApiRequest) -> ProductApiResponse:
         reject_forbidden_authority_shape(request)
@@ -132,6 +135,14 @@ class ProductApiFacade:
                 if method == "POST" and len(parts) == 4:
                     payload = self._e3_payload(request, "ENTRY_PLAN_SCHEMA_INVALID")
                     return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.generate_master_plan(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
+                if method == "GET" and len(parts) == 5 and parts[4] == "approval-preview":
+                    return self._safe(200, self._entry_approval_bridge_api.preview(subject, draft_id))
+                if method == "GET" and len(parts) == 5 and parts[4] == "approval":
+                    return self._safe(200, self._entry_approval_bridge_api.get_approval(subject, draft_id))
+                if method == "POST" and len(parts) == 5 and parts[4] == "approve":
+                    return self._safe(202, self._entry_approval_bridge_api.approve(subject, draft_id, self._e4_payload(request)))
+                if method == "POST" and len(parts) == 6 and parts[4] == "approval" and parts[5] == "reconcile":
+                    return self._safe(202, self._entry_approval_bridge_api.reconcile(subject, draft_id, self._e4_payload(request, reconcile=True)))
             raise ProductApiRejected("UNSUPPORTED_ROUTE")
         if method == "GET" and parts == ["factory-home", "status"]:
             return self._safe(200, self._factory_home_read_model.factory_status(actor_scope))
@@ -193,6 +204,20 @@ class ProductApiFacade:
         if not isinstance(key, str) or not key.strip() or not isinstance(reason, str) or not reason.strip() or not isinstance(expected, int) or expected < 0:
             raise ProductApiRejected(code)
         return {"idempotency_key": key, "reason": reason, "expected_version": expected}
+
+    @staticmethod
+    def _e4_payload(request: ProductApiRequest, reconcile: bool = False) -> Mapping[str, Any]:
+        body = dict(request.body)
+        allowed = {"reason", "idempotency_key", "correlation_id"} if reconcile else {"reason", "idempotency_key", "expected_draft_version", "master_plan_id", "expected_plan_version", "plan_revision_id", "approved_plan_content_hash", "proposal_revision_id", "proposal_content_hash", "compiled_blueprint_hash", "acknowledgements", "correlation_id"}
+        if set(body) - allowed:
+            raise ProductApiRejected("ENTRY_APPROVAL_SCHEMA_INVALID")
+        key = body.get("idempotency_key") or request.headers.get("Idempotency-Key")
+        if not isinstance(key, str) or not key.strip() or not isinstance(body.get("reason"), str) or not body["reason"].strip():
+            raise ProductApiRejected("ENTRY_APPROVAL_SCHEMA_INVALID")
+        body["idempotency_key"] = key
+        if not reconcile and (not isinstance(body.get("expected_draft_version"), int) or not isinstance(body.get("expected_plan_version"), int) or not isinstance(body.get("acknowledgements"), list)):
+            raise ProductApiRejected("ENTRY_APPROVAL_SCHEMA_INVALID")
+        return body
 
     @staticmethod
     def _understanding_payload(request: ProductApiRequest) -> Mapping[str, Any]:

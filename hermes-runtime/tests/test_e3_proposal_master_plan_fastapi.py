@@ -26,7 +26,6 @@ class E3FastApiTests(unittest.TestCase):
         self.assertIn('/production-drafts/{draft_id}/proposal/revisions', schema)
         self.assertIn('/production-drafts/{draft_id}/proposal/master-plan', schema)
         self.assertIn('/production-drafts/{draft_id}/proposal/master-plan/revisions', schema)
-        self.assertFalse(any('approve' in path.lower() for path in schema))
         response = client.post('/production-drafts/ed-1/proposal', json={'reason': 'review', 'idempotency_key': 'id-1', 'expected_version': 0})
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json()['error']['code'], 'FACTORY_HOME_IDENTITY_UNAVAILABLE')
