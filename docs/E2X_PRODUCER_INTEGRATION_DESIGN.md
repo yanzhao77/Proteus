@@ -10,14 +10,14 @@ E2.x is a server-side, OpenAI-compatible producer boundary for the **Understandi
 | --- | --- |
 | E2.x Internal Implementation | **PASS** |
 | E2.x Final Acceptance Correction | **PASS** |
-| E2.x Live Provider Verification | **BLOCKED / NOT RUN** |
-| E2.x Phase | **NOT COMPLETE** |
+| E2.x Live Provider Verification | **PASS — NON-PRODUCTION** |
+| E2.x Phase | **COMPLETE / LIVE VERIFIED** |
 | P6 Recovery Runtime Least-Privilege Repair | **PASS** |
 | P6 Authority Gate | **CLOSED** |
 | P6 Phase | **COMPLETE / REVALIDATED** |
 | Current migration continuity | `0001 → 0028` **PASS** |
 
-Live verification is the only missing E2.x completion condition. No provider endpoint, server-only credential, non-production egress authorization, smoke API base URL, or OIDC token-file guard was supplied during this delivery.
+Live verification completed on an authorized local Docker non-production target. The controlled smoke used the Product API only and preserved the server-only credential boundary; it recorded only sanitized provenance and entity identifiers.
 
 ## 2. Authority Boundary
 
@@ -117,3 +117,9 @@ A successful smoke requires current E2 state, an immutable revision, correct sou
 [4]: ../hermes-runtime/scripts/e2x_live_provider_smoke.py "Controlled smoke runner"
 [5]: ./E2X_LIVE_PROVIDER_SMOKE_RUNBOOK.md "Non-production smoke runbook"
 [6]: ./P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md "P6 least-privilege revalidation"
+
+## 10. Authorized Non-Production Live Verification
+
+The controlled live verification specified in Section 8 completed once against the local Docker `non-production` target at `2026-08-20T03:14:47Z`. The Product-API-only runner used nine requests to create and submit one Draft, generate one Understanding, read its authority/revisions, and replay the identical idempotency key. The authoritative result matched source Draft revision `edr-3f1adc2180ac41e88e98baf90b30b753`, returned the same result on replay without a new revision, and recorded `openai-compatible` / `deepseek-chat` provenance, `v2` prompt version, `v1` schema version, legal usage, `1805 ms` latency and retry count `0`.
+
+This verification confirms the design boundary rather than adding a second authority path: OIDC-verified Product API calls reach the existing E2 authority, while credentials remain server-side. Its sanitized evidence is maintained in the live smoke delivery report. No E3 scope is authorized or included.

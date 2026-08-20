@@ -56,17 +56,18 @@ The full regression's twelve skips are established external-prerequisite cases f
 
 ## 5. Live Execution Decision
 
-The required live-smoke guards were checked without displaying values. All four were missing: `HERMES_E2X_SMOKE_ALLOW_EXTERNAL`, `HERMES_E2X_SMOKE_TARGET_CLASS`, `HERMES_E2X_SMOKE_API_BASE_URL`, and `HERMES_E2X_SMOKE_OIDC_TOKEN_FILE`. The current session contains no configured provider connector. Therefore no external request, Draft, Understanding, provider request, token read or live evidence was produced.
+The authorized local Docker non-production execution completed once after zero-request preflight checks confirmed the release, target class, OIDC token/JWKS binding, server-side provider secret boundary and runner guards. The runner used the Product API only; it did not read a provider credential or contact a provider endpoint directly.
 
 | Live condition | Result |
 | --- | --- |
-| Explicit egress guard | Missing |
-| Explicit target class | Missing |
-| Explicit non-production API base URL | Missing |
-| Readable OIDC token file | Missing |
-| Server-side provider readiness | Not assessable without a target API |
-| Live Provider Verification | **BLOCKED / NOT RUN** |
-| Sanitized live evidence | None; no live execution occurred. |
+| Explicit egress guard | Present and exactly `true` |
+| Explicit target class | `non-production` |
+| Product API request budget | **9 / 9**; no second run |
+| Logical Understanding generation | **1 / 1** |
+| Same-key replay | **1 / 1**; same authoritative result and no new revision |
+| Provider adapter attempts | **1 / 3** total |
+| Live Provider Verification | **PASS — NON-PRODUCTION** |
+| Sanitized live evidence | Retained below; no token, credential, endpoint, raw prompt or raw response. |
 
 ## 6. Protected-Path and Secret Boundary
 
@@ -78,12 +79,12 @@ No migration, P6 Recovery production source, P6 permission/runtime-role authorit
 | --- | --- |
 | E2.x Auditable Baseline Seal | **PASS** |
 | E2.x Repository Smoke Delivery | **PASS** |
-| E2.x Live Provider Verification | **BLOCKED / NOT RUN** |
-| E2.x Phase | **NOT COMPLETE** |
+| E2.x Live Provider Verification | **PASS — NON-PRODUCTION** |
+| E2.x Phase | **COMPLETE / LIVE VERIFIED** |
 | P6 Authority Gate | **CLOSED** |
 | P6 Phase | **COMPLETE / REVALIDATED** |
 
-A future phase may mark E2.x complete only after one authorized non-production live smoke passes all Product API, provenance, replay, secret-boundary and full-regression criteria. A live failure must be reported as its true stable code and assessed in a new phase; it must not trigger automatic prompt, authority, retry or validation changes.
+The authorized non-production smoke passed all Product API, provenance, replay and secret-boundary criteria. No E3 work is included. A future live failure remains subject to stable-code reporting and must not trigger automatic prompt, authority, retry or validation changes.
 
 ## References
 
@@ -92,3 +93,25 @@ A future phase may mark E2.x complete only after one authorized non-production l
 [3]: ./E2X_PRODUCER_INTEGRATION_DESIGN.md "E2.x design snapshot"
 [4]: ./E2X_PRODUCER_INTEGRATION_IMPLEMENTATION.md "E2.x implementation snapshot"
 [5]: ./P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md "P6 closed-gate evidence"
+
+## 8. Authorized Non-Production PASS Evidence
+
+> **Execution scope:** one user-authorized fixed-budget run against the local Docker `non-production` target. The runner stopped after the one governed flow and did not enter E3.
+
+| Evidence field | Sanitized value |
+| --- | --- |
+| Execution UTC | `2026-08-20T03:14:47Z` |
+| Merged release commit | `ebc9e6e8d80ad07a48f8274f7d686444941e0604` |
+| Target class | `non-production` |
+| Product API request count | `9 / 9` |
+| Draft / source revision | `ed-90adc0942dd04299a342c39fde030bbf` / `edr-3f1adc2180ac41e88e98baf90b30b753` |
+| Understanding / authoritative revision | `eun-5e5bab6b0be543799d2138ec94f985e4` / `eur-b92d2e9fc3ae4711bca70f1d12700852` |
+| Provider / model | `openai-compatible` / `deepseek-chat` |
+| Provider request identifier | `8555da4d-b22a-4de3-b09b-5026c9ddc53d` |
+| Prompt / schema version | `v2` / `v1` |
+| Usage | `325` input tokens, `117` output tokens, `442` total tokens |
+| Latency / retry count | `1805 ms` / `0` |
+| Replay result | `same_authoritative_result_no_new_revision` |
+| Stable failure code | None; run passed. |
+
+The fixed route surface was readiness, Draft create/submit, one Understanding generate/read/revisions sequence, and one same-key replay/read/revisions sequence. It did not invoke Proposal, Plan, Project, Task, Execution or P6 routes. The full runtime baseline was not re-run; its sealed `575 run / 12 skipped / 0 failures` evidence remains historical current baseline support.

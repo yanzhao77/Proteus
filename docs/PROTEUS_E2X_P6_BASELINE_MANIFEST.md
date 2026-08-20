@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `39c38cd33888f93f05a00791200dd37504509ced` |
 | Branch | `fix/p5-migration-bootstrap-deploy-repair` |
-| Generated UTC | `2026-08-20T02:10:51Z` |
+| Generated UTC | `2026-08-20T03:18:03Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -29,8 +29,8 @@
 | `8aaa4f966425a664e0c0ef8ab610a3e9c7ecac16e8e885915476490a41c31c90` | `hermes-runtime/src/hermes_runtime/migration_bootstrap.py` | modified tracked — use existing PostgresRuntimeStore migration API |
 | `14a14ec59cf739aa9511504e08312d0dce51007011cd2c1ae63570abb36d6145` | `hermes-runtime/tests/test_deployment_baseline.py` | modified tracked — lock migration readability before USER hermes |
 | `5eba523d61a7cc6c34114cf7a7fc6c46b6dd6c162b14172e3e441353c9df072c` | `hermes-runtime/tests/test_migration_bootstrap.py` | untracked — bootstrap entry contract coverage |
-| `852153bb1dda5fcbefaa783e6e54749cdb3686eb935cb188ddf8b8230f81d4c2` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
-| `a073322c50f73bcf5dbecea1f600a7518d5b8242c98a199224d088920148e73f` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
+| `892bbd8a3ebf224895cc284642ec0f6579123a2c5df6583f46372520de369693` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
+| `e6c921a36d65e1c8c6d39a719ee12e0840708e86a746f92f748dbe12e7c68503` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
 | `17e84ae952f53e61f62e91dde3673b7d15c0933a5507fc3a81f9bed455ec0947` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DELIVERY_REPORT.md` | untracked |
 | `4fc0c646eb018d64ffd3e29e4dece033684852b8af6fa011ad3f71612a0bdc93` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DESIGN.md` | untracked |
 | `2e51e85e8a4fd0150c1eeaa8564e6a4ae484843af76cab108184116bedd04bc8` | `examples/golden-todo/tests/conftest.py` | modified tracked |
@@ -45,8 +45,8 @@
 | `1f840f5887135a3624fd9a1af924cd27677b090d7605b44a5d6d9b7c175c486a` | `docs/E1_ENTRY_DRAFT_CORE_DELIVERY_REPORT.md` | untracked |
 | `86352676d847f6b13699513959262d227fb63260a0addb8c8630c704288274a2` | `docs/E1_ENTRY_DRAFT_CORE_RECON_REPORT.md` | untracked |
 | `9fe1a61f11a0d5d6807fc3e3c481981fa4192ae69952556dfe420636dbedabe6` | `docs/E2X_LIVE_PROVIDER_SMOKE_RUNBOOK.md` | untracked |
-| `2d1aff724bbb73ade728ddc2d041d2277e4058df30850ca13b5c01e6576c410d` | `docs/E2X_PRODUCER_INTEGRATION_DESIGN.md` | untracked |
-| `9a0960f19d327d194ec72e7fc129de6af407200091eea9e8b02344b4625858da` | `docs/E2X_PRODUCER_INTEGRATION_IMPLEMENTATION.md` | untracked |
+| `7d0726571663abfa21f8814d96cacd892e5a966b1f61637e26f9db9f0cb58d96` | `docs/E2X_PRODUCER_INTEGRATION_DESIGN.md` | untracked |
+| `9f8e7081e8ebd9bd40cd18717ca02d3d5d31b5ef23b52f36b82ccf9aef05c987` | `docs/E2X_PRODUCER_INTEGRATION_IMPLEMENTATION.md` | untracked |
 | `44fc7b34f961f3d306e31b32db958ab23149a8a72a6acf3e6016e3f5c1eee836` | `docs/E2X_PRODUCER_INTEGRATION_RECON_REPORT.md` | untracked |
 | `55c3b7ed3ef486482640e0e7a476d15a608de3dc5175c402022b5bcf9bf41897` | `docs/E2_ENTRY_UNDERSTANDING_DELIVERY_REPORT.md` | untracked |
 | `1c4b6bfc37bee9600e910dd6f545337433668405d19923bcdcfb2a476e700084` | `docs/E2_ENTRY_UNDERSTANDING_IMPLEMENTATION_V1.md` | untracked |
@@ -162,7 +162,7 @@
 | P0–P5 no-DB discovery | **575 run, 333 skipped, 0 failures** in `1.280 s`. |
 | Full Runtime regression | **575 run, 12 skipped, 0 failures** in `293.539 s`. |
 | Frontend Vitest/build/lint | **33/33 PASS** in `1.33 s` / PASS in `342 ms` / `0` warnings and `0` errors. |
-| Live provider smoke | **BLOCKED / NOT RUN**; no external guard, target, API URL, or token-file preconditions. |
+| Live provider smoke | **PASS — NON-PRODUCTION**; one authorized local Docker Product-API-only run consumed `9 / 9` requests, generated one governed Understanding and replayed the same idempotency key without a new revision. Full runtime was not re-run. |
 
 ## 8. Current-versus-Historical Documentation Matrix
 
@@ -176,4 +176,25 @@ No document is permitted to present a number different from Section 7 as the cur
 
 ## 9. Integrity and Boundary Record
 
-The final seal requires a passing manifest SHA-256 recomputation over all and only the hashed commit candidates, `git diff --check`, scoped secret scan, protected-path audit, and a query proving no `todo_p6_ci_*` database remains. The manifest does not require excluded `REVIEW_REQUIRED` files for clean-checkout verification. This delivery does not include provider credentials or a live provider call.
+The final seal requires a passing manifest SHA-256 recomputation over all and only the hashed commit candidates, `git diff --check`, scoped secret scan, protected-path audit, and a query proving no `todo_p6_ci_*` database remains. The manifest does not require excluded `REVIEW_REQUIRED` files for clean-checkout verification. This evidence delivery does not include provider credentials, token material, authorization headers, endpoints, DSNs, raw prompts or raw provider responses; it records one sanitized live provider verification.
+
+## 10. Authorized E2.x Non-Production Live Verification
+
+| Field | Value |
+| --- | --- |
+| Execution UTC | `2026-08-20T03:14:47Z` |
+| Release commit | `ebc9e6e8d80ad07a48f8274f7d686444941e0604` |
+| Target class | `non-production` |
+| Product API requests | `9 / 9` |
+| Logical generation / replay | `1 / 1` / `1 / 1` |
+| Draft / source revision | `ed-90adc0942dd04299a342c39fde030bbf` / `edr-3f1adc2180ac41e88e98baf90b30b753` |
+| Understanding / revision | `eun-5e5bab6b0be543799d2138ec94f985e4` / `eur-b92d2e9fc3ae4711bca70f1d12700852` |
+| Provider / model | `openai-compatible` / `deepseek-chat` |
+| Provider request identifier | `8555da4d-b22a-4de3-b09b-5026c9ddc53d` |
+| Prompt / schema | `v2` / `v1` |
+| Usage | `325` input / `117` output / `442` total tokens |
+| Latency / retry count | `1805 ms` / `0` |
+| Replay | `same_authoritative_result_no_new_revision` |
+| Verdict | **PASS — NON-PRODUCTION** |
+
+The runner used only the governed E2 Product API route surface. It created no Proposal, Plan, Project, Task, Execution or P6 side effect. This document retains no token, credential, authorization header, endpoint, DSN, raw prompt or raw provider response. The sealed Full Runtime `575 run / 12 skipped / 0 failures` result is preserved and was not re-run for this evidence update.

@@ -83,7 +83,7 @@ The runner checks legal E2 state, immutable revisions, source revision identity,
 
 ## 7. Status and Non-Goals
 
-The repository delivery is internally verified and smoke-ready. Live Provider Verification remains **BLOCKED / NOT RUN** because the required non-production external guard, target declaration, API URL and OIDC token-file were all absent. No external HTTP request, provider call or durable live smoke evidence was created.
+The repository delivery is internally verified and live-verified. One authorized fixed-budget local Docker non-production smoke passed through the Product API using verified OIDC and a real OpenAI-compatible provider. Its evidence is sanitized to safe identifiers and metadata; it contains no credential, endpoint, raw prompt or raw response.
 
 The implementation did not modify migrations `0001–0028`, P6 Recovery code/tests/trial/evidence, E1/E2 state machines, receipt/idempotency semantics, frontend provider configuration, Project/Plan/Approval authority, or real-provider behavior. It did not add a provider fallback or a second authority path.
 
@@ -94,3 +94,9 @@ The implementation did not modify migrations `0001–0028`, P6 Recovery code/tes
 [3]: ./P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md "P6 closed-gate evidence"
 [4]: ../hermes-runtime/scripts/e2x_live_provider_smoke.py "Smoke runner"
 [5]: ../hermes-runtime/tests/test_e2x_live_provider_smoke.py "Smoke runner tests"
+
+## 8. Authorized Non-Production Live Verification
+
+At `2026-08-20T03:14:47Z`, the implementation completed one authorized local Docker `non-production` Product-API-only smoke on merged release `ebc9e6e8d80ad07a48f8274f7d686444941e0604`. The run consumed the complete fixed budget of nine Product API requests, made one logical Understanding generation, and made one same-key replay. It produced one authoritative Understanding with matching source Draft revision, non-empty `openai-compatible` / `deepseek-chat` provenance, `prompt_version=v2`, `schema_version=v1`, legal usage (`325` input, `117` output, `442` total tokens), `1805 ms` latency and retry count `0`. The replay returned the same authoritative result without a new revision.
+
+The runner invoked no Proposal, Plan, Project, Task, Execution or P6 route. The full runtime regression was not re-run; the sealed `575 run / 12 skipped / 0 failures` evidence remains unchanged. The delivery retains no credential, token, authorization header, endpoint, DSN, raw prompt or raw provider response.
