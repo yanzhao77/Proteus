@@ -93,6 +93,8 @@ flowchart LR
 | P5 Production-compatible adapters | P5-4 已完成 | S3-compatible Artifact、Vault KV-v2 Secret、OTLP-compatible telemetry；redaction/bounded failure |
 | P5 Deployment/Ops baseline | P5-5 已完成 | Dockerfile、Compose、API/runtime/migration entrypoints、runbook、CI smoke |
 | P5 E2E hardening | P5-6 已完成 | authenticated API/Gate/UI、Artifact/Secret/OTLP、Explain、fault injection、secret canary redaction；Docker build、MinIO、Vault、OTLP Collector、浏览器截图真实 smoke 全部通过 |
+| E2.x Producer Integration | **COMPLETE / LIVE VERIFIED** | 受控 local Docker **non-production** live provider smoke 已通过；固定 `9 / 9` Product API 预算、一次 Understanding generation 与同 key replay 均完成。未声明 production 验证。 |
+| P6 Recovery Runtime Least Privilege | **COMPLETE / REVALIDATED** | Authority Gate **CLOSED**；功能 revalidation **PASS**。 |
 | External broker | 未实现 | Kafka、Redis、Kubernetes 均不是当前运行时能力 |
 
 P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
@@ -214,6 +216,7 @@ Proteus/
 | [P5 Deployable Product Specification](docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md) | P5 单节点可部署产品、服务拓扑与运维边界 |
 | [P5 Deployable Product Acceptance Matrix](docs/P5_DEPLOYABLE_PRODUCT_ACCEPTANCE_MATRIX.md) | P5 单节点产品化切片验收状态 |
 | [P5 Completion Summary](docs/Hermes_P5_COMPLETION_SUMMARY.md) | P5 单节点产品完成范围、边界和验证摘要 |
+| [E2.x/P6 Current Verification Baseline](docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md) | E2.x non-production live verification、P6 gate/revalidation 与唯一 repository-wide current final status authority |
 | [开发搭建操作手册](docs/DEVELOPER_GUIDE.md) | 从零搭建开发环境的完整操作手册（安装/迁移/测试/启动/部署/开发流程/FAQ） |
 | [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 规范优先级、ADR 状态与待决问题 |
 
