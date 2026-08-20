@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `39c38cd33888f93f05a00791200dd37504509ced` |
 | Branch | `fix/p5-migration-bootstrap-deploy-repair` |
-| Generated UTC | `2026-08-20T03:18:03Z` |
+| Generated UTC | `2026-08-20T03:55:58Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -29,8 +29,8 @@
 | `8aaa4f966425a664e0c0ef8ab610a3e9c7ecac16e8e885915476490a41c31c90` | `hermes-runtime/src/hermes_runtime/migration_bootstrap.py` | modified tracked — use existing PostgresRuntimeStore migration API |
 | `14a14ec59cf739aa9511504e08312d0dce51007011cd2c1ae63570abb36d6145` | `hermes-runtime/tests/test_deployment_baseline.py` | modified tracked — lock migration readability before USER hermes |
 | `5eba523d61a7cc6c34114cf7a7fc6c46b6dd6c162b14172e3e441353c9df072c` | `hermes-runtime/tests/test_migration_bootstrap.py` | untracked — bootstrap entry contract coverage |
-| `892bbd8a3ebf224895cc284642ec0f6579123a2c5df6583f46372520de369693` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
-| `e6c921a36d65e1c8c6d39a719ee12e0840708e86a746f92f748dbe12e7c68503` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
+| `3c4d871538ad2bd80cfa4eaacbabc491d30f407d7f978ff45ea54866cda59f71` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
+| `ab05490b6021010d0d63a5d80a6361b6003e486388a782935ce38190bad797b9` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
 | `17e84ae952f53e61f62e91dde3673b7d15c0933a5507fc3a81f9bed455ec0947` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DELIVERY_REPORT.md` | untracked |
 | `4fc0c646eb018d64ffd3e29e4dece033684852b8af6fa011ad3f71612a0bdc93` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DESIGN.md` | untracked |
 | `2e51e85e8a4fd0150c1eeaa8564e6a4ae484843af76cab108184116bedd04bc8` | `examples/golden-todo/tests/conftest.py` | modified tracked |
@@ -198,3 +198,21 @@ The final seal requires a passing manifest SHA-256 recomputation over all and on
 | Verdict | **PASS — NON-PRODUCTION** |
 
 The runner used only the governed E2 Product API route surface. It created no Proposal, Plan, Project, Task, Execution or P6 side effect. This document retains no token, credential, authorization header, endpoint, DSN, raw prompt or raw provider response. The sealed Full Runtime `575 run / 12 skipped / 0 failures` result is preserved and was not re-run for this evidence update.
+
+
+## 11. Current Final Status Matrix
+
+> **Current Verification Authority:** This manifest is the sole repository-wide current E2.x/P6 verification authority. The matrix below supersedes no historical record; it resolves only the current-status wording of the synchronized documentation mirrors.
+
+| Status | Current result |
+| --- | --- |
+| E2.x Repository/Internal Delivery | **PASS** |
+| E2.x Live Provider Verification | **PASS — NON-PRODUCTION** |
+| E2.x Phase | **COMPLETE / LIVE VERIFIED** |
+| P6 Authority Gate | **CLOSED** |
+| P6 Functional Revalidation | **PASS** |
+| E3 | **NOT ENTERED** |
+
+## 12. Documentation/Metadata-Only Correction Record
+
+This correction reconciles merged current-status wording only. It does not alter the live-smoke entity IDs, provenance, prompt/schema versions, usage, latency, retry count, replay result, or the fixed `9 / 9` Product API budget. No smoke, Product API/provider call, Full Runtime, P6, frontend, migration, deployment, or unit test was re-run. The sealed Full Runtime result of **575 run, 12 skipped, 0 failures** remains inherited evidence, not a result of this correction.
