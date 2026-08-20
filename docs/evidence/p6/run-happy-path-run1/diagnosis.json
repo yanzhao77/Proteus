@@ -1,6 +1,0 @@
-{
-  "diagnosis_id": "diag-f280be14310d16e64c7f0c477da3a956",
-  "input_hash": "sha256:51854ada48e3f5a18dba9999c63bfc23b5b84a95e1d3c02a0c31c65bb268c3f2",
-  "root_cause": "test_assertion_failure",
-  "root_cause_status": "PROBABLE"
-}

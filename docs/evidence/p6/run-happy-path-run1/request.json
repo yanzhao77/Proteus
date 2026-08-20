@@ -1,5 +1,0 @@
-{
-  "acceptance": "9 pytest tests pass; /health returns LIVE; CRUD on /todos works with JWT.",
-  "request": "Build the Golden Todo project: FastAPI + SQLAlchemy + PostgreSQL + JWT, with pytest coverage and Docker Compose.",
-  "summary": "Implement a Todo REST API with JWT auth and PostgreSQL storage"
-}
