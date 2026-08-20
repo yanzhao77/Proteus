@@ -12,9 +12,9 @@ The repository now has complete internal E2.x evidence and a guarded non-product
 | E2.x Final Acceptance Correction | **PASS** | All-5xx retry, semantic routes and error-envelope corrections remain verified. |
 | E2.x Auditable Baseline Seal | **PASS** | SHA-256 manifest, commit-candidate list, protected-path audit and internal verification are delivered. |
 | E2.x Repository Smoke Delivery | **PASS** | Default-deny, Product-API-only smoke runner and no-network tests are delivered. |
-| Live Provider Verification | **BLOCKED / NOT RUN** | No explicit non-production egress guard, target API, token file or server configuration evidence was supplied. |
+| Live Provider Verification | **PASS — NON-PRODUCTION** | One authorized fixed-budget Product API smoke passed with verified OIDC, real provider provenance, legal Understanding output and replay stability. |
 | P6 Authority Gate | **CLOSED** | Least-privilege repair and revalidation passed. |
-| E2.x Phase | **NOT COMPLETE** | One real, authorized non-production smoke is still required. |
+| E2.x Phase | **COMPLETE / LIVE VERIFIED** | The authorized non-production smoke passed; no E3 work is included. |
 
 ## 2. Delivered Scope
 
@@ -85,3 +85,9 @@ P6 remains closed, functionally revalidated and complete. The prior PostgreSQL 1
 [2]: ./E2X_LIVE_PROVIDER_SMOKE_RUNBOOK.md "Smoke runbook"
 [3]: ./PROTEUS_E2X_P6_BASELINE_MANIFEST.md "Baseline manifest"
 [4]: ./P6_RECOVERY_PERMISSION_REPAIR_DELIVERY_REPORT.md "P6 revalidation"
+
+## 8. Authorized Live Verification Addendum
+
+The user-authorized local Docker `non-production` smoke passed once at `2026-08-20T03:14:47Z` on merged release `ebc9e6e8d80ad07a48f8274f7d686444941e0604`. It consumed exactly nine Product API requests, completed one Understanding generation and one same-idempotency-key replay, and did not use a replacement Draft or a runner retry. The authoritative Understanding preserved its source Draft revision, recorded provider/model provenance as `openai-compatible` / `deepseek-chat`, carried `prompt_version=v2` and `schema_version=v1`, reported nullable legal usage of `325` input, `117` output and `442` total tokens, `1805 ms` latency and retry count `0`. Replay returned the same authoritative result without a new revision.
+
+Only sanitized identifiers and provenance are recorded in the companion smoke delivery report. The verification made no Proposal, Plan, Project, Task, Execution or P6 call, and it does not include provider credentials, token values or paths, authorization headers, endpoints, DSNs, raw prompts or raw responses. The sealed full-runtime baseline was not re-run.
