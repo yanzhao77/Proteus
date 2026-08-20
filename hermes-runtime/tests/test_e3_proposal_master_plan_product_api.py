@@ -1,4 +1,4 @@
-import pytest
+import unittest
 
 from hermes_runtime.application.product_api import ProductApiFacade
 from hermes_runtime.domain.models import Actor, ActorType
@@ -38,26 +38,25 @@ def facade(e3):
     return ProductApiFacade(ReadModel(), Gateway(), entry_proposal_master_plan_api=e3)
 
 
-def test_generate_proposal_uses_verified_subject_and_exact_metadata():
-    e3 = E3Api()
-    response = facade(e3).handle(request("/production-drafts/ed-1/proposal", {"reason": "review", "idempotency_key": "key-1", "expected_version": 0}))
-    assert response.status_code == 201
-    assert response.body["item"]["pre_approval_only"] is True
-    assert e3.calls == [("proposal", ("creator-1", "ed-1", 0, "key-1", "review"))]
+class E3ProductApiTests(unittest.TestCase):
+    def test_generate_proposal_uses_verified_subject_and_exact_metadata(self):
+        e3 = E3Api()
+        response = facade(e3).handle(request("/production-drafts/ed-1/proposal", {"reason": "review", "idempotency_key": "key-1", "expected_version": 0}))
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.body["item"]["pre_approval_only"])
+        self.assertEqual(e3.calls, [("proposal", ("creator-1", "ed-1", 0, "key-1", "review"))])
 
+    def test_generate_master_plan_has_exact_allowlist_and_no_approve_route(self):
+        e3 = E3Api()
+        response = facade(e3).handle(request("/production-drafts/ed-1/proposal/master-plan", {"reason": "review", "idempotency_key": "key-2", "expected_version": 0}))
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(e3.calls[0][0], "plan")
+        with self.assertRaisesRegex(ProductApiRejected, "ENTRY_PLAN_SCHEMA_INVALID"):
+            facade(e3).handle(request("/production-drafts/ed-1/proposal/master-plan", {"reason": "review", "idempotency_key": "key-2", "expected_version": 0, "approve": True}))
+        with self.assertRaisesRegex(ProductApiRejected, "UNSUPPORTED_ROUTE"):
+            facade(e3).handle(request("/production-drafts/ed-1/proposal/approve", {"reason": "review", "idempotency_key": "key-3", "expected_version": 0}))
 
-def test_generate_master_plan_has_exact_allowlist_and_no_approve_route():
-    e3 = E3Api()
-    response = facade(e3).handle(request("/production-drafts/ed-1/proposal/master-plan", {"reason": "review", "idempotency_key": "key-2", "expected_version": 0}))
-    assert response.status_code == 201
-    assert e3.calls[0][0] == "plan"
-    with pytest.raises(ProductApiRejected, match="ENTRY_PLAN_SCHEMA_INVALID"):
-        facade(e3).handle(request("/production-drafts/ed-1/proposal/master-plan", {"reason": "review", "idempotency_key": "key-2", "expected_version": 0, "approve": True}))
-    with pytest.raises(ProductApiRejected, match="UNSUPPORTED_ROUTE"):
-        facade(e3).handle(request("/production-drafts/ed-1/proposal/approve", {"reason": "review", "idempotency_key": "key-3", "expected_version": 0}))
-
-
-def test_browser_actor_cannot_override_verified_subject():
-    e3 = E3Api()
-    with pytest.raises(ProductApiRejected, match="ENTRY_DRAFT_IDENTITY_REQUIRED"):
-        facade(e3).handle(request("/production-drafts/ed-1/proposal", {"reason": "review", "idempotency_key": "key-1", "expected_version": 0}, actor="foreign"))
+    def test_browser_actor_cannot_override_verified_subject(self):
+        e3 = E3Api()
+        with self.assertRaisesRegex(ProductApiRejected, "ENTRY_DRAFT_IDENTITY_REQUIRED"):
+            facade(e3).handle(request("/production-drafts/ed-1/proposal", {"reason": "review", "idempotency_key": "key-1", "expected_version": 0}, actor="foreign"))
