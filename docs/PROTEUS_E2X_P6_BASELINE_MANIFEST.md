@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `a6f2206a6f113f221f3cc42021c12d11f739ddea` |
-| Branch | `codex/p6-autonomous-production-trial` |
-| Generated UTC | `2026-08-19T06:51:13Z` |
+| Repository HEAD | `39c38cd33888f93f05a00791200dd37504509ced` |
+| Branch | `fix/p5-migration-bootstrap-deploy-repair` |
+| Generated UTC | `2026-08-20T02:10:51Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -16,7 +16,7 @@
 
 | Classification | Meaning |
 | --- | --- |
-| `THIS_CLOSURE` | Files edited for the strict owner-plus-Create/name-cleanup closure, its validation-statistic reconciliations, and the minimal post-PR CI role bootstrap follow-up. |
+| `THIS_CLOSURE` | Files edited for the strict owner-plus-Create/name-cleanup closure, validation-statistic reconciliations, CI prerequisites, and the minimal P5 migration bootstrap deployment repair. |
 | `INHERITED_DELIVERY_CANDIDATE` | Existing modified or untracked files that compose the known E1/E2/E2.x/P6/frontend delivery surface. They are listed for a later human commit decision, not newly attributed to this closure. |
 | `REVIEW_REQUIRED` | Dirty files excluded from this commit because their relation to the required delivery cannot be proven from pathname and task evidence alone. They are listed without SHA-256 and must not be staged by inference. |
 
@@ -25,6 +25,10 @@
 | SHA-256 | Path | Working-tree state |
 | --- | --- | --- |
 | `4fdcfefdc2101e7e6240f7346abd2a7e86dfa42d870e66c7a43679bebd9dc5a5` | `.github/workflows/hermes-p5.yml` | modified tracked — post-PR Todo role and Golden Todo runtime bootstrap |
+| `3b04004a434ba00810e41ef052a20e9aa2f4bdaa3697fc35893b235117dcdcee` | `hermes-runtime/Dockerfile` | modified tracked — normalize copied migration SQL mode before non-root runtime |
+| `8aaa4f966425a664e0c0ef8ab610a3e9c7ecac16e8e885915476490a41c31c90` | `hermes-runtime/src/hermes_runtime/migration_bootstrap.py` | modified tracked — use existing PostgresRuntimeStore migration API |
+| `14a14ec59cf739aa9511504e08312d0dce51007011cd2c1ae63570abb36d6145` | `hermes-runtime/tests/test_deployment_baseline.py` | modified tracked — lock migration readability before USER hermes |
+| `5eba523d61a7cc6c34114cf7a7fc6c46b6dd6c162b14172e3e441353c9df072c` | `hermes-runtime/tests/test_migration_bootstrap.py` | untracked — bootstrap entry contract coverage |
 | `852153bb1dda5fcbefaa783e6e54749cdb3686eb935cb188ddf8b8230f81d4c2` | `docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md` | untracked |
 | `a073322c50f73bcf5dbecea1f600a7518d5b8242c98a199224d088920148e73f` | `docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md` | untracked |
 | `17e84ae952f53e61f62e91dde3673b7d15c0933a5507fc3a81f9bed455ec0947` | `docs/P6_GOLDEN_TODO_DATABASE_BOOTSTRAP_DELIVERY_REPORT.md` | untracked |

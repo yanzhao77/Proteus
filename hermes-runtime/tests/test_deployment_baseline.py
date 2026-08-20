@@ -10,6 +10,8 @@ class DeploymentBaselineTests(unittest.TestCase):
         text = (ROOT / "hermes-runtime" / "Dockerfile").read_text()
         self.assertIn("USER hermes", text)
         self.assertIn("--no-cache-dir", text)
+        self.assertIn("RUN chmod 0644 /app/migrations/*.sql", text)
+        self.assertLess(text.index("RUN chmod 0644 /app/migrations/*.sql"), text.index("USER hermes"))
         self.assertNotIn("USER root\nCMD", text)
 
     def test_compose_defines_distinct_roles_and_secret_files_without_plain_passwords(self):

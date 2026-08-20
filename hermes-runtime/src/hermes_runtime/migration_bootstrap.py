@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from hermes_runtime.config import env_or_file
-from hermes_runtime.infrastructure.postgres import PostgresStore
+from hermes_runtime.infrastructure.postgres import PostgresRuntimeStore
 
 
 def main() -> int:
@@ -10,7 +10,7 @@ def main() -> int:
     if not dsn:
         raise RuntimeError("HERMES_DATABASE_URL_REQUIRED")
     migrations = sorted(Path(__file__).parents[2].joinpath("migrations").glob("*.sql"))
-    store = PostgresStore(dsn)
+    store = PostgresRuntimeStore(dsn)
     for migration in migrations:
         store.apply_migration(migration)
     return 0

@@ -13,6 +13,7 @@ RUN python -m pip install --no-cache-dir --requirement /app/requirements.txt
 
 COPY src /app/src
 COPY migrations /app/migrations
+RUN chmod 0644 /app/migrations/*.sql
 
 USER hermes
 
