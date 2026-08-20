@@ -16,8 +16,10 @@ from hermes_runtime.domain.models import Actor, ActorType
 from hermes_runtime.infrastructure.oidc import OidcRejected, OidcTokenVerifier
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.domain.entry_understanding import EntryUnderstandingRejected, EntryUnderstandingValidationError
+from hermes_runtime.domain.entry_proposal_master_plan import EntryE3Rejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
 from hermes_runtime.infrastructure.postgres_entry_understanding import EntryUnderstandingStoreUnavailable
+from hermes_runtime.infrastructure.postgres_entry_proposal_master_plan import EntryProposalMasterPlanStoreUnavailable
 from hermes_runtime.domain.product_api import ProductApiRejected, ProductApiRequest
 
 
@@ -240,6 +242,30 @@ def create_app(
     async def answer_production_draft_clarification(draft_id: str, clarification_id: str, request: Request):
         return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/understanding/clarifications/{clarification_id}/answer", await _json_body(request))
 
+    @app.get("/production-drafts/{draft_id}/proposal")
+    def production_draft_proposal(draft_id: str, request: Request):
+        return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal", {})
+
+    @app.get("/production-drafts/{draft_id}/proposal/revisions")
+    def production_draft_proposal_revisions(draft_id: str, request: Request):
+        return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal/revisions", {})
+
+    @app.post("/production-drafts/{draft_id}/proposal")
+    async def generate_production_draft_proposal(draft_id: str, request: Request):
+        return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal", await _json_body(request))
+
+    @app.get("/production-drafts/{draft_id}/proposal/master-plan")
+    def production_draft_master_plan(draft_id: str, request: Request):
+        return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal/master-plan", {})
+
+    @app.get("/production-drafts/{draft_id}/proposal/master-plan/revisions")
+    def production_draft_master_plan_revisions(draft_id: str, request: Request):
+        return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal/master-plan/revisions", {})
+
+    @app.post("/production-drafts/{draft_id}/proposal/master-plan")
+    async def generate_production_draft_master_plan(draft_id: str, request: Request):
+        return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/master-plan", await _json_body(request))
+
     @app.get("/home", response_class=HTMLResponse)
     def factory_home(request: Request):
         return HTMLResponse(request.app.state.factory_workspace_ui.render_home())
@@ -349,6 +375,13 @@ def _dispatch(
         return _error(code, status, request_id, "request rejected")
     except EntryUnderstandingStoreUnavailable:
         return _error("E2_UNDERSTANDING_AUTHORITY_UNAVAILABLE", 503, request_id, "understanding authority unavailable")
+    except EntryE3Rejected as exc:
+        code = str(exc).split(":", 1)[0]
+        status = 409 if code.endswith("_VERSION_CONFLICT") or code.endswith("_IDEMPOTENCY_CONFLICT") or code.endswith("_SOURCE_STALE") else 404 if code in {"ENTRY_PROPOSAL_NOT_AVAILABLE", "ENTRY_PLAN_NOT_AVAILABLE"} else 422
+        return _error(code, status, request_id, "request rejected")
+    except EntryProposalMasterPlanStoreUnavailable as exc:
+        code = str(exc).split(":", 1)[0]
+        return _error(code, 503, request_id, "E3 authority unavailable")
     except ValueError:
         return _error("VALIDATION_FAILED", 400, request_id, "request rejected")
 

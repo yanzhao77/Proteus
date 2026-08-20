@@ -3,6 +3,11 @@ import type { AdapterResult, CommandMetadata, DraftListViewModel, DraftViewModel
 const pending = <T>(name: string): Promise<AdapterResult<T>> => Promise.resolve({ kind: 'not_implemented', message: `${name} is not implemented by the current Product API.` });
 
 class PendingDraftApi implements ProductionDraftApi {
+  getProposal(_draftId: string): Promise<import('../models').AdapterResult<import('../models').ProposalViewModel>> { return pending('DraftApi.getProposal'); }
+  generateProposal(_draftId: string, _metadata: import('../models').CommandMetadata): Promise<import('../models').AdapterResult<import('../models').ProposalViewModel>> { return pending('DraftApi.generateProposal'); }
+  getMasterPlan(_draftId: string): Promise<import('../models').AdapterResult<import('../models').MasterPlanViewModel>> { return pending('DraftApi.getMasterPlan'); }
+  generateMasterPlan(_draftId: string, _metadata: import('../models').CommandMetadata): Promise<import('../models').AdapterResult<import('../models').MasterPlanViewModel>> { return pending('DraftApi.generateMasterPlan'); }
+
   createDraft(_title: string, _idea: string, _metadata: CommandMetadata): Promise<AdapterResult<DraftViewModel>> { return pending('ProductionDraftApi.createDraft'); }
   listDrafts(): Promise<AdapterResult<DraftListViewModel[]>> { return pending('ProductionDraftApi.listDrafts'); }
   getDraft(_draftId: string): Promise<AdapterResult<DraftViewModel>> { return pending('ProductionDraftApi.getDraft'); }
