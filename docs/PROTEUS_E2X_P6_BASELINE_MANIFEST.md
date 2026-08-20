@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `39c38cd33888f93f05a00791200dd37504509ced` |
 | Branch | `fix/p5-migration-bootstrap-deploy-repair` |
-| Generated UTC | `2026-08-20T03:55:58Z` |
+| Generated UTC | `2026-08-20T08:39:13Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -243,7 +243,7 @@ This E3 closure preserves all inherited E2.x smoke provenance and the fixed `9 /
 | `1f2e764722e8fa4e199f663899480dd9a4b6f43ae92731c1841aabdda2b58bef` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E3_DELIVERY` |
 | `9b63e4c6b3738648f8d81b2d169724fb1c7199bc9c39ec85a53fc171824fa258` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E3_DELIVERY` |
 | `56730abbd917bc6fe80935c5ea18ae8746080d7566f1003da7e78e7bdd38231e` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E3_DELIVERY` |
-| `23c9ef63095000a68b1738ad91fc0c679ce0c89fa180cb679d37e8964a97c4cc` | `hermes-runtime/tests/test_e3_proposal_master_plan_domain.py` | `THIS_E3_DELIVERY` |
-| `08d540048b678a3643f5544e2cb013bbc26dd78b5b4e72f7742eda40636da151` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E3_DELIVERY` |
-| `ac898f8cbb1dbf8d14f1ad47d6741c99ec870338732280a399cab0c834dc92cf` | `hermes-runtime/tests/test_e3_proposal_master_plan_product_api.py` | `THIS_E3_DELIVERY` |
+| `976ff8808ef181aba0fabc2887b4591bdd6e1a6092db76777f8f382805c51982` | `hermes-runtime/tests/test_e3_proposal_master_plan_domain.py` | `THIS_E3_DELIVERY` |
+| `f383b78cb581b9cbf7919453066927a8998b0f5bcf2ca2b2d2bd32821cd2744d` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E3_DELIVERY` |
+| `22fd45ae9e887d9351e1b42a3207e840d7f29e17da6c1c280a2a0ccedb307407` | `hermes-runtime/tests/test_e3_proposal_master_plan_product_api.py` | `THIS_E3_DELIVERY` |
 | `466cfae61bc50caabdf34fa777ddde92938042c3380de29129ff08969abb21b5` | `hermes-runtime/tests/test_e3_proposal_master_plan_postgres.py` | `THIS_E3_DELIVERY` |
