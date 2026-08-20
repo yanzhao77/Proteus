@@ -4,12 +4,14 @@ import os
 from hermes_runtime.application.product_api import ProductApiFacade
 from hermes_runtime.application.entry_draft_api import UnavailableEntryDraftApi
 from hermes_runtime.application.entry_understanding_api import UnavailableEntryUnderstandingApi
+from hermes_runtime.application.entry_proposal_master_plan_api import UnavailableEntryProposalMasterPlanApi
 from hermes_runtime.infrastructure.understanding_provider_registry import build_understanding_producer_from_env
 from hermes_runtime.application.readiness import StaticReadinessCheck
 from hermes_runtime.application.factory_home_read_model import UnavailableFactoryHomeReadModel
 from hermes_runtime.infrastructure.postgres_factory_home_read_model import DenyAllActorProjectScope, PostgresCreatorActorProjectScope, PostgresFactoryHomeReadModel
 from hermes_runtime.infrastructure.postgres_entry_draft import PostgresEntryDraftStore
 from hermes_runtime.infrastructure.postgres_entry_understanding import PostgresEntryUnderstandingStore
+from hermes_runtime.infrastructure.postgres_entry_proposal_master_plan import PostgresEntryProposalMasterPlanStore
 from hermes_runtime.infrastructure.oidc import OidcConfig, OidcTokenVerifier, StaticJwksProvider
 from hermes_runtime.config import env_or_file
 from hermes_runtime.infrastructure.fastapi_app import create_app
@@ -64,8 +66,9 @@ def build_app():
     entry_draft_api = PostgresEntryDraftStore(database_url) if database_url and oidc_verifier else UnavailableEntryDraftApi()
     # No generic live LLM/provider is an established repository capability; remain fail-closed.
     entry_understanding_api = PostgresEntryUnderstandingStore(database_url, build_understanding_producer_from_env()) if database_url and oidc_verifier else UnavailableEntryUnderstandingApi()
+    entry_proposal_master_plan_api = PostgresEntryProposalMasterPlanStore(database_url) if database_url and oidc_verifier else UnavailableEntryProposalMasterPlanApi()
     return create_app(
-        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api),
+        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api),
         StaticReadinessCheck(database_ready=bool(database_url)),
         allowed_cors_origins=origins,
         oidc_verifier=oidc_verifier,

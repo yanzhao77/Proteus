@@ -11,6 +11,11 @@ const gates: GateViewModel[] = [{ gateId: 'demo-gate-001', productionName: 'Vide
 const data = <T>(value: T): Promise<AdapterResult<T>> => Promise.resolve({ kind: 'data', value });
 const noMutation = <T>(): Promise<AdapterResult<T>> => Promise.resolve({ kind: 'not_implemented', message: 'DEVELOPMENT FIXTURE does not submit authority commands.' });
 class FixtureDraftApi implements ProductionDraftApi {
+  getProposal(_draftId: string): Promise<AdapterResult<import('../models').ProposalViewModel>> { return Promise.resolve({ kind: 'not_implemented', message: 'E3 PROPOSAL AUTHORITY IS NOT AVAILABLE IN THIS ADAPTER.' }); }
+  generateProposal(_draftId: string, _metadata: CommandMetadata): Promise<AdapterResult<import('../models').ProposalViewModel>> { return noMutation(); }
+  getMasterPlan(_draftId: string): Promise<AdapterResult<import('../models').MasterPlanViewModel>> { return Promise.resolve({ kind: 'not_implemented', message: 'E3 MASTER PLAN AUTHORITY IS NOT AVAILABLE IN THIS ADAPTER.' }); }
+  generateMasterPlan(_draftId: string, _metadata: CommandMetadata): Promise<AdapterResult<import('../models').MasterPlanViewModel>> { return noMutation(); }
+
   createDraft(_title: string, _idea: string, _metadata: CommandMetadata): Promise<AdapterResult<DraftViewModel>> { return noMutation(); }
   listDrafts(): Promise<AdapterResult<DraftListViewModel[]>> { return Promise.resolve({ kind: 'not_implemented', message: 'DEVELOPMENT FIXTURE DOES NOT PROVIDE DRAFT AUTHORITY' }); }
   getDraft(_draftId: string): Promise<AdapterResult<DraftViewModel>> { return Promise.resolve({ kind: 'not_implemented', message: 'DEVELOPMENT FIXTURE DOES NOT PROVIDE DRAFT AUTHORITY' }); }

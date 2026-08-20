@@ -2,6 +2,7 @@ from typing import Any, Mapping, Optional, Protocol
 
 from hermes_runtime.application.factory_home_read_model import FactoryHomeReadModel, UnavailableFactoryHomeReadModel
 from hermes_runtime.application.entry_understanding_api import UnavailableEntryUnderstandingApi
+from hermes_runtime.application.entry_proposal_master_plan_api import UnavailableEntryProposalMasterPlanApi
 from hermes_runtime.application.entry_draft_api import EntryDraftApi, UnavailableEntryDraftApi
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
@@ -46,12 +47,14 @@ class ProductApiFacade:
         factory_home_read_model: Optional[FactoryHomeReadModel] = None,
         entry_draft_api: Optional[EntryDraftApi] = None,
         entry_understanding_api=None,
+        entry_proposal_master_plan_api=None,
     ) -> None:
         self._read_model = read_model
         self._command_gateway = command_gateway
         self._factory_home_read_model = factory_home_read_model or UnavailableFactoryHomeReadModel()
         self._entry_draft_api = entry_draft_api or UnavailableEntryDraftApi()
         self._entry_understanding_api = entry_understanding_api or UnavailableEntryUnderstandingApi()
+        self._entry_proposal_master_plan_api = entry_proposal_master_plan_api or UnavailableEntryProposalMasterPlanApi()
 
     def handle(self, request: ProductApiRequest) -> ProductApiResponse:
         reject_forbidden_authority_shape(request)
@@ -111,6 +114,25 @@ class ProductApiFacade:
                 answer = request.body.get("answer") if isinstance(request.body, Mapping) else None
                 return self._safe(202, {"availability":"CURRENT", "item":self._entry_understanding_api.answer_clarification(subject, draft_id, parts[4], answer, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
             raise ProductApiRejected("UNSUPPORTED_ROUTE")
+        if len(parts) >= 3 and parts[0] == "production-drafts" and parts[2] == "proposal":
+            subject = self._draft_subject(request)
+            draft_id = parts[1]
+            if method == "GET" and len(parts) == 3:
+                return self._safe(200, self._entry_proposal_master_plan_api.get_proposal(subject, draft_id))
+            if method == "GET" and len(parts) == 4 and parts[3] == "revisions":
+                return self._safe(200, self._entry_proposal_master_plan_api.list_proposal_revisions(subject, draft_id))
+            if method == "POST" and len(parts) == 3:
+                payload = self._e3_payload(request, "ENTRY_PROPOSAL_SCHEMA_INVALID")
+                return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.generate_proposal(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
+            if len(parts) >= 4 and parts[3] == "master-plan":
+                if method == "GET" and len(parts) == 4:
+                    return self._safe(200, self._entry_proposal_master_plan_api.get_master_plan(subject, draft_id))
+                if method == "GET" and len(parts) == 5 and parts[4] == "revisions":
+                    return self._safe(200, self._entry_proposal_master_plan_api.list_master_plan_revisions(subject, draft_id))
+                if method == "POST" and len(parts) == 4:
+                    payload = self._e3_payload(request, "ENTRY_PLAN_SCHEMA_INVALID")
+                    return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.generate_master_plan(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
+            raise ProductApiRejected("UNSUPPORTED_ROUTE")
         if method == "GET" and parts == ["factory-home", "status"]:
             return self._safe(200, self._factory_home_read_model.factory_status(actor_scope))
         if method == "GET" and len(parts) == 3 and parts[0] == "projects" and parts[2] == "status":
@@ -158,6 +180,19 @@ class ProductApiFacade:
         if request.path.strip("/") != "production-drafts" and (not isinstance(payload["expected_version"], int) or payload["expected_version"] < 1):
             raise ProductApiRejected("ENTRY_DRAFT_VALIDATION_FAILED")
         return payload
+
+    @staticmethod
+    def _e3_payload(request: ProductApiRequest, code: str) -> Mapping[str, Any]:
+        body = dict(request.body)
+        allowed = {"idempotency_key", "reason", "expected_version"}
+        if set(body) - allowed:
+            raise ProductApiRejected(code)
+        key = body.get("idempotency_key") or request.headers.get("Idempotency-Key")
+        reason = body.get("reason")
+        expected = body.get("expected_version")
+        if not isinstance(key, str) or not key.strip() or not isinstance(reason, str) or not reason.strip() or not isinstance(expected, int) or expected < 0:
+            raise ProductApiRejected(code)
+        return {"idempotency_key": key, "reason": reason, "expected_version": expected}
 
     @staticmethod
     def _understanding_payload(request: ProductApiRequest) -> Mapping[str, Any]:
