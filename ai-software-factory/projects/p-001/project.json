@@ -2,8 +2,8 @@
   "id": "p-001",
   "title": "示例项目",
   "status": "INTEGRATION",
-  "runStatus": "RUNNING",
-  "revision": 6,
+  "runStatus": "RETRYING",
+  "revision": 7,
   "createdAt": "",
   "events": [
     {
@@ -35,6 +35,12 @@
       "type": "implementation.completed",
       "actor": "factory-manager",
       "note": "backend 26/26 smoke, frontend build OK; qa=7113123f review=3728161a"
+    },
+    {
+      "ts": "2026-08-21T13:20:00Z",
+      "type": "review.request-changes",
+      "actor": "review-subagent-3728161a",
+      "note": "CON-01 中危 PATCH null→500; SEC-01 密码字节截断; 修复任务已派发 backend/frontend 子代理; ADR-0001 错误语义决策"
     }
   ],
   "meta": {
@@ -52,9 +58,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T13:05:00Z",
-    "type": "implementation.completed",
-    "actor": "factory-manager",
-    "note": "backend 26/26 smoke, frontend build OK; qa=7113123f review=3728161a"
+    "ts": "2026-08-21T13:20:00Z",
+    "type": "review.request-changes",
+    "actor": "review-subagent-3728161a",
+    "note": "CON-01 中危 PATCH null→500; SEC-01 密码字节截断; 修复任务已派发 backend/frontend 子代理; ADR-0001 错误语义决策"
   }
 }

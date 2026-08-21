@@ -6,11 +6,12 @@ info:
     Todo SaaS 后端 API（与 database-schema.sql 字段一致）。
     认证方式：JWT Bearer Token（POST /api/v1/auth/register|login 返回 access_token）。
     错误语义（4xx 统一响应体 `{ "detail": string }`）：
-      - 400 Bad Request：业务校验失败（密码强度不足、title 为空/超长、PATCH 空请求体）
+      - 400 Bad Request：PATCH 空请求体（无任何可更新字段）
+      - 422 Unprocessable Entity：业务校验失败（密码强度不足、title 为空/超长、显式 null 字段）
       - 401 Unauthorized：未携带/无效/过期 token，或登录凭据错误（响应带 `WWW-Authenticate: Bearer`）
       - 404 Not Found：资源不存在；他人资源也返回 404（防枚举，不返回 403）
       - 409 Conflict：邮箱已被注册
-      - 422 Unprocessable Entity：请求体不符合 schema（Pydantic 默认，字段缺失/类型错误）
+      - 422 的 detail 为数组（FastAPI/Pydantic 默认）；Error.detail 可为 string 或 string[]
 servers:
   - url: http://localhost:8000
     description: 本地开发（Phase 2）
