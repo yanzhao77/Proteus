@@ -7,7 +7,7 @@ info:
     认证方式：JWT Bearer Token（POST /api/v1/auth/register|login 返回 access_token）。
     错误语义（4xx 统一响应体 `{ "detail": string }`）：
       - 400 Bad Request：PATCH 空请求体（无任何可更新字段）
-      - 422 Unprocessable Entity：业务校验失败（密码强度不足、title 为空/超长、显式 null 字段）
+      - 422 Unprocessable Entity：业务校验失败（密码强度不足、title 为空/超长、）
       - 401 Unauthorized：未携带/无效/过期 token，或登录凭据错误（响应带 `WWW-Authenticate: Bearer`）
       - 404 Not Found：资源不存在；他人资源也返回 404（防枚举，不返回 403）
       - 409 Conflict：邮箱已被注册
@@ -244,10 +244,10 @@ components:
       properties:
         status:
           type: string
-          enum: [ok]
+          enum: [ok, degraded]
         database:
           type: string
-          enum: [ok]
+          enum: [ok, degraded]
           description: 数据库连通性（可选返回）
     Email:
       type: string

@@ -1,9 +1,9 @@
 {
   "id": "p-001",
   "title": "示例项目",
-  "status": "INTEGRATION",
-  "runStatus": "RETRYING",
-  "revision": 7,
+  "status": "ACCEPTANCE",
+  "runStatus": "RUNNING",
+  "revision": 10,
   "createdAt": "",
   "events": [
     {
@@ -41,6 +41,24 @@
       "type": "review.request-changes",
       "actor": "review-subagent-3728161a",
       "note": "CON-01 中危 PATCH null→500; SEC-01 密码字节截断; 修复任务已派发 backend/frontend 子代理; ADR-0001 错误语义决策"
+    },
+    {
+      "ts": "2026-08-21T13:40:00Z",
+      "type": "qa.passed",
+      "actor": "factory-manager",
+      "note": "test-gate 48 passed; review approve"
+    },
+    {
+      "ts": "2026-08-21T13:41:00Z",
+      "type": "security-audit.passed",
+      "actor": "factory-manager",
+      "note": "security-gate PASS (secret scan); Phase2 closed loop: requirement->architecture->impl->test->review"
+    },
+    {
+      "ts": "2026-08-21T13:42:00Z",
+      "type": "acceptance.reached-phase2",
+      "actor": "factory-manager",
+      "note": "Phase 2 closed loop COMPLETE; Phase 7 will add PG+Docker+release"
     }
   ],
   "meta": {
@@ -58,9 +76,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T13:20:00Z",
-    "type": "review.request-changes",
-    "actor": "review-subagent-3728161a",
-    "note": "CON-01 中危 PATCH null→500; SEC-01 密码字节截断; 修复任务已派发 backend/frontend 子代理; ADR-0001 错误语义决策"
+    "ts": "2026-08-21T13:42:00Z",
+    "type": "acceptance.reached-phase2",
+    "actor": "factory-manager",
+    "note": "Phase 2 closed loop COMPLETE; Phase 7 will add PG+Docker+release"
   }
 }

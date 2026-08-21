@@ -61,3 +61,41 @@ verdict: `request-changes`
 
 - smoke.py 实测 26/26 PASS（本机 venv：Python 3.9.6 / fastapi 0.115.6 / sqlalchemy 2.0.52 / pydantic 2.13.4 / passlib 1.7.4 / bcrypt 4.0.1 / jose 3.3.0）。
 - 定向复现（隔离 SQLite + TestClient）：JWT alg=HS256、claims=[exp,iat,sub] ✓；过期 token→401 ✓；伪造 token→401 ✓；`PATCH title=null`→**500**、`PATCH done=null`→**500**、`PATCH title=""`→422、null 后 PATCH 正常→200；login 4 字符密码→401（spec 422）；title 201 字符→422（spec 400）；72 个 CJK 字符密码→201（截断风险复现）。
+
+---
+
+## 复审（最终）
+
+verdict: `approve`
+
+> 复验方式：重读全部修复文件 + 定向复现 + 全量 pytest。修复 commit：a0888a2（ADR-0001 + api-spec 修订 + 修复派发）、2dc82a4（前端 api.js）。
+
+### 修复清单逐项复验（8/8 通过）
+
+| 原发现 | 修复内容 | 复验结果 |
+|---|---|---|
+| CON-01（中） | `model_dump(exclude_unset=True, exclude_none=True)` | ✓ `PATCH {"title":null}`→**400**（非 500）、`{"done":null}`→400、`{"title":null,"done":true}`→200 且仅更新 done（title 保持原值，null 不落库）；routers/todos.py:66 |
+| SEC-01 | 密码 UTF-8 字节 ≤72 field_validator（register+login） | ✓ 25 个 CJK 字符（75 字节）→**422**；24 个（72 字节）→201（边界正确）；schemas/auth.py:14-31 |
+| CON-03 | LoginRequest.password min_length=8 | ✓ 4 字符密码登录→**422**；schemas/auth.py:29 |
+| MAINT-01 | User.email 去 index=True | ✓ 仅 unique=True；models/user.py:16 |
+| CON-06 | 路径参数 `{todo_id}`→`{id}` | ✓ PATCH/DELETE/`_get_owned_todo` 全部 `id`，与 spec 对齐 |
+| SEC-05 | decode 限制 sub ≤19 位 + `int(sub)` try/except | ✓ 有效签名 20 位数字 sub→**401**（非 500）；security.py:52、deps.py:30-33 |
+| CON-07（前端） | api.js 仅数据端点 401 清 token，auth 端点保留服务端 detail | ✓ `isAuthEndpoint` 分支：register/login 401 走 `!res.ok` 保留 detail；数据端点 401 清 token 回登录；api.js:51-57 |
+| CON-02/04/05（契约） | ADR-0001：业务校验一律 422 / health 允许 degraded / detail 可为数组 | ✓ spec 错误语义描述与 TodoUpdate 响应已修订；`422` 涵盖弱密码/title/null 校验，400 仅保留 PATCH 空请求体；detail 注明 string|string[] |
+
+### 测试
+
+- `.venv/bin/python -m pytest -q` → **48 passed**（9.44s）。QA 已交付 `tests/test_auth.py`（12）、`tests/test_todos.py`（23）、`tests/test_regressions.py`（7，覆盖 CON-01/SEC-01/CON-03/SEC-05）+ conftest.py；t-004 回归用例全部转正。smoke.py 仍 26/26。
+- 上轮"测试审查将在 QA 完成后复核"条件已满足：正式 pytest 全绿且覆盖修复点。
+
+### 遗留发现（均低/信息级，不阻断 approve，建议下轮跟踪）
+
+| ID | 严重度 | 描述 | 位置 | 建议 |
+|---|---|---|---|---|
+| CON-04a | 低 | ADR-0001 声明"api-spec HealthResponse.database enum 增加 degraded"，但实际 spec 仍为 `enum: [ok]`——实现返回 `"degraded"` 超出 enum，ADR 决策未完全落地（spec 侧遗漏）。 | artifacts/api-spec.yaml:249；ADR 0001 | 按 ADR 补 `enum: [ok, degraded]`（或改实现仅返回 ok）。 |
+| SPEC-01 | 信息 | spec 顶部错误语义清单将"显式 null 字段"列为 422，而实现按修复清单对 `{"title":null}` 返回 400（exclude_none 后视为"无任何可更新字段"）。行为无害且与 PATCH 响应定义（400=空请求体）一致，但清单文案与实现口径有出入。 | api-spec.yaml:10 | 文案微调：删除 422 清单中"显式 null 字段"，并入 400"无任何可更新字段"说明。 |
+| SEC-02/03/04 | 低 | 维持上轮观察项（登录时序枚举、localStorage token、无限流），不在本次修复清单内。 | — | Phase 7 加固清单跟踪。 |
+
+### 结论
+
+8/8 修复项复验通过，pytest 48/48 全绿，无高/中危未解决项；仅存 1 项低危（CON-04a，spec 侧 enum 遗漏）与 2 项信息级口径问题。**最终 verdict：approve**。
