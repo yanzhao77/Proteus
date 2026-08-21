@@ -12,8 +12,8 @@ from hermes_runtime.domain.entry_approval_bridge import (
 class E4DomainTests(unittest.TestCase):
     def source(self, **overrides):
         plan = {
-            "schema_version": "v1",
-            "compiler": "e3-master-plan-v1",
+            "schema_version": "e3-v1",
+            "compiler": "master-plan-compiler-v1",
             "pre_approval_only": True,
             "nodes": [
                 {"node_key": "a", "title": "First", "requirement_refs": ["r1"]},

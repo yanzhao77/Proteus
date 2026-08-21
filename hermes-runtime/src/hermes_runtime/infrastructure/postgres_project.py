@@ -157,6 +157,15 @@ class PostgresProjectStore(PostgresGraphStore):
                 self._complete_command(connection, command.envelope, receipt)
                 self._trigger_fault(FaultPoint.BEFORE_PROJECT_COMMIT)
                 return receipt
+        except psycopg.errors.UniqueViolation:
+            # A different authoritative project.create command already owns the
+            # deterministic project identity. Surface a stable child rejection
+            # so a durable caller can classify it as terminal rather than an
+            # unknown transport/process interruption.
+            code = "PROJECT_ALREADY_EXISTS"
+            rejected = CommandRejected(code)
+            self._persist_rejection(command.envelope, request_hash, code, "")
+            raise rejected
         except CommandRejected as exc:
             self._persist_rejection(command.envelope, request_hash, exc.code, exc.detail)
             raise

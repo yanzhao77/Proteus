@@ -150,8 +150,10 @@ class PostgresEntryApprovalBridgeStore:
         with self._connect() as c:
             prior = c.execute("SELECT status,correlation_id FROM public.entry_approval_bridges WHERE bridge_id=%s FOR UPDATE", (bridge_id,)).fetchone()
             if not prior: raise EntryE4Rejected("ENTRY_APPROVAL_NOT_AVAILABLE")
+            if prior["status"] == status:
+                return
             c.execute("UPDATE public.entry_approval_bridges SET status=%s,updated_at=now() WHERE bridge_id=%s", (status, bridge_id))
-            c.execute("INSERT INTO public.entry_approval_bridge_transitions(transition_id,bridge_id,from_status,to_status,reason_code,correlation_id) VALUES(%s,%s,%s,%s,%s,%s)", (stable_id("transition", bridge_id, status, reason), bridge_id, prior["status"], status, reason, prior["correlation_id"]))
+            c.execute("INSERT INTO public.entry_approval_bridge_transitions(transition_id,bridge_id,from_status,to_status,reason_code,correlation_id) VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT (transition_id) DO NOTHING", (stable_id("transition", bridge_id, status, reason), bridge_id, prior["status"], status, reason, prior["correlation_id"]))
 
     def materialize(self, bridge_id: str, project_id: str) -> None:
         with self._connect() as c:
@@ -159,7 +161,25 @@ class PostgresEntryApprovalBridgeStore:
             if not bridge: raise EntryE4Rejected("ENTRY_APPROVAL_NOT_AVAILABLE")
             c.execute("UPDATE public.entry_approval_bridges SET status='MATERIALIZED',project_id=%s,materialized_at=now(),updated_at=now() WHERE bridge_id=%s", (project_id, bridge_id))
             c.execute("INSERT INTO public.entry_approval_materialized_bindings(bridge_id,draft_id,master_plan_id,master_plan_revision_id,project_id) VALUES(%s,%s,%s,%s,%s) ON CONFLICT (bridge_id) DO NOTHING", (bridge_id, bridge["draft_id"], bridge["master_plan_id"], bridge["master_plan_revision_id"], project_id))
-            c.execute("INSERT INTO public.entry_approval_bridge_transitions(transition_id,bridge_id,from_status,to_status,reason_code,correlation_id) VALUES(%s,%s,'VERIFICATION_APPLYING','MATERIALIZED','CHILD_RECEIPTS_RECORDED',%s)", (stable_id("transition", bridge_id, "materialized"), bridge_id, bridge["correlation_id"]))
+            c.execute("INSERT INTO public.entry_approval_bridge_transitions(transition_id,bridge_id,from_status,to_status,reason_code,correlation_id) VALUES(%s,%s,'VERIFICATION_APPLYING','MATERIALIZED','CHILD_RECEIPTS_RECORDED',%s) ON CONFLICT (transition_id) DO NOTHING", (stable_id("transition", bridge_id, "materialized"), bridge_id, bridge["correlation_id"]))
+
+    def load_bridge(self, creator_subject: str, draft_id: str) -> Mapping[str, object]:
+        """Creator-scoped durable bridge load for a fresh orchestrator instance."""
+        try:
+            with self._connect() as c:
+                row = c.execute(
+                    "SELECT bridge_id,status,project_id,compiled_blueprint,compiled_blueprint_hash,"
+                    "correlation_id,project_command_id,graph_command_id FROM public.entry_approval_bridges "
+                    "WHERE creator_subject=%s AND draft_id=%s ORDER BY created_at DESC LIMIT 1 FOR UPDATE",
+                    (creator_subject, draft_id),
+                ).fetchone()
+                if not row:
+                    raise EntryE4Rejected("ENTRY_APPROVAL_NOT_AVAILABLE")
+                return dict(row)
+        except EntryE4Rejected:
+            raise
+        except Exception as exc:
+            raise EntryApprovalBridgeUnavailable("ENTRY_APPROVAL_UNAVAILABLE") from exc
 
     def get_approval(self, creator_subject: str, draft_id: str) -> Mapping[str, object]:
         try:

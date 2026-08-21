@@ -28,6 +28,10 @@ Product API/FastAPI may expose one nested Master Plan family for approval previe
 
 The Draft Workspace may show server-computed acknowledgements, a preview, explicit approval confirmation, processing/reconciliation/terminal state, and authoritative Project ID only when materialized. It must not default acknowledgements, auto-approve, start runtime, or fabricate Portfolio/Live Production views.
 
+## Closure verification addendum
+
+The implemented durable bridge satisfied the required proof obligations against a real disposable PostgreSQL 16 authority database. The final 26-scenario matrix used a fault wrapper that calls the actual ControlPlane child port and interrupts only after that port commits; each recovery path rebuilt the orchestrator and store. It proved receipt-first ordering, deterministic receipt replay, recovery after receipt/Project/Graph/each VerificationPlan boundary, no duplicate child facts under duplicate and concurrent reconciliation, terminal real-child collision handling, database immutability, creator isolation and runtime ACL/direct-DML denial. No conflict with E1–E3 or P6 authority was observed.
+
 ## Recon verdict
 
 No P0–P6, E1–E3 invariant, migration `0001–0029`, or P6 trial driver change is required by this design. E4 can proceed with one new migration, new bridge modules, E4-specific tests, and adapter calls to existing child authority ports.

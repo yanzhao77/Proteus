@@ -27,7 +27,7 @@ class E4SagaTests(unittest.TestCase):
         saga = ApprovalBridgeSaga(cp, repo)
         bridge = {"bridge_id":"bridge", "status":"PROCESSING", "compiled_blueprint": {
             "project_id":"project", "project_command_id":"project-c", "graph_command_id":"graph-c", "source":{"draft_id":"draft"},
-            "tasks":[{"task_id":"task-a","title":"A","verification_plan_id":"vp-a","create_command_id":"vpc-a"},{"task_id":"task-b","title":"B","verification_plan_id":"vp-b","create_command_id":"vpc-b"}],
+            "tasks":[{"task_id":"task-a","title":"A","verification_plan_id":"vp-a","create_command_id":"vpc-a","verification_expected_task_version":1},{"task_id":"task-b","title":"B","verification_plan_id":"vp-b","create_command_id":"vpc-b","verification_expected_task_version":1}],
             "dependencies":[{"task_id":"task-b","depends_on_task_id":"task-a"}],
         }}
         result = saga.materialize(bridge)
@@ -38,5 +38,5 @@ class E4SagaTests(unittest.TestCase):
         self.assertEqual(graph.operations[-1].task_id, "task-b")
         self.assertEqual(graph.operations[-1].depends_on_task_id, "task-a")
         self.assertEqual(repo.materialized, [("bridge", "project")])
-        self.assertNotIn("worker", str(cp.calls).lower())
+        self.assertTrue(all(command.envelope.actor.actor_type.value == "control_plane" for _, command in cp.calls))
         self.assertNotIn("scheduler", str(cp.calls).lower())

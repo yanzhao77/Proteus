@@ -105,7 +105,7 @@ def _derive_blueprint(source: ApprovalSource) -> Mapping[str, Any]:
     plan = source.plan_content
     if plan.get("pre_approval_only") is not True:
         raise EntryE4Rejected("ENTRY_APPROVAL_PLAN_NOT_PRE_APPROVAL")
-    if plan.get("compiler") != "e3-master-plan-v1" or plan.get("schema_version") != "v1":
+    if plan.get("compiler") != "master-plan-compiler-v1" or plan.get("schema_version") != "e3-v1":
         raise EntryE4Rejected("ENTRY_APPROVAL_PLAN_NOT_CURRENT")
     nodes = plan.get("nodes")
     dependencies = plan.get("dependencies")
@@ -130,6 +130,9 @@ def _derive_blueprint(source: ApprovalSource) -> Mapping[str, Any]:
             "requirement_refs": tuple(sorted(str(ref) for ref in item.get("requirement_refs", []))),
             "verification_plan_id": stable_id("verification", bridge_id, key),
             "create_command_id": stable_id("create-verification", bridge_id, key),
+            # E4 graph lowering inserts every task at v0 then deterministically
+            # recomputes NEW -> READY/BLOCKED, yielding task v1 before plans attach.
+            "verification_expected_task_version": 1,
             "verification_policy": E4_POLICY_VERSION,
         })
     tasks = {item["node_key"]: item for item in lowered_nodes}

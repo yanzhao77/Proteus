@@ -90,8 +90,63 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.hermes_e4_reject_frozen_bridge_change()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF OLD.approval_command_id IS DISTINCT FROM NEW.approval_command_id
+     OR OLD.creator_subject IS DISTINCT FROM NEW.creator_subject
+     OR OLD.approver_subject IS DISTINCT FROM NEW.approver_subject
+     OR OLD.draft_id IS DISTINCT FROM NEW.draft_id
+     OR OLD.source_draft_revision_id IS DISTINCT FROM NEW.source_draft_revision_id
+     OR OLD.source_understanding_revision_id IS DISTINCT FROM NEW.source_understanding_revision_id
+     OR OLD.proposal_revision_id IS DISTINCT FROM NEW.proposal_revision_id
+     OR OLD.proposal_content_hash IS DISTINCT FROM NEW.proposal_content_hash
+     OR OLD.master_plan_id IS DISTINCT FROM NEW.master_plan_id
+     OR OLD.master_plan_revision_id IS DISTINCT FROM NEW.master_plan_revision_id
+     OR OLD.master_plan_content_hash IS DISTINCT FROM NEW.master_plan_content_hash
+     OR OLD.compiler_version IS DISTINCT FROM NEW.compiler_version
+     OR OLD.policy_version IS DISTINCT FROM NEW.policy_version
+     OR OLD.compiled_blueprint IS DISTINCT FROM NEW.compiled_blueprint
+     OR OLD.compiled_blueprint_hash IS DISTINCT FROM NEW.compiled_blueprint_hash
+     OR OLD.required_acknowledgements IS DISTINCT FROM NEW.required_acknowledgements
+     OR OLD.acknowledged_refs IS DISTINCT FROM NEW.acknowledged_refs
+     OR OLD.intended_project_id IS DISTINCT FROM NEW.intended_project_id
+     OR OLD.project_command_id IS DISTINCT FROM NEW.project_command_id
+     OR OLD.graph_command_id IS DISTINCT FROM NEW.graph_command_id
+     OR OLD.correlation_id IS DISTINCT FROM NEW.correlation_id THEN
+    RAISE EXCEPTION 'E4 frozen bridge authority record';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+DROP TRIGGER IF EXISTS hermes_e4_bridge_frozen_immutable ON public.entry_approval_bridges;
+CREATE TRIGGER hermes_e4_bridge_frozen_immutable
+BEFORE UPDATE ON public.entry_approval_bridges
+FOR EACH ROW EXECUTE FUNCTION public.hermes_e4_reject_frozen_bridge_change();
+
+CREATE OR REPLACE FUNCTION public.hermes_e4_reject_receipt_rewrite()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  -- The only legitimate UPDATE is the transaction-local first fill of the
+  -- initially NULL result payload that commits with the frozen bridge record.
+  IF OLD.result_payload IS NULL AND NEW.result_payload IS NOT NULL
+     AND OLD.command_id IS NOT DISTINCT FROM NEW.command_id
+     AND OLD.creator_subject IS NOT DISTINCT FROM NEW.creator_subject
+     AND OLD.command_type IS NOT DISTINCT FROM NEW.command_type
+     AND OLD.idempotency_key IS NOT DISTINCT FROM NEW.idempotency_key
+     AND OLD.request_fingerprint IS NOT DISTINCT FROM NEW.request_fingerprint
+     AND OLD.status IS NOT DISTINCT FROM NEW.status
+     AND OLD.error_code IS NOT DISTINCT FROM NEW.error_code
+     AND OLD.correlation_id IS NOT DISTINCT FROM NEW.correlation_id THEN
+    RETURN NEW;
+  END IF;
+  RAISE EXCEPTION 'E4 immutable authority record';
+END;
+$$;
 DROP TRIGGER IF EXISTS hermes_e4_receipt_immutable ON public.entry_approval_command_receipts;
-CREATE TRIGGER hermes_e4_receipt_immutable BEFORE DELETE ON public.entry_approval_command_receipts FOR EACH ROW EXECUTE FUNCTION public.hermes_e4_reject_immutable_change();
+CREATE TRIGGER hermes_e4_receipt_immutable
+BEFORE UPDATE OR DELETE ON public.entry_approval_command_receipts
+FOR EACH ROW EXECUTE FUNCTION public.hermes_e4_reject_receipt_rewrite();
 DROP TRIGGER IF EXISTS hermes_e4_step_immutable ON public.entry_approval_bridge_steps;
 CREATE TRIGGER hermes_e4_step_immutable BEFORE UPDATE OR DELETE ON public.entry_approval_bridge_steps FOR EACH ROW EXECUTE FUNCTION public.hermes_e4_reject_immutable_change();
 DROP TRIGGER IF EXISTS hermes_e4_transition_immutable ON public.entry_approval_bridge_transitions;

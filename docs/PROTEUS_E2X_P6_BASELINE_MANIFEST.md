@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `39c38cd33888f93f05a00791200dd37504509ced` |
 | Branch | `fix/p5-migration-bootstrap-deploy-repair` |
-| Generated UTC | `2026-08-20T08:39:13Z` |
+| Generated UTC | `2026-08-21T01:19:12Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -99,7 +99,7 @@
 | `c71a112e3a5ef4ad0fa4a4af4f846bff7680c2c742fb3240639de5661bafaaa3` | `hermes-runtime/migrations/0027_e2x_producer_provenance.sql` | untracked |
 | `f44cc6f6d20fd7afea583ed967057d9fcda38d2419376b9b86599d1295bea678` | `hermes-runtime/migrations/0028_p6_recovery_runtime_least_privilege.sql` | untracked |
 | `7cf67da42378ed4b252529c1515beb5e3b0c25567cb2df23413751d10bad0d9c` | `hermes-runtime/scripts/e2x_live_provider_smoke.py` | untracked |
-| `35f434475a6baa9bffa2bb512a6697bda76cead80f068ce636a8bc180aec56f8` | `hermes-runtime/src/hermes_runtime/api_main.py` | modified tracked |
+| `b5dbe9881c075d3bfbf473d3200f7241c51f00d595fa8774e77508d38f8c8fc8` | `hermes-runtime/src/hermes_runtime/api_main.py` | modified tracked |
 | `990163cbdca2608474f1565c10ad9a7d457fc105a1080174c4b407a23a9a5c13` | `hermes-runtime/src/hermes_runtime/application/entry_draft_api.py` | untracked |
 | `adb8e5b2fdac14f1e56bb59c6c3ba3e2a84e60a7be08d209c2ed75886c6ea39b` | `hermes-runtime/src/hermes_runtime/application/entry_understanding_api.py` | untracked |
 | `df692928211b3c02d2076de60aee1a8843a1556219ef166be58b50c0eab53446` | `hermes-runtime/src/hermes_runtime/application/factory_home_read_model.py` | untracked |
@@ -218,7 +218,7 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 
 ## 12. Documentation/Metadata-Only Correction Record
 
-This E3 closure preserves all inherited E2.x smoke provenance and the fixed `9 / 9` Product API budget without rerunning smoke or calling a provider. It records this delivery's real disposable PostgreSQL Full Runtime result of **586 passed, 12 skipped, 0 failures** in `321.58 s`, P6 `20/20 PASS`, E3 formal PostgreSQL `8/8 PASS`, fresh `0001 → 0029` migration PASS and frontend `35/35 PASS`. Historical `575 run / 12 skipped / 0 failures` remains sealed inherited evidence only.
+This E3 closure preserves all inherited E2.x smoke provenance and the fixed `9 / 9` Product API budget without rerunning smoke or calling a provider. It preserves the E3 delivery's real disposable PostgreSQL Full Runtime result of **586 passed, 12 skipped, 0 failures** in `321.58 s`, P6 `20/20 PASS`, E3 formal PostgreSQL `8/8 PASS`, fresh `0001 → 0029` migration PASS and frontend `35/35 PASS`. This E4 closure additionally records **634 run, 12 skipped, 0 failures**, real PostgreSQL durable matrix `26/26 PASS`, fresh `0001 → 0030` migration PASS, P6 Recovery focused `9/9 PASS`, and frontend `35/35 PASS`; it does not rerun E2.x provider smoke. Historical `575 run / 12 skipped / 0 failures` remains sealed inherited evidence only.
 
 ## E4 Approval Bridge Final Status
 
@@ -231,7 +231,7 @@ This E3 closure preserves all inherited E2.x smoke provenance and the fixed `9 /
 | P6 Authority Gate | CLOSED |
 | P6 Functional Revalidation | PASS |
 
-E4 is limited to explicit approval, deterministic lowering, durable bridge receipts and reconciliation through existing ControlPlane child command ports. It introduces no direct runtime, provider or P6 authority.
+E4 is limited to explicit approval, deterministic lowering, receipt-first durable bridge records and fresh-instance reconciliation through existing ControlPlane child command ports. The sealed real PostgreSQL matrix covers post-commit interruption after Project, Graph and each VerificationPlan child boundary, terminal child rejection, immutable authority facts and direct-DML denial. It introduces no direct runtime, provider or P6 authority.
 
 ## 13. E3 Delivery SHA-256 Inventory
 
@@ -253,7 +253,7 @@ E4 is limited to explicit approval, deterministic lowering, durable bridge recei
 | `545695a334457741ec91421f9a7370eb59c5acf6fb32f227f4057a7a87d19c4e` | `hermes-runtime/src/hermes_runtime/domain/entry_proposal_master_plan.py` | `THIS_E3_DELIVERY` |
 | `83590b3c54743b7491402c23354ae1f874ff02ba7119271fc315fe9c3c1a4ba8` | `hermes-runtime/src/hermes_runtime/application/entry_proposal_master_plan_api.py` | `THIS_E3_DELIVERY` |
 | `cf362dbd3116736e2810c0c50833769ca239934439bc1fc604561d99222f11af` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_proposal_master_plan.py` | `THIS_E3_DELIVERY` |
-| `35f434475a6baa9bffa2bb512a6697bda76cead80f068ce636a8bc180aec56f8` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E3_DELIVERY` |
+| `b5dbe9881c075d3bfbf473d3200f7241c51f00d595fa8774e77508d38f8c8fc8` | `hermes-runtime/src/hermes_runtime/api_main.py` | `SUPERSEDED_BY_E4_COMPOSITION` |
 | `fe163a42b7a6842bfc001fbc068e452339ed381862d5874906e0f2c299046fdc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E3_DELIVERY` |
 | `25cdb38184b333aef964c7e853a319b7d952cb7cd447039e457ae631d9e2f3a1` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E3_DELIVERY` |
 | `976ff8808ef181aba0fabc2887b4591bdd6e1a6092db76777f8f382805c51982` | `hermes-runtime/tests/test_e3_proposal_master_plan_domain.py` | `THIS_E3_DELIVERY` |
@@ -263,26 +263,29 @@ E4 is limited to explicit approval, deterministic lowering, durable bridge recei
 
 
 ## 14. E4 Delivery SHA-256 Inventory
-
+> `THIS_E4_DELIVERY` records the exact E4 closure files. The manifest does not hash itself, temporary test environments, DSN files, disposable database material or user REVIEW_REQUIRED files.
 | SHA-256 | Path | Inventory treatment |
 | --- | --- | --- |
-| `ae85d83ee64997334907d7491053a12fe89e4c8b1469cf4c812ff8ec1521b6f9` | `docs/E4_APPROVAL_BRIDGE_DELIVERY_REPORT.md` | `E4_DELIVERY_CANDIDATE` |
-| `e4b956f250162b03c0a99e9ef7b74e25097d2f994567bd31d97d7f03064910ff` | `docs/E4_APPROVAL_BRIDGE_DESIGN.md` | `E4_DELIVERY_CANDIDATE` |
-| `796a680066b6ba6445b2e0ec6ca25089d04968d69725784b2046ef30c2cae222` | `docs/E4_APPROVAL_BRIDGE_IMPLEMENTATION.md` | `E4_DELIVERY_CANDIDATE` |
-| `e6067cf5d04d67d4262ec7d40369f5552c11de77dfde6bec61e69e4da1a3e060` | `docs/E4_APPROVAL_BRIDGE_RECON_REPORT.md` | `E4_DELIVERY_CANDIDATE` |
-| `ce1efec0fd5757b818ea4acfe4e2a202444b2efcce132c7e3795d7921fa6afb6` | `frontend/src/App.tsx` | `E4_DELIVERY_CANDIDATE` |
-| `3126572ad4d7f5c915c17bc9fc21d515626a2011357a19e1f5de2db9751d8f60` | `frontend/src/api/productApiAdapters.ts` | `E4_DELIVERY_CANDIDATE` |
-| `5158f7a1bc6db7db275e66531f04ab167f3adc5572fae45552930c490dc75459` | `frontend/src/models.ts` | `E4_DELIVERY_CANDIDATE` |
-| `de166a82b1569173eead207df83392be89fdccaedf99e71cb2bbf626a5193d98` | `hermes-runtime/migrations/0030_e4_approval_bridge.sql` | `E4_DELIVERY_CANDIDATE` |
-| `35f434475a6baa9bffa2bb512a6697bda76cead80f068ce636a8bc180aec56f8` | `hermes-runtime/src/hermes_runtime/api_main.py` | `E4_DELIVERY_CANDIDATE` |
-| `2b47387f85e797c4d05fe8b53be683908159003c08e9c8bfb5cf46411e1abeb2` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge.py` | `E4_DELIVERY_CANDIDATE` |
-| `cd334f49283f56f804d91901ca373ae303b7437ddb6218223a6e30d9b7bf237e` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `E4_DELIVERY_CANDIDATE` |
-| `fe163a42b7a6842bfc001fbc068e452339ed381862d5874906e0f2c299046fdc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `E4_DELIVERY_CANDIDATE` |
-| `efff2eb0020f9ab8ee9f21e99be2e4137de9f8203d9d76b2078d651ac635da12` | `hermes-runtime/src/hermes_runtime/domain/entry_approval_bridge.py` | `E4_DELIVERY_CANDIDATE` |
-| `25cdb38184b333aef964c7e853a319b7d952cb7cd447039e457ae631d9e2f3a1` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `E4_DELIVERY_CANDIDATE` |
-| `f4b20b21375985fb9b1aee2473e157913ddb0b9d88c0e48222471f37940a0238` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `E4_DELIVERY_CANDIDATE` |
-| `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `E4_DELIVERY_CANDIDATE` |
-| `c200f692b962a48b4e4dd3ab1651a25327157d1bc002a57102b0f00601d4e08f` | `hermes-runtime/tests/test_e4_approval_bridge_domain.py` | `E4_DELIVERY_CANDIDATE` |
-| `3e10f003b5d2e27b7f82026e46a6e7a1a500a512e04486e074035362571e33d0` | `hermes-runtime/tests/test_e4_approval_bridge_fastapi.py` | `E4_DELIVERY_CANDIDATE` |
-| `7b9b849773843a2eae748b5f948d24383c6cf9e48d9d613a3fd8c0d5ccaf5d92` | `hermes-runtime/tests/test_e4_approval_bridge_product_api.py` | `E4_DELIVERY_CANDIDATE` |
-| `892a33f6625fd7fe12a7d7e86a87973d47461f8f9a7f4087579d303631221ec6` | `hermes-runtime/tests/test_e4_approval_bridge_saga.py` | `E4_DELIVERY_CANDIDATE` |
+| `28ac233665a20375aba76e280348b24857de80d3244d0f9795f0afe3bbc5c3da` | `docs/E4_APPROVAL_BRIDGE_DELIVERY_REPORT.md` | `THIS_E4_DELIVERY` |
+| `e4b956f250162b03c0a99e9ef7b74e25097d2f994567bd31d97d7f03064910ff` | `docs/E4_APPROVAL_BRIDGE_DESIGN.md` | `THIS_E4_DELIVERY` |
+| `08b500e8d1b29a2ae9b29114a44fcd14f2e6730a0980fd515663ae6a4c7cffbc` | `docs/E4_APPROVAL_BRIDGE_IMPLEMENTATION.md` | `THIS_E4_DELIVERY` |
+| `a15a0fffb7c3a35bc249ca9401c75ce3a6a9450b87ccce1f8edeee7f83281bf1` | `docs/E4_APPROVAL_BRIDGE_RECON_REPORT.md` | `THIS_E4_DELIVERY` |
+| `ce1efec0fd5757b818ea4acfe4e2a202444b2efcce132c7e3795d7921fa6afb6` | `frontend/src/App.tsx` | `THIS_E4_DELIVERY` |
+| `3126572ad4d7f5c915c17bc9fc21d515626a2011357a19e1f5de2db9751d8f60` | `frontend/src/api/productApiAdapters.ts` | `THIS_E4_DELIVERY` |
+| `5158f7a1bc6db7db275e66531f04ab167f3adc5572fae45552930c490dc75459` | `frontend/src/models.ts` | `THIS_E4_DELIVERY` |
+| `473c71eadb1d1a2ad7a062d8e1d2b5add646a75f3e3cb5a164a62bc93992668f` | `hermes-runtime/migrations/0030_e4_approval_bridge.sql` | `THIS_E4_DELIVERY` |
+| `b5dbe9881c075d3bfbf473d3200f7241c51f00d595fa8774e77508d38f8c8fc8` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E4_DELIVERY` |
+| `ebdb1d2904b2d93a90ffbd86c521f490bc5db39d9db0e5b97774d52d3c465aab` | `hermes-runtime/src/hermes_runtime/application/durable_approval_bridge_orchestrator.py` | `THIS_E4_DELIVERY` |
+| `2b47387f85e797c4d05fe8b53be683908159003c08e9c8bfb5cf46411e1abeb2` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
+| `3d1e9da6023d5300a16b9582dd679bf9c1f5a36592f3fde487085c89af1e2830` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `THIS_E4_DELIVERY` |
+| `fe163a42b7a6842bfc001fbc068e452339ed381862d5874906e0f2c299046fdc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E4_DELIVERY` |
+| `388448255b6d26f5590ad134ee2af6249847d24ed7afd7f57db20809ab285b86` | `hermes-runtime/src/hermes_runtime/domain/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
+| `25cdb38184b333aef964c7e853a319b7d952cb7cd447039e457ae631d9e2f3a1` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E4_DELIVERY` |
+| `7a91c7400ca459510396adf5d4de14576483fe2db6afe39081d44d77325ee8a0` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
+| `5a65822d7141af709742d362225d3ef1ac89c1adfdc1defc7b6f8a925826c70c` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_project.py` | `THIS_E4_DELIVERY` |
+| `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E4_DELIVERY` |
+| `eabd49e39995faf61cfa0614cf1e866ae33e4fa7f0c520d24a333a32da947fdf` | `hermes-runtime/tests/test_e4_approval_bridge_domain.py` | `THIS_E4_DELIVERY` |
+| `3e10f003b5d2e27b7f82026e46a6e7a1a500a512e04486e074035362571e33d0` | `hermes-runtime/tests/test_e4_approval_bridge_fastapi.py` | `THIS_E4_DELIVERY` |
+| `11e76a8743ba821b4f56c1c82aaebaa24b9be9d60193d38e81c9a089063b8c04` | `hermes-runtime/tests/test_e4_approval_bridge_postgres.py` | `THIS_E4_DELIVERY` |
+| `7b9b849773843a2eae748b5f948d24383c6cf9e48d9d613a3fd8c0d5ccaf5d92` | `hermes-runtime/tests/test_e4_approval_bridge_product_api.py` | `THIS_E4_DELIVERY` |
+| `0a2dd0eac0d6fce62a3ad076229fed601a8cc858479e5a9ad394e7f1b82df85c` | `hermes-runtime/tests/test_e4_approval_bridge_saga.py` | `THIS_E4_DELIVERY` |

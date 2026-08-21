@@ -25,8 +25,11 @@ class ApprovalBridgeSaga:
     def _actor() -> Actor:
         return Actor(ActorType.CONTROL_PLANE, "e4-approval-bridge")
 
-    def _envelope(self, command_id: str, command_type: str, project_id: str, reason: str) -> CommandEnvelope:
-        return CommandEnvelope(command_id, command_type, command_id, 0, self._actor(), reason, project_id)
+    def _envelope(
+        self, command_id: str, command_type: str, project_id: str, reason: str,
+        expected_version: int = 0,
+    ) -> CommandEnvelope:
+        return CommandEnvelope(command_id, command_type, command_id, expected_version, self._actor(), reason, project_id)
 
     def materialize(self, bridge: Mapping[str, Any]) -> Mapping[str, Any]:
         """Advance only via existing child command ports; caller reconciles deterministic receipts before each retry."""
@@ -56,14 +59,17 @@ class ApprovalBridgeSaga:
         for task in blueprint["tasks"]:
             plan = VerificationPlan(
                 task["verification_plan_id"], task["task_id"], project_id, 1, "ACTIVE", ("current-artifact",),
-                "all_required_pass", "independent", self._actor(),
+                "all_required_pass", "worker_context_excluded", self._actor(),
                 (VerificationPlanCheck(
                     f"check-{task['verification_plan_id']}", "artifact-policy", "e4-v1", True, 300,
-                    "artifact satisfies frozen E4 verification policy", "required", 1,
+                    "artifact satisfies frozen E4 verification policy", "E4", 1,
                 ),),
             )
             receipt = self.control_plane.create_verification_plan(CreateVerificationPlan(
-                self._envelope(task["create_command_id"], "verification.create_plan", project_id, "E4 verification policy"), plan
+                self._envelope(
+                    task["create_command_id"], "verification_plan.create", project_id,
+                    "E4 verification policy", task["verification_expected_task_version"],
+                ), plan
             ))
             self.bridge_repository.record_child_step(bridge_id, "CREATE_VERIFICATION_PLAN", task["create_command_id"], receipt.__dict__)
         self.bridge_repository.materialize(bridge_id, project_id)
