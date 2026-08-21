@@ -3,7 +3,7 @@
   "title": "示例项目",
   "status": "ACCEPTANCE",
   "runStatus": "RUNNING",
-  "revision": 12,
+  "revision": 14,
   "createdAt": "",
   "events": [
     {
@@ -71,6 +71,18 @@
       "type": "quality.passed",
       "actor": "factory-manager",
       "note": "Phase4 demo: gate FAIL -> switch-agent fix -> PASS; pytest 48"
+    },
+    {
+      "ts": "2026-08-21T14:20:00Z",
+      "type": "user.pause",
+      "actor": "user",
+      "note": "Phase5 demo: user paused the project"
+    },
+    {
+      "ts": "2026-08-21T14:21:00Z",
+      "type": "user.resume",
+      "actor": "user",
+      "note": "Phase5 demo: user resumed the project"
     }
   ],
   "meta": {
@@ -88,9 +100,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T14:10:00Z",
-    "type": "quality.passed",
-    "actor": "factory-manager",
-    "note": "Phase4 demo: gate FAIL -> switch-agent fix -> PASS; pytest 48"
+    "ts": "2026-08-21T14:21:00Z",
+    "type": "user.resume",
+    "actor": "user",
+    "note": "Phase5 demo: user resumed the project"
   }
 }
