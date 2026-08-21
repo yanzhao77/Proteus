@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `251d87c84eb1e8330234516e4830fe9d6e171ae3` |
+| Repository HEAD | `310f708473295b3f4d1ecf7f6d71651cbde6b4b1` |
 | Branch | `feat/e5-e7-product-experience` |
-| Generated UTC | `2026-08-21T03:18:02Z` |
+| Generated UTC | `2026-08-21T03:41:05Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -266,7 +266,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 > `THIS_E4_DELIVERY` records the exact E4 closure files. The manifest does not hash itself, temporary test environments, DSN files, disposable database material or user REVIEW_REQUIRED files.
 | SHA-256 | Path | Inventory treatment |
 | --- | --- | --- |
-| `28ac233665a20375aba76e280348b24857de80d3244d0f9795f0afe3bbc5c3da` | `docs/E4_APPROVAL_BRIDGE_DELIVERY_REPORT.md` | `THIS_E4_DELIVERY` |
+| `44b418fbab5ca3693dd2532d6f04db472f2c5bfb198ece4574f38b90075ea7da` | `docs/E4_APPROVAL_BRIDGE_DELIVERY_REPORT.md` | `THIS_E4_DELIVERY` |
 | `e4b956f250162b03c0a99e9ef7b74e25097d2f994567bd31d97d7f03064910ff` | `docs/E4_APPROVAL_BRIDGE_DESIGN.md` | `THIS_E4_DELIVERY` |
 | `08b500e8d1b29a2ae9b29114a44fcd14f2e6730a0980fd515663ae6a4c7cffbc` | `docs/E4_APPROVAL_BRIDGE_IMPLEMENTATION.md` | `THIS_E4_DELIVERY` |
 | `a15a0fffb7c3a35bc249ca9401c75ce3a6a9450b87ccce1f8edeee7f83281bf1` | `docs/E4_APPROVAL_BRIDGE_RECON_REPORT.md` | `THIS_E4_DELIVERY` |
@@ -281,7 +281,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `240cae3046111146088443cf062244423a5dba43e46790b35949f78a432643fc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E4_DELIVERY` |
 | `388448255b6d26f5590ad134ee2af6249847d24ed7afd7f57db20809ab285b86` | `hermes-runtime/src/hermes_runtime/domain/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
 | `adeef3e99edbde689d6129bc14b59eef1c19c6ff033ca362eb18d17516dcbe79` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E4_DELIVERY` |
-| `7a91c7400ca459510396adf5d4de14576483fe2db6afe39081d44d77325ee8a0` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
+| `ee31ea37f5c8a341da9af56ee31967ef7f00a2e181cb4a210ceab340a664d341` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
 | `5a65822d7141af709742d362225d3ef1ac89c1adfdc1defc7b6f8a925826c70c` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_project.py` | `THIS_E4_DELIVERY` |
 | `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E4_DELIVERY` |
 | `eabd49e39995faf61cfa0614cf1e866ae33e4fa7f0c520d24a333a32da947fdf` | `hermes-runtime/tests/test_e4_approval_bridge_domain.py` | `THIS_E4_DELIVERY` |
