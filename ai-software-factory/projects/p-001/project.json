@@ -1,9 +1,9 @@
 {
   "id": "p-001",
   "title": "示例项目",
-  "status": "ACCEPTANCE",
-  "runStatus": "RUNNING",
-  "revision": 16,
+  "status": "DELIVERED",
+  "runStatus": "COMPLETED",
+  "revision": 18,
   "createdAt": "",
   "events": [
     {
@@ -95,6 +95,18 @@
       "type": "change.completed",
       "actor": "factory-manager",
       "note": "FR-6 due_date incremental done: pytest 63, FE build, contracts updated"
+    },
+    {
+      "ts": "2026-08-21T15:05:00Z",
+      "type": "build.deployed",
+      "actor": "factory-manager",
+      "note": "docker compose up: PG16+FastAPI+React/nginx; full smoke PASS; persistence verified"
+    },
+    {
+      "ts": "2026-08-21T15:06:00Z",
+      "type": "release.delivered",
+      "actor": "factory-manager",
+      "note": "Phase 7 acceptance COMPLETE: runnable React+FastAPI+PostgreSQL+Docker + full artifacts"
     }
   ],
   "meta": {
@@ -112,9 +124,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T14:50:00Z",
-    "type": "change.completed",
+    "ts": "2026-08-21T15:06:00Z",
+    "type": "release.delivered",
     "actor": "factory-manager",
-    "note": "FR-6 due_date incremental done: pytest 63, FE build, contracts updated"
+    "note": "Phase 7 acceptance COMPLETE: runnable React+FastAPI+PostgreSQL+Docker + full artifacts"
   }
 }

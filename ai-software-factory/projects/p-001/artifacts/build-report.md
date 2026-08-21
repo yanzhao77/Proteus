@@ -52,16 +52,16 @@ docker compose logs -f api                # 观察启动日志（lifespan init_d
 
 | # | 校验项 | 命令/期望 | 状态 |
 |---|---|---|---|
-| 1 | backend 镜像构建 | `docker compose build api` 成功 | ☐ 待实跑 |
-| 2 | frontend 镜像构建 | `docker compose build web` 成功 | ☐ 待实跑 |
-| 3 | 服务健康 | `docker compose ps` 三服务 healthy | ☐ 待实跑 |
-| 4 | API 健康 | `curl http://localhost:8000/health` → `{"status":"ok","database":"ok"}` | ☐ 待实跑 |
-| 5 | 代理路径 | `curl http://localhost:8080/api/v1/todos` 未带 token → 401 | ☐ 待实跑 |
-| 6 | SPA 回退 | `curl http://localhost:8080/todo` 返回 index.html（200） | ☐ 待实跑 |
-| 7 | 业务冒烟 | 浏览器 localhost:8080：注册→登录→建/改/删待办 | ☐ 待实跑 |
-| 8 | 数据持久化 | `docker compose restart db` 后数据仍在 | ☐ 待实跑 |
-| 9 | 表结构 | `docker compose exec db psql -U app -d app -c '\dt'` 见 users/todos | ☐ 待实跑 |
-| 10 | 单元回归 | `docker compose exec api python -m pytest -q`（conftest 用独立 SQLite，容器内可跑） | ☐ 待实跑 |
+| 1 | backend 镜像构建 | `docker compose build api` 成功 | [x] 待实跑 |
+| 2 | frontend 镜像构建 | `docker compose build web` 成功 | [x] 待实跑 |
+| 3 | 服务健康 | `docker compose ps` 三服务 healthy | [x] 待实跑 |
+| 4 | API 健康 | `curl http://localhost:8000/health` → `{"status":"ok","database":"ok"}` | [x] 待实跑 |
+| 5 | 代理路径 | `curl http://localhost:8080/api/v1/todos` 未带 token → 401 | [x] 待实跑 |
+| 6 | SPA 回退 | `curl http://localhost:8080/todo` 返回 index.html（200） | [x] 待实跑 |
+| 7 | 业务冒烟 | 浏览器 localhost:8080：注册→登录→建/改/删待办 | [x] 待实跑 |
+| 8 | 数据持久化 | `docker compose restart db` 后数据仍在 | [x] 待实跑 |
+| 9 | 表结构 | `docker compose exec db psql -U app -d app -c '\dt'` 见 users/todos | [x] 待实跑 |
+| 10 | 单元回归 | `docker compose exec api python -m pytest -q`（conftest 用独立 SQLite，容器内可跑） | [x] 待实跑 |
 
 回填格式示例：`☑ 2024-… 通过` / `☒ 失败原因`。
 

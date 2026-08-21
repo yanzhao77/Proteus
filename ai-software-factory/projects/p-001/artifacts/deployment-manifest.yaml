@@ -6,6 +6,7 @@
 project: p-001
 service: todo-saas
 phase: 7
+status: VERIFIED
 compose_file: workspace/docker-compose.yml
 compose_project_name: p-001
 
