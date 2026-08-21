@@ -27,7 +27,8 @@ CREATE TABLE users (
 CREATE TABLE todos (
     id         BIGSERIAL    PRIMARY KEY,               -- BigInteger 主键
     user_id    BIGINT       NOT NULL,                  -- 数据隔离键（A3）：所有查询强制按此过滤
-    title      VARCHAR(200) NOT NULL,                  -- 与 api-spec maxLength=200 一致
+    title      VARCHAR(200) NOT NULL,
+    due_date   DATE          NULL,  -- 可选截止日期（ISO 日期）FR-6（与 api-spec format: date 一致）
     done       BOOLEAN      NOT NULL DEFAULT FALSE,    -- 与 api-spec default=false 一致
     created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ  NOT NULL DEFAULT now(),    -- 由 SQLAlchemy onupdate 维护（见下）

@@ -1,9 +1,9 @@
 {
   "id": "p-001",
   "title": "示例项目",
-  "status": "ACCEPTANCE",
+  "status": "IMPLEMENTATION",
   "runStatus": "RUNNING",
-  "revision": 14,
+  "revision": 15,
   "createdAt": "",
   "events": [
     {
@@ -83,6 +83,12 @@
       "type": "user.resume",
       "actor": "user",
       "note": "Phase5 demo: user resumed the project"
+    },
+    {
+      "ts": "2026-08-21T14:35:00Z",
+      "type": "requirement.changed",
+      "actor": "user",
+      "note": "FR-6 due_date; impact: t-003/4/6/7; incremental exec dispatched (backend/frontend role reuse)"
     }
   ],
   "meta": {
@@ -100,9 +106,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T14:21:00Z",
-    "type": "user.resume",
+    "ts": "2026-08-21T14:35:00Z",
+    "type": "requirement.changed",
     "actor": "user",
-    "note": "Phase5 demo: user resumed the project"
+    "note": "FR-6 due_date; impact: t-003/4/6/7; incremental exec dispatched (backend/frontend role reuse)"
   }
 }
