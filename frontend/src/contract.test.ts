@@ -83,4 +83,15 @@ describe('Factory Home product and visual contracts', () => {
     expect(app).toContain('RECEIPT PENDING — DRAFT NOT YET APPLIED');
   });
 
+  it('keeps Live Production snapshot-first, read-only, and navigation-only for Gate review', () => {
+    expect(app).toContain('getLiveSnapshot(id)');
+    expect(app).toContain('getLiveEvents(id, watermark, 50)');
+    expect(app).toContain('setRehydration((value) => value + 1)');
+    expect(app).toContain('LIVE PRODUCTION // READ-ONLY');
+    expect(app).toContain('REVIEW GATE →');
+    expect(app).toContain('Runtime pause, resume, stop, retry, worker reassignment, task mutation, plan mutation and direct Gate decisions are unavailable.');
+    expect(app).not.toContain('setTaskState');
+    expect(app).not.toContain('submitGateDecision');
+  });
+
 });

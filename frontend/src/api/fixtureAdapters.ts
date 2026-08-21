@@ -37,6 +37,8 @@ class FixtureGateApi implements GateApi {
 }
 class FixtureProductionApi implements ProductionApi {
   getSnapshot(id: string): Promise<AdapterResult<ProductionCardViewModel>> { return data(cards.find((card) => card.productionId === id) ?? cards[0]); }
+  getLiveSnapshot(_id: string): Promise<AdapterResult<import('../models').LiveProductionSnapshotViewModel>> { return noMutation(); }
+  getLiveEvents(_id: string, _after: number, _limit?: number): Promise<AdapterResult<import('../models').LiveProductionEventFeedViewModel>> { return noMutation(); }
   pause(): Promise<AdapterResult<void>> { return noMutation(); }
   resume(): Promise<AdapterResult<void>> { return noMutation(); }
   stop(): Promise<AdapterResult<void>> { return noMutation(); }

@@ -29,6 +29,8 @@ class PendingGateApi implements GateApi {
 }
 class PendingProductionApi implements ProductionApi {
   getSnapshot(): Promise<AdapterResult<ProductionCardViewModel>> { return pending('ProductionApi.getSnapshot'); }
+  getLiveSnapshot(_id: string): Promise<AdapterResult<import('../models').LiveProductionSnapshotViewModel>> { return pending('ProductionApi.getLiveSnapshot'); }
+  getLiveEvents(_id: string, _after: number, _limit?: number): Promise<AdapterResult<import('../models').LiveProductionEventFeedViewModel>> { return pending('ProductionApi.getLiveEvents'); }
   pause(): Promise<AdapterResult<void>> { return pending('ProductionApi.pause'); }
   resume(): Promise<AdapterResult<void>> { return pending('ProductionApi.resume'); }
   stop(): Promise<AdapterResult<void>> { return pending('ProductionApi.stop'); }
