@@ -70,4 +70,17 @@ describe('Factory Home product and visual contracts', () => {
     expect(app).not.toContain('setProjectState');
     expect(app).not.toContain('createExecutionRequest');
   });
+  it('keeps Product API as the production adapter and isolates fixture selection to explicit development demo mode', () => {
+    const selector = readFileSync('src/api/index.ts', 'utf8');
+    expect(selector).toContain("import.meta.env.DEV && import.meta.env.VITE_PROTEUS_DEMO === 'true'");
+    expect(selector).toContain('return productApiAdapters();');
+    expect(selector).not.toContain('VITE_PRODUCT_API_READS');
+  });
+  it('reuses the same draft idempotency key when command outcome is unknown', () => {
+    expect(app).toContain('const pendingKey = useRef<string | null>(null)');
+    expect(app).toContain('pendingKey.current ?? crypto.randomUUID()');
+    expect(app).toContain('OUTCOME UNKNOWN — RETRY REUSES THE SAME KEY');
+    expect(app).toContain('RECEIPT PENDING — DRAFT NOT YET APPLIED');
+  });
+
 });
