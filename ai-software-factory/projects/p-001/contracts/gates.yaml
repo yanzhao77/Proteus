@@ -1,0 +1,26 @@
+# 质量门槛定义 —— 每个阶段出口一个 Gate；结果写入 reports/<stage>-gate.md
+gates:
+  requirementCoverage:
+    stage: REQUIREMENT_APPROVED
+    check: user-stories.yaml 每项在 implementation-plan.md 中有对应任务
+  architectureConsistency:
+    stage: TECH_DESIGN_APPROVED
+    check: 架构审查子代理 verdict == approve
+  apiCompleteness:
+    stage: IMPLEMENTATION
+    check: api-spec.yaml 端点与代码实现一一对应
+  codeQuality:
+    stage: INTEGRATION
+    check: lint 通过 + review 子代理 approve
+  test:
+    stage: QA
+    check: 测试套件全绿 + 覆盖率阈值
+  security:
+    stage: SECURITY_AUDIT
+    check: 依赖审计无高危 + 安全审查清单通过
+  build:
+    stage: RELEASE
+    check: 构建成功 + 产物校验
+  deployment:
+    stage: DELIVERED
+    check: docker compose up + 健康检查通过

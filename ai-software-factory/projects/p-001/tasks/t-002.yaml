@@ -1,0 +1,9 @@
+id: t-002
+title: 认证（注册/登录 + JWT）
+epic: auth
+dependsOn: [t-001]
+role: backend
+status: pending
+outputs: [workspace/backend/app/routers/auth.py, workspace/backend/app/core/security.py]
+acceptance: ["注册 201 + token", "弱密码 422", "登录成功 200 token", "登录失败 401", "密码 bcrypt 哈希"]
+attempts: 0

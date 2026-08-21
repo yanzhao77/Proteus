@@ -1,0 +1,42 @@
+{
+  "id": "p-001",
+  "title": "示例项目",
+  "status": "IMPLEMENTATION_PLANNING",
+  "runStatus": "RUNNING",
+  "revision": 3,
+  "createdAt": "",
+  "events": [
+    {
+      "ts": "2026-08-21T12:30:00Z",
+      "type": "requirement.approved",
+      "actor": "factory-manager",
+      "note": "assumptions A1-A4 recorded"
+    },
+    {
+      "ts": "2026-08-21T12:32:00Z",
+      "type": "plan.created",
+      "actor": "factory-manager",
+      "note": "implementation-plan.md + 7 tasks DAG"
+    }
+  ],
+  "meta": {
+    "stack": [],
+    "budget": {
+      "total": null,
+      "spent": {
+        "planning": 0,
+        "development": 0,
+        "testing": 0,
+        "security": 0,
+        "release": 0,
+        "reserve": 0
+      }
+    }
+  },
+  "event": {
+    "ts": "2026-08-21T12:32:00Z",
+    "type": "plan.created",
+    "actor": "factory-manager",
+    "note": "implementation-plan.md + 7 tasks DAG"
+  }
+}

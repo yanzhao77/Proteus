@@ -1,0 +1,9 @@
+id: t-001
+title: 后端骨架 + 配置
+epic: backend
+dependsOn: []
+role: backend
+status: pending
+outputs: [workspace/backend/app/main.py, workspace/backend/requirements.txt, workspace/backend/.env.example]
+acceptance: ["uvicorn app.main:app 可启动", "/health 返回 200 ok"]
+attempts: 0

@@ -1,0 +1,6 @@
+# 被生产软件的源码树各自独立 git 管理，工厂仓库不跟踪其内容
+projects/*/workspace/
+projects/*/logs/*.log
+__pycache__/
+node_modules/
+*.pyc

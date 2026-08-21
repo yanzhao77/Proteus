@@ -1,0 +1,9 @@
+id: t-003
+title: Todo CRUD API
+epic: todos
+dependsOn: [t-002]
+role: backend
+status: pending
+outputs: [workspace/backend/app/routers/todos.py, workspace/backend/app/models/todo.py]
+acceptance: ["创建 201", "列表仅本人", "PATCH done/title", "DELETE 204", "越权访问他人 todo 404"]
+attempts: 0

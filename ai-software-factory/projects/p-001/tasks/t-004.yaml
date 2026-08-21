@@ -1,0 +1,9 @@
+id: t-004
+title: 后端测试套件
+epic: qa
+dependsOn: [t-002, t-003]
+role: qa
+status: pending
+outputs: [workspace/backend/tests/test_auth.py, workspace/backend/tests/test_todos.py]
+acceptance: ["pytest 全绿", "覆盖注册/登录/todo CRUD/鉴权边界"]
+attempts: 0

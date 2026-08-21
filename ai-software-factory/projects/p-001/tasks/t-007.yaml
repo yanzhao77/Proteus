@@ -1,0 +1,9 @@
+id: t-007
+title: 代码 Review
+epic: qa
+dependsOn: [t-003, t-006]
+role: review
+status: pending
+outputs: [reports/review-report.md]
+acceptance: ["verdict approve 或 request-changes + 理由", "安全问题标注 SEC-*"]
+attempts: 0
