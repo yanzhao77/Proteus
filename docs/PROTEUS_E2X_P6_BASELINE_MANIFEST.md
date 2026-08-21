@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `87343487fdabaf7079e258bf173ceaa6368d4286` |
-| Branch | `fix/p6-secret-guard-policy-1787290349` |
-| Generated UTC | `2026-08-21T06:19:12Z` |
+| Repository HEAD | `84ba4b0d094f2139a47b575f859907cc0f360612` |
+| Branch | `stage-a2/0032-execution-prepare-structured-secret-guard` |
+| Generated UTC | `2026-08-21T09:51:49Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -158,11 +158,12 @@
 | Cleanup-authenticity/bootstrap PostgreSQL/Golden Todo | **13/13 PASS** in `2.830 s`; factory-issued, evidence-tamper, OID-replacement and owner-mismatch closure; direct Golden Todo **9/9 PASS**. |
 | P6 permission/runtime-role | **6/6 PASS** in `3.777 s`. |
 | P6 focused permission/runtime-role/Todo/autonomous | **20/20 PASS** in `125.88 s` on this E3 disposable PostgreSQL acceptance. |
+| Stage A2 execution-prepare convergence | **PASS** — fresh `0001→0032` metadata audit; canonical sandbox guard callsite; P6 bootstrap/autonomous **14/14 PASS** in `105.804 s`. |
 | Focused E1/E2/E2.x/FH-1/FastAPI/OIDC/Product API | **86/86 PASS** in `4.309 s`. |
 | E3 formal PostgreSQL authority / migration bootstrap | **8/8 PASS** in `1.17 s`; deterministic, replay, freshness, immutability, isolation, grants and negative side effects verified. |
 | P0–P5 no-DB discovery | **575 run, 333 skipped, 0 failures** in `1.280 s`. |
-| Full Runtime regression | **586 passed, 12 skipped, 0 failures** in `321.58 s` on this E3 disposable PostgreSQL acceptance. Historical sealed baseline: `575 run, 12 skipped, 0 failures`. |
-| Frontend Vitest/build/lint | **35/35 PASS** in `1.17 s` / PASS in `323 ms` / `0` warnings and `0` errors. |
+| Full Runtime regression | **704 run, 12 skipped, 0 failures** in `430.060 s` on Stage A2 fresh PostgreSQL 16 acceptance. Historical sealed baselines remain historical evidence. |
+| Frontend Vitest/build/lint | **40/40 PASS** in `1.20 s` / PASS in `349 ms` / `0` warnings and `0` errors. |
 | Live provider smoke | **PASS — NON-PRODUCTION**; one authorized local Docker Product-API-only run consumed `9 / 9` requests, generated one governed Understanding and replayed the same idempotency key without a new revision. Full runtime was not re-run. |
 
 ## 8. Current-versus-Historical Documentation Matrix
@@ -212,7 +213,7 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E2.x Phase | **COMPLETE / LIVE VERIFIED** |
 | P6 Authority Gate | **CLOSED** |
 | P6 Functional Revalidation | **PASS** |
-| P6 Secret Guard Policy Repair | **PASS — Stage A; structured JSONB guard, runtime canary evidence, and no E8 continuation** |
+| P6 Secret Guard Policy Repair | **PASS — Stage A2; 0031 structured JSONB policy plus 0032 live sandbox callsite convergence; no E8 continuation** |
 | E3 Proposal / Master Plan | **PASS** |
 | E3 Phase | **COMPLETE** |
 | E4 Approval Bridge | **PASS / COMPLETE** |
@@ -347,8 +348,22 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | SHA-256 | Path | Inventory treatment |
 | --- | --- | --- |
 | `df32a9885c58d1e5b00ab3054a104fb212c2780ee9a6d8a529ffcbfc68428e49` | `hermes-runtime/migrations/0031_p6_secret_guard_structured_jsonb.sql` | `THIS_P6_SECRET_GUARD_REPAIR` |
-| `dcc8b430fd2d63916e7a68dcbf2b8cf2a37a56d3c5d9988038012045e4c2cdd2` | `hermes-runtime/tests/test_execution_postgres.py` | `THIS_P6_SECRET_GUARD_REPAIR` |
+| `c253ad76a3db19134019895001a2f2634f67eec46ba6b0621a59d2eba5e17ca1` | `hermes-runtime/tests/test_execution_postgres.py` | `THIS_P6_SECRET_GUARD_REPAIR` |
 | `ebb12079042348873239aaf07f18856299fa92e2de851a47d46e225b0ae9212c` | `docs/P6_SECRET_GUARD_FALSE_POSITIVE_POLICY_REPAIR_DESIGN.md` | `THIS_P6_SECRET_GUARD_REPAIR` |
 | `fb682085932006da616ae15acc736aad056987710407f5504b1def7e604cf785` | `docs/P6_SECRET_GUARD_FALSE_POSITIVE_POLICY_REPAIR_DELIVERY_REPORT.md` | `THIS_P6_SECRET_GUARD_REPAIR` |
 
 Stage A adds only forward migration `0031` and structured P6 secret-guard evidence. It preserves E4 durable identity, all prior authority semantics, and the E8 NOT ENTERED boundary. Real PostgreSQL evidence: focused guard/admission 3/3 PASS; P6 Execution/permissions/recovery plus E4 durable 47/47 PASS; P6 standalone 14/14 PASS; Full Runtime 702 run, 12 skipped, 0 failures in 370.956 seconds; frontend 40 PASS, build PASS, lint 0 warnings / 0 errors.
+
+## 16. Stage A2 Execution-Prepare Convergence SHA-256 Inventory
+
+> `THIS_P6_SECRET_GUARD_STAGE_A2` records the forward-only convergence delivery. The manifest remains non-self-referential and does not hash temporary test environments, DSNs, disposable databases, E8 forensic worktrees or `REVIEW_REQUIRED` files.
+
+| SHA-256 | Path | Inventory treatment |
+| --- | --- | --- |
+| `ba990e1a1029673dffdc8f7cc020bf3ce1034a84b4d1dcfe19f3bd95800f107f` | `hermes-runtime/migrations/0032_p6_execution_prepare_structured_secret_guard.sql` | `THIS_P6_SECRET_GUARD_STAGE_A2` |
+| `c253ad76a3db19134019895001a2f2634f67eec46ba6b0621a59d2eba5e17ca1` | `hermes-runtime/tests/test_execution_postgres.py` | `THIS_P6_SECRET_GUARD_STAGE_A2` — replaces its prior Stage A hash because the file is modified by this stage. |
+| `67f74458aa5eafcf3265a1ca104977900d36c7dab65e4f960e9f568e395f0313` | `docs/P6_SECRET_GUARD_STAGE_A2_DESIGN.md` | `THIS_P6_SECRET_GUARD_STAGE_A2` |
+| `cd04c271d434c342d3bc5dc40ac45b1402ad74eb19838986c8565ec08b190b33` | `docs/P6_SECRET_GUARD_STAGE_A2_DELIVERY_REPORT.md` | `THIS_P6_SECRET_GUARD_STAGE_A2` |
+
+Stage A2 changes no historical migration, E4 durable identity, P6 authority state machine, business schema, role or grant. Fresh PostgreSQL evidence confirms owner `hermes_execution_owner`, `SECURITY DEFINER`, hardened `pg_catalog` search path, unchanged ACL, no legacy sandbox text-regex callsite, canonical helper use, and the current action-route set. Local gates: P6 bootstrap/autonomous `14/14 PASS`; no-DB `704 run / 437 skipped / 0 failures`; Full Runtime `704 run / 12 skipped / 0 failures`; frontend `40/40 PASS`, build PASS and oxlint `0/0`. E8 remains **NOT ENTERED** until this Stage A2 PR is merged and master is independently verified.
+

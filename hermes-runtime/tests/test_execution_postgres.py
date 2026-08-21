@@ -36,7 +36,7 @@ class ExecutionPostgresTests(unittest.TestCase):
         self.execution = ExecutionPreparation(PostgresExecutionStore(DATABASE_URL))
         self.seed_fixture()
 
-    def seed_fixture(self, suffix="p2"):
+    def seed_fixture(self, suffix="p2", sandbox_profile=None):
         with psycopg.connect(DATABASE_URL) as connection:
             for command_id, command_type in (
                 ("cmd-create-project-" + suffix, "project.create"),
@@ -382,10 +382,16 @@ class ExecutionPostgresTests(unittest.TestCase):
                    VALUES ('sbx-1','project-1','task-1','action-1','template-1',
                            1,'sha256:context','sandbox-compiler/1.0',
                            'contract-only/1.0',
-                           '{"bindings":{"project_id":"project-1"},"secrets":{"mode":"denied"}}',
+                           %s::jsonb,
                            'sha256:sandbox','sha256:constraints',%s,
                            'sandbox_compiler','fixture')""",
-                ("cmd-sandbox-" + suffix,),
+                (
+                    json.dumps(sandbox_profile or {
+                        "bindings": {"project_id": "project-1"},
+                        "secrets": {"mode": "denied"},
+                    }),
+                    "cmd-sandbox-" + suffix,
+                ),
             )
 
     def command(self, suffix="1", **overrides):
@@ -498,6 +504,30 @@ class ExecutionPostgresTests(unittest.TestCase):
         for payload in accepted:
             with self.subTest(payload_shape=sorted(payload)):
                 self.assertFalse(self._guard_result(payload))
+
+    def test_structured_guard_rejects_runtime_canary_inside_sandbox_bindings(self):
+        canary = "s" + "k-" + uuid.uuid4().hex
+        self.assertTrue(self._guard_result({"bindings": {"task_id": canary}}))
+
+    def test_prepare_callsite_converges_to_canonical_guard_for_e4_task_binding(self):
+        e4_task_id = stable_id("task", "bridge-stage-a2", "node-stage-a2")
+        sandbox_profile = {
+            "bindings": {"project_id": "project-1", "task_id": e4_task_id},
+            "secrets": {"mode": "denied"},
+        }
+        self.store.reset_for_test()
+        self.seed_fixture("0032-e4-binding", sandbox_profile=sandbox_profile)
+        self.assertFalse(self._guard_result(sandbox_profile))
+        command = self.command("0032-e4-binding")
+        first = self.execution.prepare(command)
+        self.assertEqual("QUEUED", first["request_state"])
+        restarted = ExecutionPreparation(PostgresExecutionStore(DATABASE_URL))
+        replay = restarted.prepare(command)
+        self.assertTrue(replay["deduplicated"])
+        self.assertEqual(first["execution_request_id"], replay["execution_request_id"])
+        with psycopg.connect(DATABASE_URL) as connection:
+            self.assertEqual(1, connection.execute("SELECT count(*) FROM execution_requests").fetchone()[0])
+            self.assertEqual(1, connection.execute("SELECT count(*) FROM execution_queue_items").fetchone()[0])
 
     def test_runtime_canary_rejection_has_no_persisted_secret_material(self):
         canary = "s" + "k-" + uuid.uuid4().hex
