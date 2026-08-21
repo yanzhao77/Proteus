@@ -143,7 +143,20 @@ class ProductApiFacade:
                     payload = self._e3_payload(request, "ENTRY_PLAN_SCHEMA_INVALID")
                     return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.generate_master_plan(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
                 if method == "GET" and len(parts) == 5 and parts[4] == "approval-preview":
-                    return self._safe(200, self._entry_approval_bridge_api.preview(subject, draft_id))
+                    preview = self._entry_approval_bridge_api.preview(subject, draft_id)
+                    if isinstance(preview, Mapping):
+                        return self._safe(200, preview)
+                    # ApprovalPreview is a domain dataclass. Do not expose its frozen
+                    # blueprint (which contains child identities); return only the
+                    # creator-visible values required to form the approval command.
+                    return self._safe(200, {
+                        "availability": "CURRENT",
+                        "bridge_id": preview.bridge_id,
+                        "compiled_blueprint_hash": preview.compiled_blueprint_hash,
+                        "required_acknowledgements": list(preview.required_acknowledgements),
+                        "compiler_version": preview.compiler_version,
+                        "policy_version": preview.policy_version,
+                    })
                 if method == "GET" and len(parts) == 5 and parts[4] == "approval":
                     return self._safe(200, self._entry_approval_bridge_api.get_approval(subject, draft_id))
                 if method == "POST" and len(parts) == 5 and parts[4] == "approve":

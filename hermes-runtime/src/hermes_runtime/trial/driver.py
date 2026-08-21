@@ -43,7 +43,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
 
 from hermes_runtime.application.accounting import ResourceAccounting
 from hermes_runtime.application.capabilities import (
@@ -843,6 +843,9 @@ class AutonomousRunDriver:
     def run_happy_path(
         self, request: Mapping[str, Any], run_id: str,
         first_fault: str = WorkerFaultMode.BROKEN_TEST,
+        *,
+        existing_entry: Optional[Mapping[str, str]] = None,
+        stage_observer: Optional[Callable[[str, Mapping[str, Any]], None]] = None,
     ) -> Dict[str, Any]:
         """Execute the full autonomous happy path and return collected records.
 
@@ -850,46 +853,79 @@ class AutonomousRunDriver:
         implementation execution (BROKEN_TEST or MISSING_FEATURE); the
         autonomous loop then diagnoses and repairs it either way.
         """
-        project_id = "project-" + run_id
-        task_id = "task-" + run_id
+        entry = dict(existing_entry or {})
         summary = str(request.get("summary") or request.get("request") or "Build a Todo API")
+        if entry:
+            required = (
+                "project_id", "task_id", "verification_plan_id",
+                "verification_check_id", "readiness_event_id",
+            )
+            missing = [name for name in required if not isinstance(entry.get(name), str) or not entry[name]]
+            if missing:
+                raise TrialError("existing entry handoff missing: " + ",".join(missing))
+            project_id = entry["project_id"]
+            task_id = entry["task_id"]
+            plan_id = entry["verification_plan_id"]
+            verification_check_id = entry["verification_check_id"]
+            patch_event_id = entry["readiness_event_id"]
+        else:
+            project_id = "project-" + run_id
+            task_id = "task-" + run_id
+            plan_id = ""
+            verification_check_id = "pytest"
+            patch_event_id = ""
         self._project_id = project_id
         self.records["request"] = dict(request)
         self.records["run_id"] = run_id
         self.records["project_id"] = project_id
         self.records["task_id"] = task_id
-
         self._ensure_verifier(VERIFIER_IDENTITY)
         self.workspace = self.workspace_root / run_id
         self.workspace.mkdir(parents=True, exist_ok=True)
-
-        # --- project + task graph (Software Request intake)
-        create_receipt = self.control_plane.create_project(CreateProject(
-            self._envelope("project.create", "key-create-" + run_id, 0,
-                           self.control, project_id, "autonomous software request"),
-            summary,
-            self.user,
-        ))
-        self.records["project"] = {
-            "project_id": project_id,
-            "state": "CREATED",
-            "receipt": create_receipt.__dict__,
-            "request": dict(request),
-        }
-        patch_receipt = self.control_plane.apply_work_graph_patch(ApplyWorkGraphPatch(
-            self._envelope("work_graph.apply_patch", "key-graph-" + run_id, 0,
-                           self.control, project_id, "create golden todo task"),
-            GraphPatch(
-                base_graph_version=0,
-                decision_id="decision-graph-" + run_id,
-                operations=(CreateTask(GraphTask(task_id, "implement", summary)),),
-            ),
-        ))
-        if not patch_receipt.event_ids:
-            raise TrialError("graph patch produced no event")
-        patch_event_id = patch_receipt.event_ids[0]
-        self.records["task"] = {"task_id": task_id, "state": "READY"}
-
+        def observe(stage: str) -> None:
+            if stage_observer is not None:
+                stage_observer(stage, dict(self.records))
+        # E8 may hand off an E4-materialized Project/Task/VerificationPlan. The
+        # lifecycle below still invokes the established formal P6 command ports.
+        if entry:
+            self.records["project"] = {
+                "project_id": project_id,
+                "state": "E4_MATERIALIZED",
+                "source": "entry_approval_bridge",
+                "request": dict(request),
+            }
+            self.records["task"] = {
+                "task_id": task_id,
+                "state": "READY",
+                "source": "E4_MATERIALIZED",
+            }
+        else:
+            # --- project + task graph (Software Request intake)
+            create_receipt = self.control_plane.create_project(CreateProject(
+                self._envelope("project.create", "key-create-" + run_id, 0,
+                               self.control, project_id, "autonomous software request"),
+                summary,
+                self.user,
+            ))
+            self.records["project"] = {
+                "project_id": project_id,
+                "state": "CREATED",
+                "receipt": create_receipt.__dict__,
+                "request": dict(request),
+            }
+            patch_receipt = self.control_plane.apply_work_graph_patch(ApplyWorkGraphPatch(
+                self._envelope("work_graph.apply_patch", "key-graph-" + run_id, 0,
+                               self.control, project_id, "create golden todo task"),
+                GraphPatch(
+                    base_graph_version=0,
+                    decision_id="decision-graph-" + run_id,
+                    operations=(CreateTask(GraphTask(task_id, "implement", summary)),),
+                ),
+            ))
+            if not patch_receipt.event_ids:
+                raise TrialError("graph patch produced no event")
+            patch_event_id = patch_receipt.event_ids[0]
+            self.records["task"] = {"task_id": task_id, "state": "READY"}
         # --- Situation: work_available (real analyzer over the real patch
         #     event, which records the authoritative readiness change;
         #     P6 extension classifies it as work_available)
@@ -923,36 +959,37 @@ class AutonomousRunDriver:
             "action": implement_action,
         }
 
-        # --- Verification plan (real control-plane command)
-        task_version = self._task_version(task_id, project_id)
-        plan_id = "plan-" + run_id
-        self.control_plane.create_verification_plan(CreateVerificationPlan(
-            self._envelope("verification_plan.create", "key-plan-verif-" + run_id,
-                           task_version, self.control, project_id,
-                           "create pytest verification plan"),
-            VerificationPlan(
-                verification_plan_id=plan_id,
-                task_id=task_id,
-                project_id=project_id,
-                version=1,
-                status="ACTIVE",
-                artifact_selectors=("workspace",),
-                aggregation_rule="all_required_pass",
-                independence="worker_context_excluded",
-                created_by=self.control,
-                checks=(VerificationPlanCheck(
-                    check_id="pytest",
-                    check_type="integration_test",
-                    runner_profile="pytest",
-                    required=True,
-                    timeout_seconds=300,
-                    pass_condition="exit_code == 0",
-                    evidence_level="E2",
-                    ordinal=0,
-                ),),
-            ),
-        ))
-
+        # --- Verification plan. E8 reuses the frozen E4 plan and maps
+        # independently executed pytest evidence to its authoritative check ID.
+        if not entry:
+            task_version = self._task_version(task_id, project_id)
+            plan_id = "plan-" + run_id
+            self.control_plane.create_verification_plan(CreateVerificationPlan(
+                self._envelope("verification_plan.create", "key-plan-verif-" + run_id,
+                               task_version, self.control, project_id,
+                               "create pytest verification plan"),
+                VerificationPlan(
+                    verification_plan_id=plan_id,
+                    task_id=task_id,
+                    project_id=project_id,
+                    version=1,
+                    status="ACTIVE",
+                    artifact_selectors=("workspace",),
+                    aggregation_rule="all_required_pass",
+                    independence="worker_context_excluded",
+                    created_by=self.control,
+                    checks=(VerificationPlanCheck(
+                        check_id=verification_check_id,
+                        check_type="integration_test",
+                        runner_profile="pytest",
+                        required=True,
+                        timeout_seconds=300,
+                        pass_condition="exit_code == 0",
+                        evidence_level="E2",
+                        ordinal=0,
+                    ),),
+                ),
+            ))
         # --- resource account
         account_id = "account-" + run_id
         self.accounting.create_account(CreateResourceAccount(
@@ -1001,6 +1038,7 @@ class AutonomousRunDriver:
             "fencing_token": lease_impl["fencing_token"],
             "action": "implement",
         }
+        observe("RUNNING")
 
         # --- execution 1: golden worker builds a DEFECTIVE project -> pytest FAILS
         worker1 = self._run_golden_worker(
@@ -1061,6 +1099,7 @@ class AutonomousRunDriver:
             "recovery_level": feedback["recovery_level"],
             "event_ids": feedback["event_ids"],
         }
+        observe("VERIFICATION_FAILED_RECOVERING")
 
         # --- Situation: verification_failed (from feedback.created)
         feedback_event_id = feedback["event_ids"][0]
@@ -1286,7 +1325,7 @@ class AutonomousRunDriver:
                 verifier_run_id=verifier_run_id,
                 verdict=Verdict.PASS,
                 check_results=(VerificationCheckResult(
-                    check_id="pytest", status=Verdict.PASS,
+                    check_id=verification_check_id, status=Verdict.PASS,
                     finding_codes=(), evidence_refs=(evidence_id,),
                     started_at=_now(), completed_at=_now(),
                 ),),
@@ -1312,6 +1351,7 @@ class AutonomousRunDriver:
             "verification_id": golden_verification_id,
             "receipt": apply_receipt.__dict__,
         }
+        observe("VERIFICATION_PASSED")
 
         # --- complete the recovery attempt (real controller)
         completion = self.recovery.complete_recovery_attempt(CompleteRecoveryAttempt(
@@ -1332,6 +1372,7 @@ class AutonomousRunDriver:
         self.records["delivery"] = self._advance_project_to_accepted(
             project_id, run_id, account_id,
         )
+        observe("DELIVERED_ACCEPTED")
 
         # --- evidence snapshot
         self.records["events"] = self._collect_events(project_id)
@@ -1341,6 +1382,18 @@ class AutonomousRunDriver:
             "manifest": manifest,
         }
         return self.records
+
+    def run_happy_path_from_entry(
+        self, request: Mapping[str, Any], run_id: str,
+        entry_handoff: Mapping[str, str],
+        first_fault: str = WorkerFaultMode.BROKEN_TEST,
+        stage_observer: Optional[Callable[[str, Mapping[str, Any]], None]] = None,
+    ) -> Dict[str, Any]:
+        """E8-only adapter: execute formal P6 ports on an E4 materialized project."""
+        return self.run_happy_path(
+            request, run_id, first_fault, existing_entry=entry_handoff,
+            stage_observer=stage_observer,
+        )
 
     def _scenario_project(self, run_id: str, summary: str, task_id: str):
         """Shared intake for scenario runs: project + task graph + readiness."""
