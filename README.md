@@ -70,7 +70,7 @@ flowchart LR
 | **E2.x · Producer Integration** | **PASS — NON-PRODUCTION** | server-side OpenAI-compatible producer；受控 live smoke 与 same-key replay 已验证。 |
 | **E3 · Proposal / Master Plan** | **PASS / COMPLETE** | 确定性 Proposal、Master Plan、hash、revision 与 creator isolation。 |
 | **E4 · Approval Bridge** | **PASS / COMPLETE** | receipt-first durable saga，经既有 Control Plane ports 幂等物化。 |
-| **E5–E7 · Product Experience** | **NOT ENTERED** | Product read model、Factory Home resume、Live Production integration。 |
+| **E5–E7 · Product Experience** | **PASS / COMPLETE** | Source-derived Product API/read model、production-real-API Factory Home resume、read-only Live Production snapshot/live-feed。 |
 | **E8 · Production Entry Trial** | **NOT ENTERED** | Idea 到既有 P6 delivery 的最终纵向验收。 |
 
 ### Control Plane
@@ -85,7 +85,7 @@ flowchart LR
 | **P5** | **COMPLETE** | FastAPI、OIDC、runtime supervisor、S3/Vault/OTLP adapters 与单节点部署。 |
 | **P6** | **COMPLETE / REVALIDATED** | Autonomous trial通过；Recovery runtime least-privilege gate已关闭。 |
 
-最新封存的 E4 验收包括：真实 PostgreSQL durable matrix **26/26 PASS**、fresh migration **0001 → 0030 PASS**、Full Runtime **634 run / 12 skipped / 0 failures**、frontend **35 PASS**，以及 manifest **139 entries / 0 mismatch**。README 只提供概览；当前状态、测试数字和文件哈希的权威来源是 [E2.x/P6 Baseline Manifest](docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md)。
+最新封存的 E4–E7 验收包括：真实 PostgreSQL E4 durable matrix **26/26 PASS**、fresh migration **0001 → 0030 PASS**、最终 Full Runtime **699 run / 12 skipped / 0 failures in 472.450 seconds**、frontend **40 PASS / production build PASS / oxlint 0 warnings**，以及 manifest **166 non-self entries / 0 mismatch**。README 只提供概览；当前状态、测试数字和文件哈希的权威来源是 [E2.x/P6 Baseline Manifest](docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md)。
 
 ## 快速开始
 
