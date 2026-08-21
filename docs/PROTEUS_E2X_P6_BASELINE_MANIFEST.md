@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `310f708473295b3f4d1ecf7f6d71651cbde6b4b1` |
-| Branch | `feat/e5-e7-product-experience` |
-| Generated UTC | `2026-08-21T03:41:05Z` |
+| Repository HEAD | `b0c8629d2ae5a89ffa3c4f93063e458fd8da5356` |
+| Branch | `docs/e5-e7-authority-correction` |
+| Generated UTC | `2026-08-21T04:07:37Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -214,22 +214,19 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | P6 Functional Revalidation | **PASS** |
 | E3 Proposal / Master Plan | **PASS** |
 | E3 Phase | **COMPLETE** |
-| E4 Approval Bridge | **NOT ENTERED** |
+| E4 Approval Bridge | **PASS / COMPLETE** |
+| E5 Product API / Read Model | **PASS / COMPLETE** |
+| E6 Factory Home / Resume | **PASS / COMPLETE** |
+| E7 Live Production Integration | **PASS / COMPLETE** |
+| E8 Production Entry Trial | **NOT ENTERED** |
 
 ## 12. Documentation/Metadata-Only Correction Record
 
 This E3 closure preserves all inherited E2.x smoke provenance and the fixed `9 / 9` Product API budget without rerunning smoke or calling a provider. It preserves the E3 delivery's real disposable PostgreSQL Full Runtime result of **586 passed, 12 skipped, 0 failures** in `321.58 s`, P6 `20/20 PASS`, E3 formal PostgreSQL `8/8 PASS`, fresh `0001 → 0029` migration PASS and frontend `35/35 PASS`. This E4 closure additionally records **634 run, 12 skipped, 0 failures**, real PostgreSQL durable matrix `26/26 PASS`, fresh `0001 → 0030` migration PASS, P6 Recovery focused `9/9 PASS`, and frontend `35/35 PASS`; it does not rerun E2.x provider smoke. Historical `575 run / 12 skipped / 0 failures` remains sealed inherited evidence only.
 
-## E4 Approval Bridge Final Status
+## E4 Approval Bridge Historical Scope
 
-| Status | Current authority |
-| --- | --- |
-| E2.x Live Provider Verification | PASS — NON-PRODUCTION |
-| E3 Phase | COMPLETE |
-| E4 Approval Bridge | PASS / COMPLETE |
-| E5+ | NOT ENTERED |
-| P6 Authority Gate | CLOSED |
-| P6 Functional Revalidation | PASS |
+> E4 is complete. Its original no-E5+ boundary describes only the scope of the E4 delivery at that time; it is not a current repository-wide phase status. Section 11 is the unique current final status matrix, and Section 15 records the later E5–E7 closure.
 
 E4 is limited to explicit approval, deterministic lowering, receipt-first durable bridge records and fresh-instance reconciliation through existing ControlPlane child command ports. The sealed real PostgreSQL matrix covers post-commit interruption after Project, Graph and each VerificationPlan child boundary, terminal child rejection, immutable authority facts and direct-DML denial. It introduces no direct runtime, provider or P6 authority.
 
@@ -302,7 +299,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | E7 Live Production projection | PASS — source-derived snapshot/live-feed, real PostgreSQL evidence, Product API/FastAPI contracts, 40 frontend tests. |
 | Fresh migration | PASS — 0001→0030 independent PostgreSQL 16 verification. |
 | P6 Golden Todo / autonomous trial | PASS — 14 tests in task-only disposable PostgreSQL. |
-| Full Runtime | PASS — 699 run, 12 skipped, 0 failures in 412.953 seconds. |
+| Full Runtime | PASS — 699 run, 12 skipped, 0 failures in 472.450 seconds. |
 | P0–P5 no-DB discovery | PASS — 699 run, 432 skipped, 0 failures. |
 | Frontend production quality | PASS — 40 tests, production build, oxlint 0 warnings / 0 errors. |
 
