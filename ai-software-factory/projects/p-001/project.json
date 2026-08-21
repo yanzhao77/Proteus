@@ -3,7 +3,7 @@
   "title": "示例项目",
   "status": "ACCEPTANCE",
   "runStatus": "RUNNING",
-  "revision": 10,
+  "revision": 12,
   "createdAt": "",
   "events": [
     {
@@ -59,6 +59,18 @@
       "type": "acceptance.reached-phase2",
       "actor": "factory-manager",
       "note": "Phase 2 closed loop COMPLETE; Phase 7 will add PG+Docker+release"
+    },
+    {
+      "ts": "2026-08-21T13:55:00Z",
+      "type": "quality.failed",
+      "actor": "factory-manager",
+      "note": "Phase4 demo: injected regression 404->403, test-gate FAIL 6/48; switch-agent fix dispatched"
+    },
+    {
+      "ts": "2026-08-21T14:10:00Z",
+      "type": "quality.passed",
+      "actor": "factory-manager",
+      "note": "Phase4 demo: gate FAIL -> switch-agent fix -> PASS; pytest 48"
     }
   ],
   "meta": {
@@ -76,9 +88,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T13:42:00Z",
-    "type": "acceptance.reached-phase2",
+    "ts": "2026-08-21T14:10:00Z",
+    "type": "quality.passed",
     "actor": "factory-manager",
-    "note": "Phase 2 closed loop COMPLETE; Phase 7 will add PG+Docker+release"
+    "note": "Phase4 demo: gate FAIL -> switch-agent fix -> PASS; pytest 48"
   }
 }
