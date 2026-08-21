@@ -310,6 +310,11 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: 可选截止日期（ISO 日期），FR-6
           description: 对应 todos.title VARCHAR(200)
         done:
           type: boolean
@@ -323,6 +328,11 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: 可选截止日期；显式 null 表示清除
         done:
           type: boolean
       description: 至少提供一个字段（title 和/或 done）；均不提供返回 400
@@ -338,6 +348,11 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: 可选截止日期（ISO 日期），FR-6
         done:
           type: boolean
         created_at:

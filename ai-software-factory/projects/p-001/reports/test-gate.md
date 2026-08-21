@@ -6,3 +6,5 @@ evidence: pytest 48 passed (39 + 9 regressions) in 9.34s
 evidence: injected regression dc4f3c0: 404->403; 6 failed/48 (cross-user isolation)
 ## 2026-08-21T04:49:35Z — PASS
 evidence: gate-fix 385be18: 404 restored, pytest 48 passed (6 failed -> 0)
+## 2026-08-21T04:54:05Z — PASS
+evidence: FR-6: pytest 63 passed + FE build

@@ -1,9 +1,9 @@
 {
   "id": "p-001",
   "title": "示例项目",
-  "status": "IMPLEMENTATION",
+  "status": "ACCEPTANCE",
   "runStatus": "RUNNING",
-  "revision": 15,
+  "revision": 16,
   "createdAt": "",
   "events": [
     {
@@ -89,6 +89,12 @@
       "type": "requirement.changed",
       "actor": "user",
       "note": "FR-6 due_date; impact: t-003/4/6/7; incremental exec dispatched (backend/frontend role reuse)"
+    },
+    {
+      "ts": "2026-08-21T14:50:00Z",
+      "type": "change.completed",
+      "actor": "factory-manager",
+      "note": "FR-6 due_date incremental done: pytest 63, FE build, contracts updated"
     }
   ],
   "meta": {
@@ -106,9 +112,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T14:35:00Z",
-    "type": "requirement.changed",
-    "actor": "user",
-    "note": "FR-6 due_date; impact: t-003/4/6/7; incremental exec dispatched (backend/frontend role reuse)"
+    "ts": "2026-08-21T14:50:00Z",
+    "type": "change.completed",
+    "actor": "factory-manager",
+    "note": "FR-6 due_date incremental done: pytest 63, FE build, contracts updated"
   }
 }

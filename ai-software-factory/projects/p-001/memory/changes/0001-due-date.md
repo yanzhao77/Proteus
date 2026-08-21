@@ -18,4 +18,4 @@ seed: t-003（Todo CRUD）与 t-006（前端待办页）
 5. 只重跑受影响任务；与截止日期无关的模块（认证等）不重跑
 
 ## 执行摘要
-- 2026-08-21: 契约修订（api-spec/schema）完成；backend/frontend 增量实现已派发（角色复用 ae1e5138/13cd635f）；Gate 验证待回填
+- 2026-08-21: 契约修订（api-spec/schema）完成；backend f28dead（+15 用例，null 清除语义）+ frontend 16084ab；pytest 63 passed；FE build PASS；api-spec/schema 已含 due_date
