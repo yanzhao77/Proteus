@@ -64,12 +64,16 @@ def build_app():
     origins = [item for item in os.getenv("HERMES_CORS_ORIGINS", "").split(",") if item]
     database_url = env_or_file("HERMES_DATABASE_URL")
     oidc_verifier = _build_oidc_verifier()
+    entry_draft_api = PostgresEntryDraftStore(database_url) if database_url and oidc_verifier else UnavailableEntryDraftApi()
     factory_home_read_model = (
-        PostgresFactoryHomeReadModel(database_url, PostgresCreatorActorProjectScope(database_url))
+        PostgresFactoryHomeReadModel(
+            database_url,
+            PostgresCreatorActorProjectScope(database_url),
+            entry_draft_api,
+        )
         if database_url and oidc_verifier
         else UnavailableFactoryHomeReadModel()
     )
-    entry_draft_api = PostgresEntryDraftStore(database_url) if database_url and oidc_verifier else UnavailableEntryDraftApi()
     # No generic live LLM/provider is an established repository capability; remain fail-closed.
     entry_understanding_api = PostgresEntryUnderstandingStore(database_url, build_understanding_producer_from_env()) if database_url and oidc_verifier else UnavailableEntryUnderstandingApi()
     entry_proposal_master_plan_api = PostgresEntryProposalMasterPlanStore(database_url) if database_url and oidc_verifier else UnavailableEntryProposalMasterPlanApi()

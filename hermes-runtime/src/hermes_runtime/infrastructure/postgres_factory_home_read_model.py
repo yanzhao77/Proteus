@@ -35,16 +35,25 @@ class PostgresCreatorActorProjectScope:
         if actor_id != subject:
             return None
         query = """
-            SELECT DISTINCT transition.project_id
-            FROM public.project_transition_records transition
-            WHERE transition.previous_state IS NULL
-              AND transition.requested_by_type = 'user'
-              AND transition.requested_by_id = %s
-            ORDER BY transition.project_id ASC
+            SELECT DISTINCT owned.project_id
+            FROM (
+              SELECT binding.project_id
+              FROM public.entry_approval_materialized_bindings binding
+              JOIN public.entry_approval_bridges bridge ON bridge.bridge_id = binding.bridge_id
+              WHERE bridge.creator_subject = %s
+                AND bridge.status = 'MATERIALIZED'
+              UNION
+              SELECT transition.project_id
+              FROM public.project_transition_records transition
+              WHERE transition.previous_state IS NULL
+                AND transition.requested_by_type = 'user'
+                AND transition.requested_by_id = %s
+            ) AS owned
+            ORDER BY owned.project_id ASC
         """
         try:
             with psycopg.connect(self._dsn, row_factory=dict_row) as connection:
-                rows = connection.execute(query, (subject,)).fetchall()
+                rows = connection.execute(query, (subject, subject)).fetchall()
             return tuple(str(row["project_id"]) for row in rows)
         except Exception:
             return None
@@ -53,9 +62,10 @@ class PostgresCreatorActorProjectScope:
 class PostgresFactoryHomeReadModel(FactoryHomeReadModel):
     """Reads existing Project and Human Gate facts without issuing authority commands."""
 
-    def __init__(self, dsn: str, actor_project_scope: ActorProjectScope) -> None:
+    def __init__(self, dsn: str, actor_project_scope: ActorProjectScope, draft_reader: Any = None) -> None:
         self._dsn = dsn
         self._actor_project_scope = actor_project_scope
+        self._draft_reader = draft_reader
 
     def factory_home_snapshot(self, actor_scope: Mapping[str, Any]) -> Mapping[str, Any]:
         scope = self._scope(actor_scope)
@@ -127,10 +137,35 @@ class PostgresFactoryHomeReadModel(FactoryHomeReadModel):
         return self._gates_for(scope)
 
     def production_drafts(self, actor_scope: Mapping[str, Any]) -> Mapping[str, Any]:
-        return UnavailableFactoryHomeReadModel().production_drafts(actor_scope)
+        subject = actor_scope.get("identity_subject")
+        if actor_scope.get("identity_verified") is not True or actor_scope.get("actor_id") != subject or not isinstance(subject, str) or not subject:
+            return UnavailableFactoryHomeReadModel().production_drafts(actor_scope)
+        if self._draft_reader is None:
+            return UnavailableFactoryHomeReadModel().production_drafts(actor_scope)
+        try:
+            return self._draft_reader.list(subject)
+        except Exception:
+            return self._degraded("DRAFT_SOURCE_UNAVAILABLE")
 
     def factory_status(self, actor_scope: Mapping[str, Any]) -> Mapping[str, Any]:
-        return UnavailableFactoryHomeReadModel().factory_status(actor_scope)
+        # There is no separate Factory lifecycle authority. Report the absence of
+        # a health fact explicitly rather than inferring health from the browser
+        # or from a successful read query.
+        scope = self._scope(actor_scope)
+        if scope is None:
+            return UnavailableFactoryHomeReadModel().factory_status(actor_scope)
+        return {
+            "availability": "DEGRADED",
+            "reason": "FACTORY_STATUS_FACTS_NOT_AVAILABLE",
+            "as_of": None,
+            "freshness": "NOT_AVAILABLE",
+            "source": "project_scope",
+            "source_version": None,
+            "control_plane": "UNKNOWN",
+            "workforce": "UNKNOWN",
+            "event_stream": "UNKNOWN",
+            "degraded_reasons": ["FACTORY_STATUS_FACTS_NOT_AVAILABLE"],
+        }
 
     def _scope(self, actor_scope: Mapping[str, Any]) -> Optional[tuple[str, ...]]:
         project_ids = self._actor_project_scope.project_ids_for(actor_scope)
@@ -151,9 +186,11 @@ class PostgresFactoryHomeReadModel(FactoryHomeReadModel):
             }
         query = """
             SELECT p.project_id, p.title, p.state, p.version, p.updated_at,
+                   binding.master_plan_revision_id,
                    (SELECT COUNT(*) FROM public.human_gate_requests g
                     WHERE g.project_id = p.project_id AND g.request_state = 'REQUESTED') AS gate_count
             FROM public.projects p
+            LEFT JOIN public.entry_approval_materialized_bindings binding ON binding.project_id = p.project_id
             WHERE p.project_id = ANY(%s)
             ORDER BY p.updated_at DESC, p.project_id ASC
         """
@@ -165,7 +202,7 @@ class PostgresFactoryHomeReadModel(FactoryHomeReadModel):
                 "reason": None,
                 "as_of": None,
                 "freshness": "NOT_AVAILABLE",
-                "source": "projects",
+                "source": "projects,entry_approval_materialized_bindings",
                 "source_version": None,
                 "items": [self._production_card(row) for row in rows],
             }
@@ -219,11 +256,11 @@ class PostgresFactoryHomeReadModel(FactoryHomeReadModel):
             "progress_basis": "NOT_AVAILABLE",
             "owner": None,
             "gate_count": int(row["gate_count"]),
-            "plan_revision": None,
+            "plan_revision": row.get("master_plan_revision_id"),
             "last_updated": str(row["updated_at"]),
             "as_of": str(row["updated_at"]),
             "freshness": "NOT_AVAILABLE",
-            "source": "projects",
+            "source": "projects,entry_approval_materialized_bindings",
             "source_version": int(row["version"]),
             "links": {"overview": "/factory-home/productions/{}".format(row["project_id"])},
         }

@@ -73,7 +73,7 @@ class FactoryHomeReadModelTests(unittest.TestCase):
     def test_portfolio_is_source_backed_and_missing_progress_is_null(self):
         result = self.model.production_portfolio(self.actor)
         self.assertEqual("CURRENT", result["availability"])
-        self.assertEqual("projects", result["source"])
+        self.assertEqual("projects,entry_approval_materialized_bindings", result["source"])
         card = result["items"][0]
         self.assertEqual("p-1", card["project_id"])
         self.assertEqual("Real Project", card["display_name"])
@@ -130,6 +130,14 @@ class FactoryHomeReadModelTests(unittest.TestCase):
         self.assertEqual("NOT_AVAILABLE", drafts.body["availability"])
         with self.assertRaises(ProductApiRejected):
             facade.handle(ProductApiRequest("POST", "/factory-home", {}, {}, actor))
+
+    def test_configured_factory_status_is_explicitly_degraded_not_healthy(self):
+        result = self.model.factory_status(self.actor)
+        self.assertEqual("DEGRADED", result["availability"])
+        self.assertEqual("FACTORY_STATUS_FACTS_NOT_AVAILABLE", result["reason"])
+        self.assertEqual("UNKNOWN", result["control_plane"])
+        self.assertEqual("UNKNOWN", result["workforce"])
+        self.assertEqual("UNKNOWN", result["event_stream"])
 
     def test_default_unavailable_model_never_claims_a_portfolio(self):
         result = UnavailableFactoryHomeReadModel().factory_home_snapshot(self.actor)
