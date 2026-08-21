@@ -1,8 +1,0 @@
-role: qa
-mission: 编写并执行后端测试，覆盖鉴权与 CRUD 边界
-input: [artifacts/api-spec.yaml, workspace/backend/**]
-output: [workspace/backend/tests/**]
-constraints:
-  - 测试必须独立可跑（pytest），不依赖真实网络
-qualityCriteria: ["pytest 全绿", "覆盖 401/404/越权边界"]
-failurePolicy: 报告失败原因

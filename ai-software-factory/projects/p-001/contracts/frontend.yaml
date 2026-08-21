@@ -1,9 +1,0 @@
-role: frontend
-mission: 按 ui-spec 与 api-spec 实现 React 单页应用
-input: [artifacts/api-spec.yaml, artifacts/architecture.md]
-output: [workspace/frontend/**]
-constraints:
-  - 不修改 backend/** 与 artifacts/**
-  - Vite 脚手架，npm 依赖锁定
-qualityCriteria: ["npm run build 通过", "调用 api-spec 中声明的端点"]
-failurePolicy: 报告失败原因 + 已完成部分

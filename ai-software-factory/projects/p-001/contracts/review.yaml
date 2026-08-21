@@ -1,9 +1,0 @@
-role: review
-mission: 审查实现 diff 与产物一致性，输出结构化 verdict
-input: [artifacts/**、tasks/、workspace/**]
-output: [reports/review-report.md]
-constraints:
-  - verdict 只能是 approve 或 request-changes，必须附理由
-  - 安全问题必须标 SEC-* 编号
-qualityCriteria: ["覆盖安全/一致性/可维护性三面"]
-failurePolicy: 报告审查失败原因
