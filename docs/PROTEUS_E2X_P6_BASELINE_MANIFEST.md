@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `39c38cd33888f93f05a00791200dd37504509ced` |
 | Branch | `fix/p5-migration-bootstrap-deploy-repair` |
-| Generated UTC | `2026-08-21T01:19:12Z` |
+| Generated UTC | `2026-08-21T01:38:24Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -286,6 +286,6 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E4_DELIVERY` |
 | `eabd49e39995faf61cfa0614cf1e866ae33e4fa7f0c520d24a333a32da947fdf` | `hermes-runtime/tests/test_e4_approval_bridge_domain.py` | `THIS_E4_DELIVERY` |
 | `3e10f003b5d2e27b7f82026e46a6e7a1a500a512e04486e074035362571e33d0` | `hermes-runtime/tests/test_e4_approval_bridge_fastapi.py` | `THIS_E4_DELIVERY` |
-| `11e76a8743ba821b4f56c1c82aaebaa24b9be9d60193d38e81c9a089063b8c04` | `hermes-runtime/tests/test_e4_approval_bridge_postgres.py` | `THIS_E4_DELIVERY` |
+| `02182ef98878e52a74d3fa7b3017751c88b73517351d67d205f21b743a11984e` | `hermes-runtime/tests/test_e4_approval_bridge_postgres.py` | `THIS_E4_DELIVERY` |
 | `7b9b849773843a2eae748b5f948d24383c6cf9e48d9d613a3fd8c0d5ccaf5d92` | `hermes-runtime/tests/test_e4_approval_bridge_product_api.py` | `THIS_E4_DELIVERY` |
 | `0a2dd0eac0d6fce62a3ad076229fed601a8cc858479e5a9ad394e7f1b82df85c` | `hermes-runtime/tests/test_e4_approval_bridge_saga.py` | `THIS_E4_DELIVERY` |

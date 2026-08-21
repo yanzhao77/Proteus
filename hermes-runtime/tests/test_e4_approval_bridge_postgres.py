@@ -24,7 +24,12 @@ from hermes_runtime.domain.entry_approval_bridge import EntryE4Rejected, preview
 from hermes_runtime.domain.models import Actor, ActorType, CommandEnvelope
 from hermes_runtime.infrastructure.postgres_entry_approval_bridge import PostgresEntryApprovalBridgeStore
 from hermes_runtime.infrastructure.postgres_project import PostgresProjectStore
-from tests.test_e3_proposal_master_plan_postgres import E3ProposalMasterPlanPostgresTests
+try:
+    # Direct module execution from hermes-runtime uses the tests namespace.
+    from tests.test_e3_proposal_master_plan_postgres import E3ProposalMasterPlanPostgresTests
+except ModuleNotFoundError:
+    # Repository-root CI discovery sets hermes-runtime/tests as the top-level.
+    from test_e3_proposal_master_plan_postgres import E3ProposalMasterPlanPostgresTests
 
 DATABASE_URL = os.getenv("HERMES_TEST_DATABASE_URL")
 
