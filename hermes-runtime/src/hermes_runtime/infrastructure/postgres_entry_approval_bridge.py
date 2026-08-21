@@ -144,7 +144,7 @@ class PostgresEntryApprovalBridgeStore:
     def record_child_step(self, bridge_id: str, step: str, command_id: str, receipt: Mapping[str, object]) -> None:
         with self._connect() as c:
             target = str(receipt.get("project_id") or receipt.get("task_id") or receipt.get("verification_plan_id") or bridge_id)
-            c.execute("INSERT INTO public.entry_approval_bridge_steps(step_id,bridge_id,step_name,child_command_id,child_receipt_ref,intended_target_id,request_hash,result_code,status,completed_at) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'SUCCEEDED',now()) ON CONFLICT (child_command_id) DO NOTHING", (stable_id("step", bridge_id, step, command_id), bridge_id, step, command_id, str(receipt.get("receipt_id") or command_id), target, content_hash(dict(receipt)), str(receipt.get("result_code") or "SUCCEEDED")))
+            c.execute("INSERT INTO public.entry_approval_bridge_steps(step_id,bridge_id,step_name,child_command_id,child_receipt_ref,intended_target_id,request_hash,result_code,status,completed_at) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'SUCCEEDED',now()) ON CONFLICT DO NOTHING", (stable_id("step", bridge_id, step, command_id), bridge_id, step, command_id, str(receipt.get("receipt_id") or command_id), target, content_hash(dict(receipt)), str(receipt.get("result_code") or "SUCCEEDED")))
 
     def transition(self, bridge_id: str, status: str, reason: str) -> None:
         with self._connect() as c:
