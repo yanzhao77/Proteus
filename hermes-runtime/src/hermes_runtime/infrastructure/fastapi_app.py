@@ -17,9 +17,11 @@ from hermes_runtime.infrastructure.oidc import OidcRejected, OidcTokenVerifier
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.domain.entry_understanding import EntryUnderstandingRejected, EntryUnderstandingValidationError
 from hermes_runtime.domain.entry_proposal_master_plan import EntryE3Rejected
+from hermes_runtime.domain.entry_approval_bridge import EntryE4Rejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
 from hermes_runtime.infrastructure.postgres_entry_understanding import EntryUnderstandingStoreUnavailable
 from hermes_runtime.infrastructure.postgres_entry_proposal_master_plan import EntryProposalMasterPlanStoreUnavailable
+from hermes_runtime.application.entry_approval_bridge import EntryApprovalBridgeUnavailable
 from hermes_runtime.domain.product_api import ProductApiRejected, ProductApiRequest
 
 
@@ -186,6 +188,14 @@ def create_app(
     def factory_home_production_snapshot(project_id: str, request: Request):
         return _factory_dispatch(request, f"/factory-home/productions/{project_id}")
 
+    @app.get("/factory-home/productions/{project_id}/live")
+    def live_production_snapshot(project_id: str, request: Request):
+        return _factory_dispatch(request, f"/factory-home/productions/{project_id}/live")
+
+    @app.get("/factory-home/productions/{project_id}/live-feed")
+    def live_production_feed(project_id: str, request: Request, after: int = 0, limit: int = 50):
+        return _factory_dispatch(request, f"/factory-home/productions/{project_id}/live-feed", {"after": after, "limit": limit})
+
     @app.get("/factory-home/gates")
     def factory_home_gates(request: Request):
         return _factory_dispatch(request, "/factory-home/gates")
@@ -265,6 +275,21 @@ def create_app(
     @app.post("/production-drafts/{draft_id}/proposal/master-plan")
     async def generate_production_draft_master_plan(draft_id: str, request: Request):
         return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/master-plan", await _json_body(request))
+    @app.get("/production-drafts/{draft_id}/proposal/master-plan/approval-preview")
+    def production_draft_master_plan_approval_preview(draft_id: str, request: Request):
+        return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal/master-plan/approval-preview", {})
+
+    @app.get("/production-drafts/{draft_id}/proposal/master-plan/approval")
+    def production_draft_master_plan_approval(draft_id: str, request: Request):
+        return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal/master-plan/approval", {})
+
+    @app.post("/production-drafts/{draft_id}/proposal/master-plan/approve")
+    async def approve_production_draft_master_plan(draft_id: str, request: Request):
+        return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/master-plan/approve", await _json_body(request))
+
+    @app.post("/production-drafts/{draft_id}/proposal/master-plan/approval/reconcile")
+    async def reconcile_production_draft_master_plan_approval(draft_id: str, request: Request):
+        return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/master-plan/approval/reconcile", await _json_body(request))
 
     @app.get("/home", response_class=HTMLResponse)
     def factory_home(request: Request):
@@ -307,8 +332,8 @@ def _draft_dispatch(request: Request, method: str, path: str, body: Mapping[str,
     return _verified_dispatch(request, method, path, body)
 
 
-def _factory_dispatch(request: Request, path: str):
-    return _verified_dispatch(request, "GET", path, {})
+def _factory_dispatch(request: Request, path: str, query: Optional[Mapping[str, Any]] = None):
+    return _verified_dispatch(request, "GET", path, query or {})
 
 
 def _verified_dispatch(request: Request, method: str, path: str, body: Mapping[str, Any]):
@@ -382,6 +407,13 @@ def _dispatch(
     except EntryProposalMasterPlanStoreUnavailable as exc:
         code = str(exc).split(":", 1)[0]
         return _error(code, 503, request_id, "E3 authority unavailable")
+    except EntryE4Rejected as exc:
+        code = str(exc).split(":", 1)[0]
+        status = 409 if code.endswith("_VERSION_CONFLICT") or code.endswith("_IDEMPOTENCY_CONFLICT") or code.endswith("_SOURCE_STALE") or code.endswith("_RECONCILIATION_REQUIRED") else 403 if code == "ENTRY_APPROVAL_UNAUTHORIZED" else 422
+        return _error(code, status, request_id, "request rejected")
+    except EntryApprovalBridgeUnavailable as exc:
+        code = str(exc).split(":", 1)[0]
+        return _error(code, 503, request_id, "E4 approval authority unavailable")
     except ValueError:
         return _error("VALIDATION_FAILED", 400, request_id, "request rejected")
 

@@ -2,237 +2,274 @@
 
 # Proteus
 
-**Autonomous software factory infrastructure, built around explicit authority, verifiable evidence, and recoverable execution.**
+### An autonomous software factory with explicit authority, durable recovery, and evidence-backed delivery.
 
-把一个想法持续推进为可验证、可交付的软件项目。默认自主运行，人类按风险介入，所有关键结论都有证据支撑。
+把一个想法推进为可审阅的计划、受控的执行，以及由独立验证和证据支撑的软件交付。
 
-[架构设计](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) · [Runtime V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) · [规范](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) · [P4 产品化规范](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) · [P5 单节点产品规范](docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md) · [架构决策](ARCHITECTURE_DECISIONS.md) · [P0 验收](docs/P0_ACCEPTANCE_MATRIX.md) · [P1 验收](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) · [P2 验收](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md) · [P4 验收](docs/P4_PRODUCTIZATION_ACCEPTANCE_MATRIX.md) · [P5 验收](docs/P5_DEPLOYABLE_PRODUCT_ACCEPTANCE_MATRIX.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-2ea44f.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776ab.svg)](hermes-runtime/requirements.txt)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169e1.svg)](docs/DEVELOPER_GUIDE.md)
+[![Frontend](https://img.shields.io/badge/React-TypeScript-149eca.svg)](frontend/README.md)
+
+[快速开始](#快速开始) · [系统如何工作](#系统如何工作) · [交付状态](#交付状态) · [架构边界](#架构边界) · [文档导航](#文档导航)
 
 </div>
 
 ---
 
-> 🚀 **新手上路？从这里开始**
->
-> 完整的分步操作手册见 [**开发搭建操作手册**](docs/DEVELOPER_GUIDE.md)：
-> 环境准备 → 安装依赖 → 启动 PostgreSQL → 执行迁移 → 运行测试（领域 / PG / 外部适配器）
-> → 启动 API / Supervisor → 单节点 Compose 部署 → 开发新能力标准流程 → 故障排查 FAQ。
-> 手册中的所有命令均在当前 master 上实测，输出可直接对照。
-
----
-
 ## Proteus 是什么
 
-Proteus 是 **Hermes Autonomous Software Factory** 的设计与核心运行时仓库。它关注的不是“让 Agent 多写一点代码”，而是如何把多个不可靠、可重试的执行单元组织成一个可靠的软件交付系统：
+Proteus 是 **Hermes Autonomous Software Factory** 的产品与核心运行时仓库。它解决的不是“让 Agent 多生成一些代码”，而是如何把规划、执行、验证和恢复组织成一条可靠的软件生产线。
 
-- **Autonomous First**：系统持续观察、诊断、规划、执行和验证，而不是等待人工逐步驱动。
-- **Human-on-the-Loop**：人类处理高风险决策和例外，不成为正常流程的串行瓶颈。
-- **Evidence Driven**：任务完成、状态流转和最终交付都必须绑定可追溯证据。
-- **Deterministic Control Plane**：Agent 可以提出意图，但只有控制平面能够提交权威状态。
-- **Failure Is Feedback**：失败进入诊断、修复和重规划闭环，而不是直接终止流程。
-- **Everything Is Recoverable**：命令幂等、事件可重放、投递可恢复，进程崩溃不应破坏业务事实。
+在 Proteus 中，Agent 可以提出意图，Worker 可以执行任务，但只有 Control Plane 能提交权威状态。任务是否完成不由 Worker 自述决定，而由独立 Verification、Artifact hash 和 Evidence 共同证明。失败也不是流程终点：它会进入诊断、恢复和重新规划闭环。
 
-当前仓库已经完成 **P0 权威骨架**、**P1 自治决策链**、**P2 执行权威链**、**P3 运维治理 runtime**、**P4 产品化边界**，以及 **P5 单节点可部署产品基线**（FastAPI 服务、常驻 runtime supervisor、生产 OIDC/Human Gate UI、S3/Vault/OTLP-compatible adapters、部署运维基线与真实外部 smoke 证据）。P4/P5 都不会新增绕过 Control Plane 的状态写入路径。Python/PostgreSQL 实现可以把权威 Event 依次转换为 Situation、Diagnosis、CandidateAction、PolicyDecision、RiskAssessment 和带 ResourceReservation 的 DecisionRecord，再冻结 Capability/Context/Sandbox，创建并排队 ExecutionRequest，由 Scheduler 原子获取 Lease、Fencing Token 和执行锁；P3 runtime 已覆盖 Human Gate/Waiting/Resume、Checkpoint/Replay/Reconcile、Quarantine/Evidence invalidation、immutable Decision Explain/Audit/Trace、第一个真实 Docker execution target，以及跨切片 E2E hardening。
+| 原则 | Proteus 的保证 |
+| --- | --- |
+| **Authority first** | 所有状态变更通过带版本、身份、原因和幂等键的语义命令完成。 |
+| **Evidence over claims** | Worker 不能宣布自己成功；最终结论必须绑定独立验证和可追溯证据。 |
+| **Autonomous by default** | 系统持续观察、诊断、规划、执行和验证，人类只在风险与例外处介入。 |
+| **Fail closed** | 身份、权限、版本、配置或来源事实不完整时，系统拒绝推进而不是猜测。 |
+| **Recovery is a protocol** | Receipt、Outbox、Lease、Fencing、Checkpoint 和 Reconcile 让崩溃恢复可证明。 |
+| **One source of truth** | UI、模型、Worker、Verifier 和遥测都不能成为第二套 Project/Task authority。 |
 
-## 核心闭环
+## 系统如何工作
+
+Proteus 将“进入工厂”和“在工厂中执行”分成两条清晰衔接的链路：
 
 ```mermaid
 flowchart LR
-    E["Authoritative Event"] --> S["Situation"]
-    S --> D["Diagnosis"]
-    D --> P["Candidate Actions"]
-    P --> C["Policy + Risk"]
-    C --> B["Budget + ActionScore"]
-    B --> R["DecisionRecord + Reservation"]
-    R --> X["ExecutionRequest"]
+    I["Human idea"] --> D["E1 EntryDraft"]
+    D --> U["E2 Understanding"]
+    U --> M["E3 Proposal + Master Plan"]
+    M --> A["E4 Explicit approval"]
+    A --> B["Durable Approval Bridge"]
+    B --> P["Project + Task DAG + Verification Plans"]
+
+    P --> S["Situation + Diagnosis"]
+    S --> C["Candidate actions"]
+    C --> R["Policy + Risk + Budget"]
+    R --> Q["Decision + Reservation"]
+    Q --> X["ExecutionRequest"]
     X --> L["Queue + Lease + Fencing"]
-    L -. "P2-4" .-> W["Worker + Sandbox"]
-    W -.-> A["Artifact + Evidence"]
-    A -.-> V["Independent Verification"]
-    V -. "FAIL feedback" .-> E
+    L --> W["Worker + Sandbox"]
+    W --> V["Independent Verification"]
+    V --> E["Artifact + Evidence"]
+    V -. "failure feedback" .-> S
 ```
 
-实线部分已经覆盖 P0、P1、P2 以及 P3-1/P3-2/P3-3/P3-4/P3-5 的数据库 authority slices；生产 UI、IdP 和云集成仍不属于当前 runtime。贯穿整个运行时的核心边界是：**Worker 不能宣布自己成功，Verifier 不能直接改写任务状态，Policy/Risk/Score/Explain/Docker Adapter 不能互相越权，Agent 也不能绕过 Control Plane 写入权威事实。**
+批准之前，Entry 只能产生版本化的 Draft、Understanding、Proposal 和 Master Plan。只有 E4 Approval Bridge 可以调用既有 Control Plane 命令，将获批计划确定性地物化为 Project、Task Graph 和 Verification Plan。它采用 receipt-first、确定性 child command ID 和可重启 reconcile，避免重复 Project 或部分失败后的原始回滚。
 
-## 当前实现
+## 交付状态
 
-| 能力 | 当前状态 | 关键保证 |
+### Production Entry
+
+| 阶段 | 状态 | 已交付能力 |
 | --- | --- | --- |
-| Completion / Verification | 已实现 | Artifact hash 精确绑定；Worker 与 Verifier 的 run/context 相互独立 |
-| Task 与 Project authority | 已实现 | 语义命令、版本检查、fail-closed guard、受控状态迁移 |
-| Work Graph / Task DAG | 已实现 | 依赖边无环；项目级 graph version；READY 权威计算 |
-| Event Log / Outbox | 已实现 | 状态、事件、Outbox 和 CommandReceipt 在同一本地事务提交 |
-| Event delivery | 已实现 | relay lease、重试、DLQ、授权 redrive、至少一次投递 |
-| Idempotent consumer | 已实现 | Inbox 去重、partition-local 连续 checkpoint、gap parking/drain |
-| Resource Accounting | P1 已完成 | 十二维整数资源、原子预留、Usage、Settlement、threshold 与 Budget Fact |
-| Situation / Diagnosis | P1 已完成 | sequence-bounded AnalysisContext、确定性分类、指纹去重与证据约束诊断 |
-| Candidate Action Planner | P1 已完成 | 版本化 Registry、确定性候选生成、ResourceEstimate 与权威状态隔离 |
-| Policy / Risk | P1 已完成 | DENY/REQUIRE_HUMAN fail-closed；Risk 只评估风险，不授予权限 |
-| Action Selection | P1 已完成 | 预算可行性、确定性评分、冲突过滤、不可变 DecisionRecord |
-| Selection / Reservation bridge | P1 已完成 | SelectedAction、Reservation、Event、Outbox、Receipt 同事务提交 |
-| Capability / Context / Sandbox | P2-1 已完成 | 版本化 WorkerTemplate、确定性匹配、不可变 Context Bundle、fail-closed SandboxProfile 编译 |
-| ExecutionRequest / Queue | P2-2 已完成 | admission fail-closed、P1 Reservation 单次交接、冻结输入、同事务 Queue/Event/Outbox/Receipt |
-| Scheduler / Lease / Fencing | P2-3 已完成 | PostgreSQL 原子 claim、单调 token、续租/过期接管/重排队、执行锁与权限隔离 |
-| Worker lifecycle / Result admission | P2 已完成 | AgentRun、current-token candidate/result、minimal quarantine、settlement；真实 Docker target 由 P3-5 承接 |
-| Human Gate / Waiting / Resume | P3-1 已完成 | Gate Request/Decision/Application 分离；ResumeContext 当前 guard 重检 |
-| Checkpoint / Replay / Reconcile | P3-2 已完成 | replay shadow generation、checkpoint/reconcile finding/plan、无 authority fold/patch |
-| Quarantine / Evidence invalidation | P3-3 已完成 | append-only review/adoption/redrive；Evidence invalidation 不删证据、不改 VerificationResult、阻断 stale Gate resume |
-| Decision Explain / Audit / Trace | P3-4 已完成 | immutable snapshot/ref graph、缺链显式 MISSING、授权查询、audit trace 与脱敏 |
-| Production Docker execution | P3-5 已完成 | Docker target 1.0、非 root/只读 rootfs/deny network、fencing labels、artifact/output/usage、side-effect receipts |
-| P3 E2E hardening | P3-6 已完成 | Human Gate、Docker、side-effect、Quarantine、Evidence、Replay/Reconcile、Explain 端到端权限边界 |
-| P4 Productization Contract | P4-0 已完成 | Public API、Human Gate identity、Artifact/Secret/Retention、Observability/export 产品边界；无新增 core authority |
-| P4 Public API boundary | P4-1 已完成 | stdlib in-process facade；只允许语义查询/命令 wrapper，拒绝 generic PATCH/status/Event/SQL |
-| P4 Human Gate product boundary | P4-2 已完成 | local/test identity assertion；Gate 展示与 Decision 提交分离，不能直接 Project resume |
-| P4 Artifact/Secret/Retention | P4-3 已完成 | content-addressed local artifact store；secret handle-only；retention tombstone 与 active dependency guard |
-| P4 Observability/export | P4-4 已完成 | OpenTelemetry-compatible local envelope；redaction；MISSING links；metrics/traces 不授权 |
-| P4 E2E hardening | P4-5 已完成 | API、Gate、Artifact、Secret、Retention、Observability 跨边界回归 |
-| P5 Deployable Product Contract | P5-0 已完成 | 单节点 topology、FastAPI、supervisor、OIDC/UI、S3/Vault/OTLP、deployment/ops 边界规范 |
-| P5 FastAPI service host | P5-1 已完成 | 成熟 FastAPI/Pydantic transport；allowlisted semantic routes；health/readiness；redacted error envelope |
-| P5 Runtime supervisor | P5-2 已完成 | bounded service loops；backoff/jitter；critical readiness；graceful cancellation；DB fencing correctness声明 |
-| P5 OIDC + Human Gate UI | P5-3 已完成 | PyJWT/cryptography OIDC 验证；production 禁用 local issuer；最小 Gate inbox/detail/decision UI |
-| P5 Production-compatible adapters | P5-4 已完成 | S3-compatible Artifact、Vault KV-v2 Secret、OTLP-compatible telemetry；redaction/bounded failure |
-| P5 Deployment/Ops baseline | P5-5 已完成 | Dockerfile、Compose、API/runtime/migration entrypoints、runbook、CI smoke |
-| P5 E2E hardening | P5-6 已完成 | authenticated API/Gate/UI、Artifact/Secret/OTLP、Explain、fault injection、secret canary redaction；Docker build、MinIO、Vault、OTLP Collector、浏览器截图真实 smoke 全部通过 |
-| E2.x Producer Integration | **COMPLETE / LIVE VERIFIED** | 受控 local Docker **non-production** live provider smoke 已通过；固定 `9 / 9` Product API 预算、一次 Understanding generation 与同 key replay 均完成。未声明 production 验证。 |
-| P6 Recovery Runtime Least Privilege | **COMPLETE / REVALIDATED** | Authority Gate **CLOSED**；功能 revalidation **PASS**。 |
-| External broker | 未实现 | Kafka、Redis、Kubernetes 均不是当前运行时能力 |
+| **E1 · EntryDraft** | **PASS** | creator-scoped Draft、不可变 revision、版本并发与幂等命令。 |
+| **E2 · Understanding** | **PASS** | typed clarification、assumption、source freshness 与领域校验。 |
+| **E2.x · Producer Integration** | **PASS — NON-PRODUCTION** | server-side OpenAI-compatible producer；受控 live smoke 与 same-key replay 已验证。 |
+| **E3 · Proposal / Master Plan** | **PASS / COMPLETE** | 确定性 Proposal、Master Plan、hash、revision 与 creator isolation。 |
+| **E4 · Approval Bridge** | **PASS / COMPLETE** | receipt-first durable saga，经既有 Control Plane ports 幂等物化。 |
+| **E5–E7 · Product Experience** | **PASS / COMPLETE** | Source-derived Product API/read model、production-real-API Factory Home resume、read-only Live Production snapshot/live-feed。 |
+| **E8 · Production Entry Trial** | **NOT ENTERED** | Idea 到既有 P6 delivery 的最终纵向验收。 |
 
-P0、P1 和 P2 的需求、实现与测试映射分别见 [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md)、各项 [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) 和 [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md)。更精确的 authority 和非目标边界见 [hermes-runtime/README.md](hermes-runtime/README.md)。
+### Control Plane
+
+| 阶段 | 状态 | 核心范围 |
+| --- | --- | --- |
+| **P0** | **COMPLETE** | Project/Task authority、DAG、Verification、Event/Outbox 与命令幂等。 |
+| **P1** | **COMPLETE** | Situation、Diagnosis、Planning、Policy、Risk、Budget、Selection 与 Reservation。 |
+| **P2** | **COMPLETE** | Execution admission、Queue、Scheduler、Lease、Fencing、Worker 与 result admission。 |
+| **P3** | **COMPLETE** | Human Gate、Checkpoint/Replay/Reconcile、Quarantine、Evidence invalidation 与 Docker execution。 |
+| **P4** | **COMPLETE** | Product API、Artifact/Secret/Retention、Observability 与产品化安全边界。 |
+| **P5** | **COMPLETE** | FastAPI、OIDC、runtime supervisor、S3/Vault/OTLP adapters 与单节点部署。 |
+| **P6** | **COMPLETE / REVALIDATED** | Autonomous trial通过；Recovery runtime least-privilege gate已关闭。 |
+
+最新封存的 E4–E7 验收包括：真实 PostgreSQL E4 durable matrix **26/26 PASS**、fresh migration **0001 → 0030 PASS**、最终 Full Runtime **699 run / 12 skipped / 0 failures in 472.450 seconds**、frontend **40 PASS / production build PASS / oxlint 0 warnings**，以及 manifest **166 non-self entries / 0 mismatch**。README 只提供概览；当前状态、测试数字和文件哈希的权威来源是 [E2.x/P6 Baseline Manifest](docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md)。
 
 ## 快速开始
 
-> 💡 本节省略了细节，**完整的分步搭建流程（含所有命令、预期输出、常见错误）请参阅**
-> [开发搭建操作手册](docs/DEVELOPER_GUIDE.md)。下面只给出最快路径。
+完整环境、迁移、服务和故障排查说明见 [开发搭建操作手册](docs/DEVELOPER_GUIDE.md)。下面是最短的本地开发路径。
 
 ### 环境要求
 
 - Python 3.9+
-- PostgreSQL 14+（仅集成测试需要）
-- Docker（可选，用于启动一次性测试数据库）
+- PostgreSQL 14+（authority、并发与权限测试需要）
+- Docker（推荐，用于 disposable PostgreSQL 和外部适配器）
+- Node.js 与 pnpm（Factory Home frontend需要）
 
-### 运行纯领域测试
-
-领域测试不需要数据库，也不需要安装第三方依赖：
-
-```bash
-cd hermes-runtime
-PYTHONPATH=src python3 -m unittest \
-  tests.test_domain_authority \
-  tests.test_graph_domain \
-  tests.test_project_domain \
-  tests.test_resource_accounting_domain \
-  tests.test_situation_domain \
-  tests.test_diagnosis_domain \
-  tests.test_planner_domain \
-  tests.test_policy_domain \
-  tests.test_risk_domain \
-  tests.test_selection_domain \
-  tests.test_architecture_boundaries -v
-```
-
-### 运行完整集成测试
-
-启动一个本地 PostgreSQL：
-
-```bash
-docker run --rm --name hermes-runtime-postgres \
-  -e POSTGRES_PASSWORD=hermes \
-  -e POSTGRES_DB=hermes_test \
-  -p 55432:5432 \
-  -d postgres:16-alpine
-```
-
-安装依赖并执行测试：
+### 1. 运行后端测试
 
 ```bash
 cd hermes-runtime
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 
-HERMES_TEST_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_test' \
-  PYTHONPATH=src python3 -m unittest discover -s tests -v
+# 无数据库发现：PostgreSQL测试会明确 skipped
+PYTHONPATH=src python -m unittest discover -s tests
 ```
 
-如果没有显式设置 `HERMES_TEST_DATABASE_URL`，测试发现仍可运行，但 PostgreSQL 集成测试会被跳过；SQLite 或 mock 不被视为 PostgreSQL authority/concurrency 语义的有效证明。
+没有数据库的 skipped 不能作为 PostgreSQL authority、并发或权限验收证据。完整回归需要真实 PostgreSQL：
 
-当前 P0-P3-6 回归基线在 P3-4/P3-5/P3-6 阶段新增 Explain/Audit/Trace、Docker execution 与 E2E hardening 测试；最终精确数字见本分支 P3-6 commit 和 PR 验证记录。阶段验收不能把跳过的数据库、Docker、并发或权限测试计为通过。
+```bash
+docker run --rm --name hermes-dev-postgres \
+  -e POSTGRES_PASSWORD=hermes \
+  -e POSTGRES_DB=hermes_test \
+  -p 55432:5432 \
+  -d postgres:16-alpine
 
-### 执行一次 Outbox Relay
+HERMES_TEST_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_test' \
+  PYTHONPATH=src python -m unittest discover -s tests
+```
+
+### 2. 应用迁移并启动 API
 
 ```bash
 cd hermes-runtime
-HERMES_DATABASE_URL='postgresql://user:password@host:5432/database' \
-  PYTHONPATH=src python3 -m hermes_runtime.relay_once \
-  --owner relay-1 \
-  --batch-size 100
+
+HERMES_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_test' \
+  PYTHONPATH=src python -m hermes_runtime.migration_bootstrap
+
+HERMES_DATABASE_URL='postgresql://postgres:hermes@127.0.0.1:55432/hermes_test' \
+  PYTHONPATH=src python -m uvicorn hermes_runtime.api_main:app \
+  --host 127.0.0.1 --port 8000 --reload
 ```
 
-当前 runner 只执行一个批次，使用 PostgreSQL 本地 durable publisher；仓库暂未包含常驻后台循环或外部消息代理。
+服务端未配置数据库或 OIDC verifier 时，受保护的 Product API capability会保持 fail closed。不要用浏览器 actor header、fixture identity或inline secret绕过该边界。
 
-## 代码结构
+### 3. 启动 Factory Home
+
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+
+Vite默认将Product API请求代理到 `http://127.0.0.1:8000`。纯视觉开发可显式运行 `VITE_PROTEUS_DEMO=true pnpm dev`；该模式带有醒目的 Demo标识，不能作为真实 authority evidence。
+
+Frontend验证：
+
+```bash
+pnpm test
+pnpm build
+pnpm lint
+```
+
+## 核心能力
+
+| 能力域 | 已实现的关键机制 |
+| --- | --- |
+| **Authority** | typed semantic commands、expected version、idempotency、CommandReceipt、least-privilege roles。 |
+| **Graph** | Project-scoped DAG、cycle rejection、graph version、authority-derived READY。 |
+| **Delivery** | immutable Event Log、transactional Outbox、relay lease、DLQ、redrive、Inbox checkpoint。 |
+| **Decision** | bounded context、deterministic diagnosis/planning、Policy/Risk、Budget、ActionScore、DecisionRecord。 |
+| **Execution** | frozen capability/context/sandbox、ExecutionRequest、Queue、Lease、Fencing、AgentRun。 |
+| **Verification** | independent Worker/Verifier identity、Verification Plan、Artifact hash、Evidence validity。 |
+| **Recovery** | checkpoint、shadow replay、reconcile findings、bounded retry、feedback/replan、Human Gate。 |
+| **Product** | FastAPI、OIDC、creator-scoped Entry、Factory Home shell、S3/Vault/OTLP-compatible adapters。 |
+
+## 架构边界
+
+Proteus 有意保持窄而严格：
+
+- PostgreSQL 是当前权威状态和并发协调点；Kafka、Redis 和 Kubernetes 不是现有运行时前提。
+- 系统采用 authoritative state + immutable event log + transactional outbox，而不是 full event sourcing。
+- 投递是 at-least-once；业务效果通过 receipt、inbox和idempotency收敛。
+- Worker提交CompletionClaim，不提交Task PASS；Verifier产生Verdict，不直接修改Task。
+- Human Gate decision是输入事实，Project resume仍需独立的受控应用命令。
+- Entry Approval Bridge只调用既有Project/Graph/Verification commands，不直接写child authority tables。
+- Metrics、traces、模型输出和UI projection只能解释事实，不能授权状态迁移。
+- Secret以server-side handle或file boundary传递，不进入浏览器、日志、receipt或文档。
+
+代码依赖方向同样是单向的：
+
+```text
+frontend/                  Product API consumer; no runtime authority
+        ↓
+FastAPI transport          Parsing, OIDC verification, safe envelopes
+        ↓
+application/               Use cases, semantic commands, ports, orchestration
+        ↓
+domain/                    Pure invariants and state machines
+        ↑
+infrastructure/            PostgreSQL and external adapter implementations
+```
+
+## 仓库结构
 
 ```text
 Proteus/
+├── frontend/                    # React + TypeScript Factory Home
 ├── hermes-runtime/
-│   ├── migrations/             # 版本化 PostgreSQL schema 与权限边界
+│   ├── migrations/              # 版本化PostgreSQL schema与权限边界
 │   ├── src/hermes_runtime/
-│   │   ├── domain/             # 纯领域规则与状态机
-│   │   ├── application/        # 命令、用例、ports 与 authority 编排
-│   │   └── infrastructure/     # PostgreSQL adapters 与 delivery 实现
-│   └── tests/                  # 领域、集成、权限与架构边界测试
+│   │   ├── domain/              # 纯领域规则与状态机
+│   │   ├── application/         # 用例、commands、ports与编排
+│   │   ├── infrastructure/      # PostgreSQL、FastAPI及外部adapters
+│   │   └── trial/               # 受控P6 autonomous acceptance harness
+│   ├── tests/                   # domain、PostgreSQL、权限与边界测试
+│   └── requirements.txt         # pinned Python dependencies
+├── deploy/                      # 单节点部署基线与runbook
+├── examples/golden-todo/        # P6真实软件交付验收fixture
 ├── docs/
-│   ├── adr/                    # 单项 Architecture Decision Records
-│   ├── specs/                  # 规范性协议与一致性测试要求
-│   └── ...                     # 总体架构、runtime 设计与验收矩阵
-├── ARCHITECTURE_DECISIONS.md   # ADR 导航及 authority order
+│   ├── adr/                     # Architecture Decision Records
+│   ├── specs/                   # 规范性协议与conformance要求
+│   └── evidence/                # 封存验收证据
+├── ARCHITECTURE_DECISIONS.md    # authority order与ADR索引
 └── README.md
 ```
 
-代码按 **authority boundary** 而不是技术框架组织。纯领域层不得依赖数据库或 Web 框架；application 层定义用例与 port；infrastructure 层负责 PostgreSQL 事务、权限和投递细节。
+代码按 **authority boundary** 而不是框架组织。`domain` 不依赖数据库或Web框架；`application` 定义用例和ports；`infrastructure` 实现事务、权限与外部连接。
 
-## 文档地图
+## 文档导航
+
+### 从这里开始
 
 | 文档 | 用途 |
 | --- | --- |
-| [Autonomous Software Factory Architecture V1.0](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) | 产品愿景、系统全景、自治闭环与长期能力模型 |
-| [Core Runtime Design V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) | 当前核心运行时的详细设计与 invariants |
-| [Runtime Normative Specification](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) | authority、ownership、阶段和 traceability 的规范来源 |
-| [Command & Event Protocol](docs/specs/Hermes_Command_Event_Protocol_V1.0.md) | 命令事务、事件、Outbox、投递与恢复协议 |
-| [Execution Lease Protocol](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | lease、fencing、result admission 与 accounting 交互 |
-| [P2 Execution Admission Specification](docs/specs/Hermes_P2_Execution_Admission_Normative_Spec_V1.0.md) | P2 admission、Reservation handoff、Queue、Lease、Worker 与 P2/P3 责任边界 |
-| [Conformance Test Specification](docs/specs/Hermes_Conformance_Test_Spec_V1.0.md) | 一致性测试、故障注入与阶段门槛 |
-| [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md) | P0 权威骨架验收结果 |
-| [P1 Resource Accounting](docs/P1_RESOURCE_ACCOUNTING_ACCEPTANCE_MATRIX.md) | P1 Slice 1 资源核算验收结果 |
-| [P1 Situation Analyzer](docs/P1_SITUATION_ANALYZER_ACCEPTANCE_MATRIX.md) | P1 Slice 2 情境分析验收结果 |
-| [P1 Diagnosis Engine](docs/P1_DIAGNOSIS_ENGINE_ACCEPTANCE_MATRIX.md) | P1 Slice 3 诊断引擎验收结果 |
-| [P1 Candidate Action Planner](docs/P1_CANDIDATE_ACTION_PLANNER_ACCEPTANCE_MATRIX.md) | P1 Slice 4 候选行动规划验收结果 |
-| [P1 Policy and Risk](docs/P1_POLICY_RISK_ACCEPTANCE_MATRIX.md) | P1 Slice 5 策略与风险验收结果 |
-| [P1 Action Selection](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) | P1 Slice 6 评分、选择、DecisionRecord 与预留验收结果 |
-| [P2 Execution Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md) | P2 Slice 1-4 的执行准备、调度、Worker/result admission 状态与证据 |
-| [P4 Productization Specification](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) | P4 API、Human Gate identity、Artifact/Secret/Retention 与 Observability 产品化边界 |
-| [P4 Productization Acceptance Matrix](docs/P4_PRODUCTIZATION_ACCEPTANCE_MATRIX.md) | P4 产品化切片验收状态 |
-| [P4 Completion Summary](docs/Hermes_P4_COMPLETION_SUMMARY.md) | P4 产品化完成范围、边界和验证摘要 |
-| [P5 Deployable Product Specification](docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md) | P5 单节点可部署产品、服务拓扑与运维边界 |
-| [P5 Deployable Product Acceptance Matrix](docs/P5_DEPLOYABLE_PRODUCT_ACCEPTANCE_MATRIX.md) | P5 单节点产品化切片验收状态 |
-| [P5 Completion Summary](docs/Hermes_P5_COMPLETION_SUMMARY.md) | P5 单节点产品完成范围、边界和验证摘要 |
-| [E2.x/P6 Current Verification Baseline](docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md) | E2.x non-production live verification、P6 gate/revalidation 与唯一 repository-wide current final status authority |
-| [开发搭建操作手册](docs/DEVELOPER_GUIDE.md) | 从零搭建开发环境的完整操作手册（安装/迁移/测试/启动/部署/开发流程/FAQ） |
-| [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 规范优先级、ADR 状态与待决问题 |
+| [开发搭建操作手册](docs/DEVELOPER_GUIDE.md) | 环境、迁移、测试、服务、部署和故障排查。 |
+| [Hermes Runtime README](hermes-runtime/README.md) | 核心运行时模块、命令和测试边界。 |
+| [Factory Home README](frontend/README.md) | 前端adapter、Demo隔离和本地运行方式。 |
+| [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) | 文档authority order、ADR状态和待决问题。 |
 
-当文档之间出现冲突时，请遵循 [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) 中定义的 authority order，而不是依据文件名或版本号自行推断。
+### 架构与规范
 
-## 设计边界
+| 文档 | 用途 |
+| --- | --- |
+| [Autonomous Software Factory Architecture](docs/Hermes_Autonomous_Software_Factory_Architecture_V1.0.md) | 产品愿景、系统全景与长期能力模型。 |
+| [Core Runtime Design V1.2](docs/Hermes_Autonomous_Software_Factory_Core_Runtime_Design_V1.2.md) | 核心运行时设计与invariants。 |
+| [Runtime Normative Specification](docs/specs/Hermes_Runtime_Normative_Spec_V1.0.md) | authority、ownership、阶段与traceability规范。 |
+| [Command & Event Protocol](docs/specs/Hermes_Command_Event_Protocol_V1.0.md) | 命令事务、事件、Outbox、投递与恢复。 |
+| [Execution Lease Protocol](docs/specs/Hermes_Execution_Lease_Protocol_V1.0.md) | Lease、Fencing、result admission与accounting。 |
+| [P4 Productization Specification](docs/specs/Hermes_P4_Productization_Normative_Spec_V1.0.md) | API、identity、Artifact、Secret、Retention和Observability。 |
+| [P5 Deployable Product Specification](docs/specs/Hermes_P5_Deployable_Product_Normative_Spec_V1.0.md) | 单节点产品拓扑、服务和运维边界。 |
 
-当前实现有意保持窄而严格：
+### Production Entry
 
-- PostgreSQL 是 MVP 的权威状态与并发协调点；当前不引入 Kafka、Redis 或 Kubernetes。
-- 系统使用 authoritative state + immutable event log + transactional outbox，不采用 full event sourcing。
-- 投递语义是 at-least-once；业务 effect 依靠 inbox/idempotency 保证不重复。
-- `supporting_refs` 只提供事实定位线索，不构成权限或状态迁移依据。
-- SelectedAction 是已经预留资源的执行意图，不是 ExecutionRequest、Queue、Lease、Worker assignment 或 SandboxProfile。
-- 生产部署必须为 Control Plane、Accounting、Situation、Diagnosis、Planner、Policy、Risk、Selection、Relay、Consumer、Redrive、Worker 和只读访问使用不同登录身份，并只授予对应 capability role。
+| 文档 | 用途 |
+| --- | --- |
+| [Production Entry Implementation Plan](docs/PROTEUS_PRODUCTION_ENTRY_IMPLEMENTATION_PLAN_V1.md) | E0–E8路线、authority边界和验收标准。 |
+| [E1 Delivery](docs/E1_ENTRY_DRAFT_CORE_DELIVERY_REPORT.md) | EntryDraft authority交付。 |
+| [E2 Delivery](docs/E2_ENTRY_UNDERSTANDING_DELIVERY_REPORT.md) | Understanding、clarification和assumption交付。 |
+| [E2.x Producer Delivery](docs/E2X_PRODUCER_INTEGRATION_DELIVERY_REPORT.md) | Provider adapter、provenance和内部验收。 |
+| [E2.x Live Smoke](docs/E2X_LIVE_PROVIDER_SMOKE_DELIVERY_REPORT.md) | 受控non-production live验证。 |
+| [E3 Delivery](docs/E3_PROPOSAL_MASTER_PLAN_DELIVERY_REPORT.md) | Proposal与Master Plan交付。 |
+| [E4 Delivery](docs/E4_APPROVAL_BRIDGE_DELIVERY_REPORT.md) | Durable Approval Bridge及crash/reconcile证据。 |
+
+### 验收与证据
+
+| 文档 | 用途 |
+| --- | --- |
+| [Current Verification Baseline](docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md) | 当前测试统计、最终状态和non-self SHA inventory。 |
+| [P0 Acceptance Matrix](docs/P0_ACCEPTANCE_MATRIX.md) | P0 authority骨架验收。 |
+| [P1 Acceptance Matrix](docs/P1_ACTION_SELECTION_ACCEPTANCE_MATRIX.md) | P1决策链与资源预留验收。 |
+| [P2 Acceptance Matrix](docs/P2_EXECUTION_ACCEPTANCE_MATRIX.md) | P2 execution admission、lease和worker验收。 |
+| [P4 Acceptance Matrix](docs/P4_PRODUCTIZATION_ACCEPTANCE_MATRIX.md) | P4产品化边界验收。 |
+| [P5 Acceptance Matrix](docs/P5_DEPLOYABLE_PRODUCT_ACCEPTANCE_MATRIX.md) | P5单节点产品验收。 |
+
+当文档发生冲突时，遵循 [Architecture Decision Index](ARCHITECTURE_DECISIONS.md) 中定义的authority order，而不是依据文件名、日期或版本号自行推断。
 
 ## License
 
-本项目使用 [Apache License 2.0](LICENSE)。
+Proteus 使用 [Apache License 2.0](LICENSE)。
