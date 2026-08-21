@@ -50,7 +50,7 @@ class ApprovalBridgeSaga:
             for dependency in blueprint["dependencies"]:
                 operations.append(AddTaskDependency(dependency["task_id"], dependency["depends_on_task_id"]))
             receipt = self.control_plane.apply_work_graph_patch(ApplyWorkGraphPatch(
-                self._envelope(blueprint["graph_command_id"], "graph.apply_patch", project_id, "E4 deterministic plan lowering"),
+                self._envelope(blueprint["graph_command_id"], "work_graph.apply_patch", project_id, "E4 deterministic plan lowering"),
                 GraphPatch(0, bridge_id, tuple(operations)),
             ))
             self.bridge_repository.record_child_step(bridge_id, "APPLY_GRAPH", blueprint["graph_command_id"], receipt.__dict__)

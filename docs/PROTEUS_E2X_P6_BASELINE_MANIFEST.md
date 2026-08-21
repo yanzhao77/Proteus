@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `84ba4b0d094f2139a47b575f859907cc0f360612` |
-| Branch | `stage-a2/0032-execution-prepare-structured-secret-guard` |
-| Generated UTC | `2026-08-21T09:51:49Z` |
+| Repository HEAD | `c5dd19e6c6f7c86cae6ed5ec0910e631d9ec72c5` |
+| Branch | `e8-production-entry-trial` |
+| Generated UTC | `2026-08-21T11:01:24Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -104,7 +104,7 @@
 | `adb8e5b2fdac14f1e56bb59c6c3ba3e2a84e60a7be08d209c2ed75886c6ea39b` | `hermes-runtime/src/hermes_runtime/application/entry_understanding_api.py` | untracked |
 | `df692928211b3c02d2076de60aee1a8843a1556219ef166be58b50c0eab53446` | `hermes-runtime/src/hermes_runtime/application/factory_home_read_model.py` | untracked |
 | `75f86464264e680c7ee668cf81fa4b784b163e624f97d44971d979c2ae3eb57a` | `hermes-runtime/src/hermes_runtime/application/factory_workspace_ui.py` | untracked |
-| `240cae3046111146088443cf062244423a5dba43e46790b35949f78a432643fc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | modified tracked |
+| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | modified tracked |
 | `83d28d70225a94295ea0dc0374e5f765ea04053d95a0ec68c28e69d8f5a59511` | `hermes-runtime/src/hermes_runtime/domain/entry_draft.py` | untracked |
 | `0f99b79473e2a6a9ab848ec497ed0e1e6682789bab86ce1e35f5f5505a11f760` | `hermes-runtime/src/hermes_runtime/domain/entry_understanding.py` | untracked |
 | `5ec2765253592709f2433110a3d70966030a1f187bc97cb926a635dfbb447a88` | `hermes-runtime/src/hermes_runtime/domain/product_api.py` | modified tracked |
@@ -161,9 +161,10 @@
 | Stage A2 execution-prepare convergence | **PASS** — fresh `0001→0032` metadata audit; canonical sandbox guard callsite; P6 bootstrap/autonomous **14/14 PASS** in `105.804 s`. |
 | Focused E1/E2/E2.x/FH-1/FastAPI/OIDC/Product API | **86/86 PASS** in `4.309 s`. |
 | E3 formal PostgreSQL authority / migration bootstrap | **8/8 PASS** in `1.17 s`; deterministic, replay, freshness, immutability, isolation, grants and negative side effects verified. |
-| P0–P5 no-DB discovery | **575 run, 333 skipped, 0 failures** in `1.280 s`. |
-| Full Runtime regression | **704 run, 12 skipped, 0 failures** in `430.060 s` on Stage A2 fresh PostgreSQL 16 acceptance. Historical sealed baselines remain historical evidence. |
-| Frontend Vitest/build/lint | **40/40 PASS** in `1.20 s` / PASS in `349 ms` / `0` warnings and `0` errors. |
+| no-DB discovery (including conditional E8 test) | **705 run, 438 skipped, 0 failures** in `1.233 s`. |
+| Full Runtime regression | **705 run, 12 skipped, 0 failures** in `429.306 s` on Stage B fresh PostgreSQL 16 acceptance. Historical sealed baselines remain historical evidence. |
+| Frontend Vitest/build/lint | **40/40 PASS** in `1.14 s` / PASS in `320 ms` / `0` warnings and `0` errors. |
+| E8 same-project Production Entry Trial | **PASS** — real E4 materialization → P6 recovery → E7 snapshot/feed, `1` test in `42.901 s`; disposable DB cleanup verified. |
 | Live provider smoke | **PASS — NON-PRODUCTION**; one authorized local Docker Product-API-only run consumed `9 / 9` requests, generated one governed Understanding and replayed the same idempotency key without a new revision. Full runtime was not re-run. |
 
 ## 8. Current-versus-Historical Documentation Matrix
@@ -220,7 +221,7 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E5 Product API / Read Model | **PASS / COMPLETE** |
 | E6 Factory Home / Resume | **PASS / COMPLETE** |
 | E7 Live Production Integration | **PASS / COMPLETE** |
-| E8 Production Entry Trial | **NOT ENTERED** |
+| E8 Production Entry Trial | **PASS / COMPLETE** — same-project real vertical trial; no E9. |
 
 ## 12. Documentation/Metadata-Only Correction Record
 
@@ -253,7 +254,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `83590b3c54743b7491402c23354ae1f874ff02ba7119271fc315fe9c3c1a4ba8` | `hermes-runtime/src/hermes_runtime/application/entry_proposal_master_plan_api.py` | `THIS_E3_DELIVERY` |
 | `cf362dbd3116736e2810c0c50833769ca239934439bc1fc604561d99222f11af` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_proposal_master_plan.py` | `THIS_E3_DELIVERY` |
 | `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `SUPERSEDED_BY_E4_COMPOSITION` |
-| `240cae3046111146088443cf062244423a5dba43e46790b35949f78a432643fc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E3_DELIVERY` |
+| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E3_DELIVERY` |
 | `adeef3e99edbde689d6129bc14b59eef1c19c6ff033ca362eb18d17516dcbe79` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E3_DELIVERY` |
 | `976ff8808ef181aba0fabc2887b4591bdd6e1a6092db76777f8f382805c51982` | `hermes-runtime/tests/test_e3_proposal_master_plan_domain.py` | `THIS_E3_DELIVERY` |
 | `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E3_DELIVERY` |
@@ -276,8 +277,8 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E4_DELIVERY` |
 | `ebdb1d2904b2d93a90ffbd86c521f490bc5db39d9db0e5b97774d52d3c465aab` | `hermes-runtime/src/hermes_runtime/application/durable_approval_bridge_orchestrator.py` | `THIS_E4_DELIVERY` |
 | `2b47387f85e797c4d05fe8b53be683908159003c08e9c8bfb5cf46411e1abeb2` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
-| `3d1e9da6023d5300a16b9582dd679bf9c1f5a36592f3fde487085c89af1e2830` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `THIS_E4_DELIVERY` |
-| `240cae3046111146088443cf062244423a5dba43e46790b35949f78a432643fc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E4_DELIVERY` |
+| `91e68c9dba4e61f53a4294a94e1a3319245b00414454c4eede29ee566b856256` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `THIS_E4_DELIVERY` |
+| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E4_DELIVERY` |
 | `388448255b6d26f5590ad134ee2af6249847d24ed7afd7f57db20809ab285b86` | `hermes-runtime/src/hermes_runtime/domain/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
 | `adeef3e99edbde689d6129bc14b59eef1c19c6ff033ca362eb18d17516dcbe79` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E4_DELIVERY` |
 | `ee31ea37f5c8a341da9af56ee31967ef7f00a2e181cb4a210ceab340a664d341` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
@@ -337,7 +338,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `dbe6271a8fab806a32292ecc566994b5782d551bda4f3f750fc9a7c6ae0d7272` | `frontend/src/contract.test.ts` | `THIS_E7_DELIVERY` |
 | `793c5c277e12ed6ea91ca1743b08fd0b5b6b4a342f36369535d20a07d7a14355` | `frontend/src/models.ts` | `THIS_E7_DELIVERY` |
 | `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E7_DELIVERY` |
-| `240cae3046111146088443cf062244423a5dba43e46790b35949f78a432643fc` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E7_DELIVERY` |
+| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E7_DELIVERY` |
 | `adeef3e99edbde689d6129bc14b59eef1c19c6ff033ca362eb18d17516dcbe79` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E7_DELIVERY` |
 | `16c17f8164167e050152502fe6e10876f253cd10396098ab6a5df7f4ae3f345a` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_live_production_read_model.py` | `THIS_E7_DELIVERY` |
 | `0b9eea74d2fc4a66fbfb84a430d30bfc9974d75b3bdb472e228714d8e999c2de` | `hermes-runtime/tests/test_e7_live_fastapi.py` | `THIS_E7_DELIVERY` |
@@ -365,5 +366,20 @@ Stage A adds only forward migration `0031` and structured P6 secret-guard eviden
 | `67f74458aa5eafcf3265a1ca104977900d36c7dab65e4f960e9f568e395f0313` | `docs/P6_SECRET_GUARD_STAGE_A2_DESIGN.md` | `THIS_P6_SECRET_GUARD_STAGE_A2` |
 | `cd04c271d434c342d3bc5dc40ac45b1402ad74eb19838986c8565ec08b190b33` | `docs/P6_SECRET_GUARD_STAGE_A2_DELIVERY_REPORT.md` | `THIS_P6_SECRET_GUARD_STAGE_A2` |
 
-Stage A2 changes no historical migration, E4 durable identity, P6 authority state machine, business schema, role or grant. Fresh PostgreSQL evidence confirms owner `hermes_execution_owner`, `SECURITY DEFINER`, hardened `pg_catalog` search path, unchanged ACL, no legacy sandbox text-regex callsite, canonical helper use, and the current action-route set. Local gates: P6 bootstrap/autonomous `14/14 PASS`; no-DB `704 run / 437 skipped / 0 failures`; Full Runtime `704 run / 12 skipped / 0 failures`; frontend `40/40 PASS`, build PASS and oxlint `0/0`. E8 remains **NOT ENTERED** until this Stage A2 PR is merged and master is independently verified.
+Stage A2 changes no historical migration, E4 durable identity, P6 authority state machine, business schema, role or grant. Fresh PostgreSQL evidence confirms owner `hermes_execution_owner`, `SECURITY DEFINER`, hardened `pg_catalog` search path, unchanged ACL, no legacy sandbox text-regex callsite, canonical helper use, and the current action-route set. Local gates: P6 bootstrap/autonomous `14/14 PASS`; no-DB `704 run / 437 skipped / 0 failures`; Full Runtime `704 run / 12 skipped / 0 failures`; frontend `40/40 PASS`, build PASS and oxlint `0/0`. At the Stage A2 closure point, E8 was **NOT ENTERED**; PR #24 has since merged and its master verification completed before this independent E8 continuation.
+
+## 17. E8 Production Entry Trial SHA-256 Inventory
+
+> `THIS_E8_COMPLETION` records only the minimum cross-phase integration contract. The manifest remains non-self-referential and excludes temporary virtual environments, disposable databases, DSNs, test logs, Stage A2 worktrees and any E9 work.
+
+| SHA-256 | Path | Inventory treatment |
+| --- | --- | --- |
+| `91e68c9dba4e61f53a4294a94e1a3319245b00414454c4eede29ee566b856256` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `THIS_E8_COMPLETION` — command type alignment for the existing E4 GraphPatch port. |
+| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E8_COMPLETION` — safe ApprovalPreview DTO, without frozen blueprint disclosure. |
+| `69f29448614012d3a8775f890fe7453bc74d964e94ccb8274ae50a7b926534a4` | `hermes-runtime/src/hermes_runtime/trial/driver.py` | `THIS_E8_COMPLETION` — P6 existing-entry continuation adapter and read-only stage observer. |
+| `505b54450180297aa56c1522e15e299af61d78a68563e909645cf64d4c821e6b` | `hermes-runtime/tests/test_e8_production_entry_trial.py` | `THIS_E8_COMPLETION` — fresh PostgreSQL same-project vertical acceptance. |
+| `e9380e406c12d27fd82fb9f6a51771264861052d23241d396800b06f8405ec3a` | `docs/E8_PRODUCTION_ENTRY_TRIAL_DESIGN.md` | `THIS_E8_COMPLETION` |
+| `e08891aa8fd0e228d0774f27938362bb45dbe68ff46cbfe8eebded7afe6b7a63` | `docs/E8_PRODUCTION_ENTRY_TRIAL_DELIVERY_REPORT.md` | `THIS_E8_COMPLETION` |
+
+E8 preserves migrations `0001–0032`, E4 durable identity, the P6 authority state machine, schema, roles and grants. The old forensic secret preflight is absent; 0031/0032 remain the only secret-policy authority. The final local gates are E8 vertical `1/1 PASS`; no-DB `705 run / 438 skipped / 0 failures`; Full Runtime `705 run / 12 skipped / 0 failures`; frontend `40/40 PASS`, build PASS and oxlint `0/0`. E8 is complete and **does not enter E9**.
 
