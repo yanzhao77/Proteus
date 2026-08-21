@@ -1,0 +1,99 @@
+# p-001 部署清单 (Deployment Manifest) — Phase 7 生产试运行
+# 生成者：AI Software Factory · devops 角色（Phase 7）
+# 对应产物：workspace/docker-compose.yml、backend/Dockerfile、frontend/Dockerfile、frontend/nginx.conf
+# 说明：仅描述文件契约；实际构建/启动由 Factory Manager 执行（见 build-report.md）。
+
+project: p-001
+service: todo-saas
+phase: 7
+compose_file: workspace/docker-compose.yml
+compose_project_name: p-001
+
+services:
+  db:
+    image: postgres:16-alpine            # 拉取，不构建
+    role: 数据存储（PostgreSQL 16）
+    ports: {}                            # 不对外暴露；仅 compose 网络内访问
+    volumes:
+      - db-data:/var/lib/postgresql/data # 数据持久化卷（compose 管理）
+    env:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_dev_only}   # dev 占位，生产替换
+    healthcheck:
+      test: pg_isready -U app -d app
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  api:
+    image: p-001-api:latest               # docker compose build 产物（后端镜像）
+    build: backend/Dockerfile（python:3.11-slim 多阶段，非 root appuser:1000）
+    role: FastAPI 应用（uvicorn，/api/v1/*，/health）
+    ports:
+      - "8000:8000"                       # 直连调试/文档；业务流量经 web 代理
+    env:
+      SECRET_KEY: ${SECRET_KEY:-dev_only_change_me}   # dev 占位；生产必须注入随机 64B secret
+      DATABASE_URL: postgresql+psycopg://app:${POSTGRES_PASSWORD:-app_dev_only}@db:5432/app
+      CORS_ORIGINS: http://localhost:8080,http://localhost:5173   # 逗号分隔（非 JSON）
+    depends_on:
+      db: { condition: service_healthy }
+    healthcheck:
+      test: python urllib GET http://localhost:8000/health（slim 无 curl，用 python）
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  web:
+    image: p-001-web:latest               # docker compose build 产物（前端镜像）
+    build: frontend/Dockerfile（node:20-alpine 构建 → nginx:1.27-alpine 托管）
+    role: SPA 静态托管 + 反向代理（/api/、/health → api:8000）
+    ports:
+      - "8080:80"
+    depends_on:
+      api: { condition: service_healthy }
+    build_args:
+      VITE_API_BASE_URL: ""               # 默认空 → 同源走 nginx 代理（生产免 CORS）
+
+networks:
+  default: compose 自动创建（服务名即 DNS：api / db / web）
+
+volumes:
+  db-data: 持久化 PostgreSQL 数据（docker volume ls 可查；删除即丢数据）
+
+# ---------------- 部署与回滚指引 ----------------
+
+deploy:
+  steps:
+    - 1. 进入 workspace/：cd ai-software-factory/projects/p-001/workspace
+    - 2. 准备环境：cp .env.example .env，生成并填入 SECRET_KEY（secrets.token_urlsafe(64)）与 POSTGRES_PASSWORD（仅本地试运行可保留默认占位）
+    - 3. 构建并启动：docker compose up --build -d
+    - 4. 冒烟：见 build-report.md 校验清单（/health、注册→登录→CRUD、SPA 回退、代理路径）
+    - 5. 数据表：api 启动时 lifespan 自动 init_db()（create_all）；Phase 7 暂未引入 Alembic，
+         表结构变更前需先引入迁移（架构 §2/§7 遗留项）
+  verification_notes:
+    - 业务入口：http://localhost:8080（web）
+    - API 直连：http://localhost:8000/docs（OpenAPI / Swagger UI）
+    - 健康检查：http://localhost:8080/health → {"status":"ok","database":"ok"}
+    - CORS_ORIGINS 是逗号分隔字符串；模板曾用 JSON 数组——与本应用 config.py 解析不符，已纠正
+    - 前端 api.js 默认回退 http://localhost:8000；镜像构建时置空 VITE_API_BASE_URL 使生产走同源代理
+
+rollback:
+  steps:
+    - 1. 回滚代码：git -C workspace checkout <上一可用提交>（Docker 文件与 app/src 一并回退）
+    - 2. 重建镜像：docker compose build --no-cache api web
+    - 3. 重启：docker compose up -d --force-recreate api web
+    - 4. 数据保留：db-data 卷不动，回滚不丢用户数据；若需清库重来：docker compose down -v（慎用，删数据）
+  database_considerations:
+    - 当前无迁移工具：表结构变化无版本回退路径，生产级变更前必须引入 Alembic
+    - SECRET_KEY 更换会使所有已签发 JWT 失效（用户需重新登录），回滚时如改 secret 需知会
+
+# ---------------- 生产加固清单（Phase 7 之后） ----------------
+hardening_todo:
+  - SECRET_KEY / POSTGRES_PASSWORD 改为 docker secrets 或密钥管理系统注入
+  - HTTPS 终止（web 前置 TLS 反代，nginx 内可配证书）
+  - 引入 Alembic 迁移并纳入 CI
+  - 限制 api 直连端口暴露（仅内网/调试）
+  - uvicorn workers > 1（无状态 JWT 天然适配，注意 create_all 并发幂等性）
