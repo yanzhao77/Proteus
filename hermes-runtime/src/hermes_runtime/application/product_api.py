@@ -1,6 +1,7 @@
 from typing import Any, Mapping, Optional, Protocol
 
 from hermes_runtime.application.factory_home_read_model import FactoryHomeReadModel, UnavailableFactoryHomeReadModel
+from hermes_runtime.infrastructure.postgres_live_production_read_model import UnavailableLiveProductionReadModel
 from hermes_runtime.application.entry_understanding_api import UnavailableEntryUnderstandingApi
 from hermes_runtime.application.entry_proposal_master_plan_api import UnavailableEntryProposalMasterPlanApi
 from hermes_runtime.application.entry_approval_bridge import UnavailableEntryApprovalBridgeApi
@@ -50,6 +51,7 @@ class ProductApiFacade:
         entry_understanding_api=None,
         entry_proposal_master_plan_api=None,
         entry_approval_bridge_api=None,
+        live_production_read_model=None,
     ) -> None:
         self._read_model = read_model
         self._command_gateway = command_gateway
@@ -58,6 +60,7 @@ class ProductApiFacade:
         self._entry_understanding_api = entry_understanding_api or UnavailableEntryUnderstandingApi()
         self._entry_proposal_master_plan_api = entry_proposal_master_plan_api or UnavailableEntryProposalMasterPlanApi()
         self._entry_approval_bridge_api = entry_approval_bridge_api or UnavailableEntryApprovalBridgeApi()
+        self._live_production_read_model = live_production_read_model or UnavailableLiveProductionReadModel()
 
     def handle(self, request: ProductApiRequest) -> ProductApiResponse:
         reject_forbidden_authority_shape(request)
@@ -76,6 +79,10 @@ class ProductApiFacade:
             return self._safe(200, self._factory_home_read_model.production_portfolio(actor_scope))
         if method == "GET" and len(parts) == 3 and parts[0] == "factory-home" and parts[1] == "productions":
             return self._safe(200, self._factory_home_read_model.production_snapshot(parts[2], actor_scope))
+        if method == "GET" and len(parts) == 4 and parts[0] == "factory-home" and parts[1] == "productions" and parts[3] == "live":
+            return self._safe(200, self._live_production_read_model.snapshot(parts[2], actor_scope))
+        if method == "GET" and len(parts) == 4 and parts[0] == "factory-home" and parts[1] == "productions" and parts[3] == "live-feed":
+            return self._safe(200, self._live_production_read_model.events(parts[2], actor_scope, request.body.get("after", 0), request.body.get("limit", 50)))
         if method == "GET" and parts == ["factory-home", "gates"]:
             return self._safe(200, self._factory_home_read_model.gate_attention(actor_scope))
         if method == "GET" and parts == ["factory-home", "drafts"]:

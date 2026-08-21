@@ -45,3 +45,16 @@
 ## Sensitive-data boundary
 
 No token, API key, authorization header, provider endpoint, DSN, password, raw provider response, raw business prompt, or Golden Todo credential value is recorded in this report.
+
+## Post-closure CI concurrency follow-up
+
+The E5–E7 closure CI run exercised a real two-thread fresh-instance reconcile race that was timing-sensitive in the prior local full-runtime run. Two workers can both obtain the same already-authoritative child receipt and then attempt to persist the same deterministic bridge-step identity. The prior statement-level idempotency clause covered the `child_command_id` unique key but not the simultaneously-derived `step_id` primary key.
+
+The E4 bridge store now uses `ON CONFLICT DO NOTHING` for child-step persistence. This remains append-only and preserves the same deterministic receipt, target and status; it only treats either unique-identity observation of the same durable fact as idempotent. It does not add authority DML, alter migrations, or alter child command semantics.
+
+| Follow-up verification | Result |
+| --- | --- |
+| CI failure reproduction target | Real `test_16_concurrent_fresh_reconciles_converge_without_duplicate_children` on task-only PostgreSQL: PASS. |
+| E4 PostgreSQL suite after correction | 32 run (including the reused E3 fixture suite), 0 failures; all 26 E4 durable scenarios PASS. |
+| Final full Runtime after correction | 699 run, 12 skipped, 0 failures in 472.450 seconds. |
+| Effect on later phases | E5, E6 and E7 remain complete; the correction is a durable E4 convergence fix only. |

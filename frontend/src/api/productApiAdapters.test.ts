@@ -60,4 +60,21 @@ describe('FH-1 Product API read adapters', () => {
     });
     expect(result.kind).toBe('not_implemented');
   });
+  it('maps a source-derived Live Production snapshot without inventing progress or authority controls', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({ availability: 'CURRENT', freshness: 'CURRENT', projection_schema_version: 'e7-live-production-projection/1', snapshot_watermark: 9, item: { production_id: 'p-1', project: { project_id: 'p-1', title: 'Real Project', state: 'IMPLEMENTING', version: 3, updated_at: '2026-08-21T00:00:00Z' }, workflow: { nodes: [{ node_id: 'task-1', title: 'Build', state: 'RUNNING', version: 2, source_identity: 'task-1' }], edges: [] }, execution_requests: [], verification: { plans: [], results: [] }, evidence: { valid_count: 0, invalidated_count: 1, missing_count: 1, items: [] }, gates: [], recovery: [], recent_events: [] } })));
+    const result = await productApiAdapters().production.getLiveSnapshot('p-1');
+    expect(result.kind).toBe('data');
+    if (result.kind === 'data') {
+      expect(result.value.snapshotWatermark).toBe(9);
+      expect(result.value.workflow.nodes[0].sourceIdentity).toBe('task-1');
+      expect(result.value.evidence.invalidatedCount).toBe(1);
+    }
+  });
+  it('preserves a stale cursor response for snapshot rehydration rather than treating it as a live event stream', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({ availability: 'STALE', reason: 'LIVE_PRODUCTION_CURSOR_AHEAD', items: [], snapshot_watermark: 9 })));
+    const result = await productApiAdapters().production.getLiveEvents('p-1', 10, 50);
+    expect(result.kind).toBe('data');
+    if (result.kind === 'data') expect(result.value.availability).toBe('STALE');
+  });
+
 });

@@ -30,7 +30,7 @@ function Layout({ children }: { children: React.ReactNode }) { return <main clas
 function ViewNotice({ title, message }: { title: string; message: string }) { return <section className="factory-panel mt-6 p-6" role="status"><p className="factory-telemetry">BACKEND AUTHORITY BRIDGE PENDING</p><h1 className="mt-3 font-display text-3xl font-semibold">{title}</h1><p className="mt-3 max-w-2xl text-factory-ink-300">{message}</p><p className="mt-5 text-sm text-factory-ink-400">This screen does not invent production state. Connect an authoritative snapshot/projection adapter to activate it.</p></section>; }
 function ProductionCard({ card }: { card: ProductionCardViewModel }) { const action = card.primaryAction === 'review_gate' ? `/gates` : `/productions/${card.productionId}`; return <article className="factory-production-card" data-state={card.state}><div className="flex items-start justify-between gap-4"><div><p className="factory-telemetry">{card.freshness.source ?? 'SOURCE NOT AVAILABLE'} // {card.freshness.status.toUpperCase()}</p><h2 className="mt-2 font-display text-xl font-semibold">{card.displayName}</h2></div><span className="factory-status" data-state={card.state} data-icon={statusGlyph[card.state]}>{statusLabel[card.state]}</span></div><div className="mt-6 text-sm text-factory-ink-300"><p>{card.phase ?? 'PHASE NOT AVAILABLE'}</p><p className="mt-2">{card.currentAction ?? 'CURRENT ACTION NOT AVAILABLE'}</p><p className="mt-3 font-mono text-xs uppercase tracking-command text-factory-ink-400">PROGRESS {card.progress === null ? 'NOT AVAILABLE' : `${card.progress}%`} · AS OF {card.lastUpdated ?? 'NOT AVAILABLE'}</p></div><footer className="mt-6 flex items-center justify-between gap-3 border-t border-factory-line pt-3"><span className="factory-telemetry">GATES {card.gateCount ?? 'NOT AVAILABLE'}</span><Link className="factory-button-secondary" to={action}>{card.primaryAction === 'review_gate' ? 'REVIEW GATE →' : 'OPEN PRODUCTION →'}</Link></footer></article>; }
 function GateCard({ gate }: { gate: GateViewModel }) { return <article className="factory-attention-card" data-severity={gate.risk === 'critical' ? 'critical' : 'high'}><p className="factory-telemetry">ACTION REQUIRED // {gate.risk.toUpperCase()} RISK</p><h2 className="mt-2 font-display text-lg">{gate.productionName ?? 'PRODUCTION NOT AVAILABLE'}</h2><p className="mt-2 text-sm font-semibold">{gate.action}</p><p className="mt-2 text-sm text-factory-ink-300">{gate.reason}</p><div className="mt-4 flex items-center justify-between gap-3"><span className="factory-telemetry">EVIDENCE {gate.evidenceCount ?? 'NOT AVAILABLE'}</span><Link className="factory-button-secondary" to="/gates">REVIEW →</Link></div></article>; }
-function IdeaDeck() { const navigate = useNavigate(); const [title, setTitle] = useState(''); const [idea, setIdea] = useState(''); const [phase, setPhase] = useState<'idle' | 'submitting' | 'error'>('idle'); const submit = async (event: FormEvent) => { event.preventDefault(); if (!title.trim() || !idea.trim()) return; setPhase('submitting'); const result = await adapters.draft.createDraft(title, idea, { actor: 'browser-user', reason: 'Create EntryDraft', idempotencyKey: crypto.randomUUID(), expectedVersion: 0 }); if (result.kind === 'data') navigate(`/drafts/${result.value.draftId}`); else setPhase('error'); }; return <section className="factory-command-deck mt-6" data-state={phase === 'error' ? 'uncertain' : title.trim() && idea.trim() ? 'valid' : 'empty'} aria-labelledby="idea-title"><span className="factory-intent-halo" aria-hidden="true"/><p className="factory-telemetry">ENTRY DRAFT // INPUT 01</p><h1 id="idea-title" className="mt-3 max-w-3xl font-display text-4xl font-semibold tracking-display sm:text-5xl">What do you want to build?</h1><p className="mt-4 max-w-2xl text-base leading-7 text-factory-ink-300">This creates a reviewable EntryDraft only. It does not create a Project or start production.</p><form onSubmit={submit}><label className="mt-8 block text-sm font-semibold" htmlFor="draft-title">Title</label><input id="draft-title" className="factory-input mt-2" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Short intent title"/><label className="mt-5 block text-sm font-semibold" htmlFor="idea">Software outcome</label><textarea id="idea" className="factory-input mt-2" value={idea} onChange={(event) => setIdea(event.target.value)} placeholder="Describe the result you want to produce…"/><div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="factory-telemetry">{phase === 'submitting' ? 'SUBMITTING DRAFT' : phase === 'error' ? 'DRAFT COMMAND REJECTED — NO LOCAL STATE CREATED' : title.trim() && idea.trim() ? 'READY TO CREATE DRAFT' : 'TITLE AND INPUT REQUIRED'}</span><button className="factory-button-primary" disabled={phase === 'submitting' || !title.trim() || !idea.trim()} type="submit">CREATE DRAFT <span aria-hidden="true">→</span></button></div></form></section>; }
+function IdeaDeck() { const navigate = useNavigate(); const [title, setTitle] = useState(''); const [idea, setIdea] = useState(''); const [phase, setPhase] = useState<'idle' | 'submitting' | 'unknown'>('idle'); const pendingKey = useRef<string | null>(null); const submit = async (event: FormEvent) => { event.preventDefault(); if (!title.trim() || !idea.trim()) return; const idempotencyKey = pendingKey.current ?? crypto.randomUUID(); pendingKey.current = idempotencyKey; setPhase('submitting'); const result = await adapters.draft.createDraft(title, idea, { actor: 'browser-user', reason: 'Create EntryDraft', idempotencyKey, expectedVersion: 0 }); if (result.kind === 'data') { pendingKey.current = null; navigate(`/drafts/${result.value.draftId}`); } else setPhase('unknown'); }; return <section className="factory-command-deck mt-6" data-state={phase === 'unknown' ? 'uncertain' : title.trim() && idea.trim() ? 'valid' : 'empty'} aria-labelledby="idea-title"><span className="factory-intent-halo" aria-hidden="true"/><p className="factory-telemetry">ENTRY DRAFT // INPUT 01</p><h1 id="idea-title" className="mt-3 max-w-3xl font-display text-4xl font-semibold tracking-display sm:text-5xl">What do you want to build?</h1><p className="mt-4 max-w-2xl text-base leading-7 text-factory-ink-300">This creates a reviewable EntryDraft only. It does not create a Project or start production.</p><form onSubmit={submit}><label className="mt-8 block text-sm font-semibold" htmlFor="draft-title">Title</label><input id="draft-title" className="factory-input mt-2" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Short intent title"/><label className="mt-5 block text-sm font-semibold" htmlFor="idea">Software outcome</label><textarea id="idea" className="factory-input mt-2" value={idea} onChange={(event) => setIdea(event.target.value)} placeholder="Describe the result you want to produce…"/><div className="mt-4 flex flex-wrap items-center justify-between gap-3"><span className="factory-telemetry" aria-live="polite">{phase === 'submitting' ? 'RECEIPT PENDING — DRAFT NOT YET APPLIED' : phase === 'unknown' ? 'OUTCOME UNKNOWN — RETRY REUSES THE SAME KEY' : title.trim() && idea.trim() ? 'READY TO CREATE DRAFT' : 'TITLE AND INPUT REQUIRED'}</span><button className="factory-button-primary" disabled={phase === 'submitting' || !title.trim() || !idea.trim()} type="submit">CREATE DRAFT <span aria-hidden="true">→</span></button></div></form></section>; }
 
 function DeckNotice({ module, phase, message }: { module: string; phase: 'pending' | 'error'; message?: string }) { return <ViewNotice title={`${module} ${phase === 'pending' ? 'not available' : 'load failed'}`} message={message ?? `${module} is unavailable for this actor scope.`}/>; }
 function Home() {
@@ -50,6 +50,122 @@ function ClarificationForm({ draftId, clarification, version }: { draftId:string
 function ApprovalBridgeDeck({ draftId, plan }: { draftId:string; plan: import('./models').MasterPlanViewModel }) { const preview=useResource(()=>adapters.draft.getApprovalPreview ? adapters.draft.getApprovalPreview(draftId) : Promise.resolve({kind:'not_implemented' as const,message:'E4 approval adapter unavailable'}),`approval-preview:${draftId}`); const [checked,setChecked]=useState<string[]>([]); const [phase,setPhase]=useState<'idle'|'approving'|'error'>('idle'); if(preview.phase!=='data'||!preview.value) return <section className="mt-4"><p className="factory-telemetry">E4 APPROVAL // PREVIEW UNAVAILABLE</p><p className="text-sm text-factory-ink-300">{preview.message ?? 'Approval preview requires an authoritative E4 bridge.'}</p></section>; const item=preview.value; const required=item.requiredAcknowledgements; const approve=async()=>{ if(!adapters.draft.approveMasterPlan || checked.length!==required.length) return; setPhase('approving'); const r=await adapters.draft.approveMasterPlan(draftId,{reason:'Explicit human approval of frozen E4 plan',idempotency_key:crypto.randomUUID(),expected_draft_version:plan.version,master_plan_id:plan.masterPlanId,expected_plan_version:plan.version,plan_revision_id:plan.current.revisionId,approved_plan_content_hash:plan.current.contentHash,proposal_revision_id:plan.current.proposalRevisionId,proposal_content_hash:'server-verified',compiled_blueprint_hash:item.compiledBlueprintHash,acknowledgements:checked,correlation_id:crypto.randomUUID()}); if(r.kind==='data') window.location.assign(`/drafts/${draftId}`); else setPhase('error'); }; return <section className="factory-panel mt-5 p-4"><p className="factory-telemetry">E4 APPROVAL BRIDGE // {item.status}</p><p className="mt-2 text-sm text-factory-ink-300">Frozen blueprint {item.compiledBlueprintHash.slice(0,12)}. Approval materializes only through authoritative Project, Graph, and Verification ports.</p><div className="mt-3 grid gap-2">{required.map((ack)=><label key={ack} className="text-sm"><input type="checkbox" checked={checked.includes(ack)} onChange={(e)=>setChecked(e.target.checked?[...checked,ack]:checked.filter(x=>x!==ack))}/> {ack}</label>)}</div><button className="factory-button-secondary mt-3" disabled={phase==='approving'||checked.length!==required.length} onClick={approve}>{phase==='approving'?'RECORDING APPROVAL':'APPROVE FROZEN MASTER PLAN'}</button>{phase==='error'&&<p className="mt-2 text-sm text-factory-amber-200">APPROVAL REJECTED — NO UNVERIFIED PROJECT CLAIM DISPLAYED</p>}<p className="mt-3 text-sm text-factory-ink-400">Project ID appears here only after authoritative bridge materialization. No worker, scheduler, execution, or provider control is available.</p></section>; }
 function DraftWorkspace() { const { id = '' } = useParams(); const draft = useResource(() => adapters.draft.getDraft(id), `draft:${id}`); return <Layout>{draft.phase === 'data' && draft.value ? <section className="factory-panel mt-6 p-6"><p className="factory-telemetry">DRAFT {draft.value.draftId} // {draft.value.state}</p><h1 className="mt-3 font-display text-3xl">Original Idea</h1><p className="mt-4 text-factory-ink-300">{draft.value.idea}</p><UnderstandingDeck draftId={draft.value.draftId} draftState={draft.value.state}/><ProposalDeck draftId={draft.value.draftId} draftState={draft.value.state}/><p className="mt-6 text-sm text-factory-amber-200">E3 stores reviewable Proposal and Master Plan authority only. It does not approve, create a Project/Production, or invoke P6.</p></section> : <ViewNotice title="Draft workspace unavailable" message={draft.message ?? 'ProductionDraftApi is pending.'}/>}</Layout>; }
 function Productions() { const portfolio = useResource(() => adapters.portfolio.listProductions(), 'portfolio'); return <Layout><section className="mt-6"><p className="factory-telemetry">PRODUCTION PORTFOLIO // READ MODEL</p><h1 className="mt-2 font-display text-3xl">Productions</h1>{portfolio.phase === 'data' ? (portfolio.value?.length ? <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{portfolio.value.map((card) => <ProductionCard key={card.productionId} card={card}/>)}</div> : <section className="factory-panel mt-5 p-5">EMPTY PORTFOLIO</section>) : <DeckNotice module="Portfolio" phase={portfolio.phase === 'error' ? 'error' : 'pending'} message={portfolio.message}/>}</section></Layout>; }
-function ProductionOverview() { const { id = '' } = useParams(); const snapshot = useResource(() => adapters.production.getSnapshot(id), `production:${id}`); return <Layout>{snapshot.phase === 'data' && snapshot.value ? <section className="mt-6"><p className="factory-telemetry">LIVE PRODUCTION // HANDOFF</p><ProductionCard card={snapshot.value}/><p className="mt-5 text-sm text-factory-ink-400">This route is a source-aware handoff. Workflow, worker, verification, evidence, recovery and intervention remain outside Factory Home.</p></section> : <ViewNotice title="Live Production snapshot unavailable" message={snapshot.message ?? 'ProductionApi.getSnapshot is pending.'}/>}</Layout>; }
+function ProductionOverview() {
+  const { id = '' } = useParams();
+  const [rehydration, setRehydration] = useState(0);
+  const snapshot = useResource(
+    () => adapters.production.getLiveSnapshot(id),
+    `live:${id}:${rehydration}`,
+  );
+  const [connection, setConnection] = useState<'LIVE' | 'STALE' | 'RECONNECTING'>('RECONNECTING');
+  const [events, setEvents] = useState<import('./models').LiveProductionEventViewModel[]>([]);
+  const watermark = snapshot.phase === 'data' && snapshot.value
+    ? snapshot.value.snapshotWatermark
+    : 0;
+
+  useEffect(() => {
+    let active = true;
+    if (snapshot.phase !== 'data' || !snapshot.value) {
+      return () => { active = false; };
+    }
+    adapters.production.getLiveEvents(id, watermark, 50).then((result) => {
+      if (!active) return;
+      if (result.kind !== 'data' || result.value.availability !== 'CURRENT') {
+        setConnection('STALE');
+        setRehydration((value) => value + 1);
+        return;
+      }
+      const seen = new Set<string>();
+      const ordered = result.value.items.filter((item) => {
+        if (seen.has(item.eventId)) return false;
+        seen.add(item.eventId);
+        return item.aggregateVersion === null || item.aggregateVersion >= 0;
+      });
+      setEvents(ordered);
+      setConnection('LIVE');
+    }).catch(() => {
+      if (active) setConnection('STALE');
+    });
+    return () => { active = false; };
+  }, [id, watermark, snapshot.phase, snapshot.value]);
+
+  if (snapshot.phase !== 'data' || !snapshot.value) {
+    return <Layout><ViewNotice
+      title="Live Production snapshot unavailable"
+      message={snapshot.message ?? 'Live Production projection is pending.'}
+    /></Layout>;
+  }
+
+  const live = snapshot.value;
+  return <Layout><section className="mt-6">
+    <p className="factory-telemetry">LIVE PRODUCTION // READ-ONLY // {connection}</p>
+    <h1 className="mt-2 font-display text-3xl">{live.project.title}</h1>
+    <p className="mt-2 text-sm text-factory-ink-300">
+      {live.project.state} · V{live.project.version} · WATERMARK {live.snapshotWatermark}
+    </p>
+    {connection !== 'LIVE' && <DeckNotice
+      module="Live projection"
+      phase="pending"
+      message="Snapshot refresh is required before live facts can be treated as current."
+    />}
+
+    <section className="factory-panel mt-5 p-5">
+      <h2 className="font-display text-xl">Workflow</h2>
+      <div className="mt-4 grid gap-3">
+        {live.workflow.nodes.map((node) => <article
+          key={node.nodeId}
+          className="border border-factory-line p-3"
+        >
+          <p className="factory-telemetry">{node.nodeId} // V{node.version}</p>
+          <p className="mt-1">{node.title} · {node.state}</p>
+        </article>)}
+      </div>
+      <p className="mt-4 text-sm text-factory-ink-400">
+        DEPENDENCY EDGES {live.workflow.edges.length} · EXECUTION REQUESTS {live.executionRequests.length}
+      </p>
+    </section>
+
+    <section className="mt-5 grid gap-4 md:grid-cols-2">
+      <article className="factory-panel p-5">
+        <h2 className="font-display text-xl">Verification & Evidence</h2>
+        <p className="mt-3 text-sm">
+          Plans {live.verification.plans.length} · Results {live.verification.results.length}
+        </p>
+        <p className="mt-2 text-sm">
+          Evidence valid {live.evidence.validCount} · invalidated {live.evidence.invalidatedCount} · missing {live.evidence.missingCount}
+        </p>
+      </article>
+      <article className="factory-panel p-5">
+        <h2 className="font-display text-xl">Recovery & Gates</h2>
+        <p className="mt-3 text-sm">Recovery findings {live.recovery.length}</p>
+        {live.gates.map((gate) => <Link
+          key={gate.gateId}
+          className="factory-button-secondary mt-3 inline-block"
+          to={gate.reviewLink}
+        >
+          REVIEW GATE →
+        </Link>)}
+      </article>
+    </section>
+
+    <section className="factory-panel mt-5 p-5">
+      <h2 className="font-display text-xl">Recent authoritative events</h2>
+      {events.length ? <ol className="mt-3 space-y-2">
+        {events.map((event) => <li
+          key={event.eventId}
+          className="font-mono text-xs"
+        >
+          #{event.productionSequence} {event.eventKind} · {event.aggregateType}/{event.aggregateId}
+        </li>)}
+      </ol> : <p className="mt-3 text-sm text-factory-ink-400">
+        NO NEW EVENTS AFTER SNAPSHOT WATERMARK
+      </p>}
+    </section>
+    <p className="mt-5 text-sm text-factory-ink-400">
+      Read-only projection. Runtime pause, resume, stop, retry, worker reassignment, task mutation, plan mutation and direct Gate decisions are unavailable.
+    </p>
+  </section></Layout>;
+}
+
 function Gates() { const gates = useResource(() => adapters.gates.listGates(), 'gates'); return <Layout><section className="mt-6"><p className="factory-telemetry">ACTION REQUIRED // HUMAN GATES</p><h1 className="mt-2 font-display text-3xl">Gate Inbox</h1>{gates.phase === 'data' ? (gates.value?.length ? <div className="mt-5 grid gap-4 md:grid-cols-2">{gates.value.map((gate) => <GateCard key={gate.gateId} gate={gate}/>)}</div> : <section className="factory-panel mt-5 p-5">NO ACTIONS REQUIRING YOU</section>) : <DeckNotice module="Gate attention" phase={gates.phase === 'error' ? 'error' : 'pending'} message={gates.message}/>}</section></Layout>; }
 export default function App() { return <Routes><Route path="/" element={<Navigate replace to="/home"/>}/><Route path="/home" element={<Home/>}/><Route path="/new" element={<NewEntry/>}/><Route path="/drafts" element={<DraftList/>}/><Route path="/drafts/:id" element={<DraftWorkspace/>}/><Route path="/productions" element={<Productions/>}/><Route path="/productions/:id" element={<ProductionOverview/>}/><Route path="/gates" element={<Gates/>}/><Route path="*" element={<Navigate replace to="/home"/>}/></Routes>; }

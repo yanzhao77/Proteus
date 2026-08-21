@@ -13,6 +13,7 @@ from hermes_runtime.infrastructure.understanding_provider_registry import build_
 from hermes_runtime.application.readiness import StaticReadinessCheck
 from hermes_runtime.application.factory_home_read_model import UnavailableFactoryHomeReadModel
 from hermes_runtime.infrastructure.postgres_factory_home_read_model import DenyAllActorProjectScope, PostgresCreatorActorProjectScope, PostgresFactoryHomeReadModel
+from hermes_runtime.infrastructure.postgres_live_production_read_model import PostgresLiveProductionReadModel, UnavailableLiveProductionReadModel
 from hermes_runtime.infrastructure.postgres_entry_draft import PostgresEntryDraftStore
 from hermes_runtime.infrastructure.postgres_entry_understanding import PostgresEntryUnderstandingStore
 from hermes_runtime.infrastructure.postgres_entry_proposal_master_plan import PostgresEntryProposalMasterPlanStore
@@ -64,12 +65,16 @@ def build_app():
     origins = [item for item in os.getenv("HERMES_CORS_ORIGINS", "").split(",") if item]
     database_url = env_or_file("HERMES_DATABASE_URL")
     oidc_verifier = _build_oidc_verifier()
-    factory_home_read_model = (
-        PostgresFactoryHomeReadModel(database_url, PostgresCreatorActorProjectScope(database_url))
-        if database_url and oidc_verifier
-        else UnavailableFactoryHomeReadModel()
-    )
     entry_draft_api = PostgresEntryDraftStore(database_url) if database_url and oidc_verifier else UnavailableEntryDraftApi()
+    _creator_scope = PostgresCreatorActorProjectScope(database_url) if database_url and oidc_verifier else None
+    factory_home_read_model = (
+        PostgresFactoryHomeReadModel(database_url, _creator_scope, entry_draft_api)
+        if _creator_scope else UnavailableFactoryHomeReadModel()
+    )
+    live_production_read_model = (
+        PostgresLiveProductionReadModel(database_url, _creator_scope)
+        if _creator_scope else UnavailableLiveProductionReadModel()
+    )
     # No generic live LLM/provider is an established repository capability; remain fail-closed.
     entry_understanding_api = PostgresEntryUnderstandingStore(database_url, build_understanding_producer_from_env()) if database_url and oidc_verifier else UnavailableEntryUnderstandingApi()
     entry_proposal_master_plan_api = PostgresEntryProposalMasterPlanStore(database_url) if database_url and oidc_verifier else UnavailableEntryProposalMasterPlanApi()
@@ -82,7 +87,7 @@ def build_app():
     else:
         entry_approval_bridge_api = UnavailableEntryApprovalBridgeApi()
     return create_app(
-        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api),
+        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api, live_production_read_model),
         StaticReadinessCheck(database_ready=bool(database_url)),
         allowed_cors_origins=origins,
         oidc_verifier=oidc_verifier,

@@ -188,6 +188,14 @@ def create_app(
     def factory_home_production_snapshot(project_id: str, request: Request):
         return _factory_dispatch(request, f"/factory-home/productions/{project_id}")
 
+    @app.get("/factory-home/productions/{project_id}/live")
+    def live_production_snapshot(project_id: str, request: Request):
+        return _factory_dispatch(request, f"/factory-home/productions/{project_id}/live")
+
+    @app.get("/factory-home/productions/{project_id}/live-feed")
+    def live_production_feed(project_id: str, request: Request, after: int = 0, limit: int = 50):
+        return _factory_dispatch(request, f"/factory-home/productions/{project_id}/live-feed", {"after": after, "limit": limit})
+
     @app.get("/factory-home/gates")
     def factory_home_gates(request: Request):
         return _factory_dispatch(request, "/factory-home/gates")
@@ -324,8 +332,8 @@ def _draft_dispatch(request: Request, method: str, path: str, body: Mapping[str,
     return _verified_dispatch(request, method, path, body)
 
 
-def _factory_dispatch(request: Request, path: str):
-    return _verified_dispatch(request, "GET", path, {})
+def _factory_dispatch(request: Request, path: str, query: Optional[Mapping[str, Any]] = None):
+    return _verified_dispatch(request, "GET", path, query or {})
 
 
 def _verified_dispatch(request: Request, method: str, path: str, body: Mapping[str, Any]):
