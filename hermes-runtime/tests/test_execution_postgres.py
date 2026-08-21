@@ -1,4 +1,6 @@
+import json
 import os
+import uuid
 import threading
 import unittest
 from pathlib import Path
@@ -10,6 +12,7 @@ except ImportError:
 
 from hermes_runtime.application.errors import CommandRejected
 from hermes_runtime.application.executions import ExecutionPreparation, PrepareExecutionRequest
+from hermes_runtime.domain.entry_approval_bridge import stable_id
 from hermes_runtime.domain.execution import ArtifactInputRef, LockIntent
 from hermes_runtime.infrastructure.postgres_execution import (
     ExecutionFaultPoint,
@@ -447,6 +450,85 @@ class ExecutionPostgresTests(unittest.TestCase):
                     "command_receipts",
                 )
             }
+
+
+    def _guard_result(self, payload):
+        with psycopg.connect(DATABASE_URL) as connection:
+            return bool(connection.execute(
+                "SELECT public.hermes_execution_has_secret_value(%s::jsonb)",
+                (json.dumps(payload),),
+            ).fetchone()[0])
+
+    def test_structured_secret_guard_rejects_canaries_and_preserves_identity_references(self):
+        canary = "s" + "k-" + uuid.uuid4().hex
+        private_marker = "-----BEGIN " + "PRIVATE KEY-----"
+        rejected = (
+            {"note": canary},
+            {"note": "header Bearer " + canary},
+            {"note": "equal=" + canary},
+            {"note": "colon:" + canary},
+            {"note": "space " + canary},
+            {"note": "slash/" + canary},
+            {"nested": {"items": [canary]}},
+            {"password": "runtime-value"},
+            {"api_key": canary},
+            {"access_token": canary},
+            {"authorization": "Bearer " + canary},
+            {"client_secret": canary},
+            {"private_key": private_marker},
+            {"note": private_marker},
+            {"secret_ref": "not-an-opaque-reference"},
+            {"credential_ref": canary},
+        )
+        for payload in rejected:
+            with self.subTest(payload_shape=sorted(payload)):
+                self.assertTrue(self._guard_result(payload))
+
+        e4_task_id = stable_id("task", "bridge-canary", "node-canary")
+        accepted = (
+            {"task_id": e4_task_id},
+            {"risk": {"ref_id": "risk-" + e4_task_id}},
+            {"project_id": "project-" + uuid.uuid4().hex},
+            {"execution_request_id": "exec-" + uuid.uuid4().hex},
+            {"verification_plan_id": "verification-" + uuid.uuid4().hex},
+            {"receipt_id": "receipt-" + uuid.uuid4().hex},
+            {"token_count": 7, "secret_ref": "secret-ref-vault-abcdef"},
+            {"credential_ref": "credential-opaque-vault-abcdef", "handle": "handle-ref-vault-abcdef"},
+        )
+        for payload in accepted:
+            with self.subTest(payload_shape=sorted(payload)):
+                self.assertFalse(self._guard_result(payload))
+
+    def test_runtime_canary_rejection_has_no_persisted_secret_material(self):
+        canary = "s" + "k-" + uuid.uuid4().hex
+        command = self.command("runtime-canary", task_id=canary)
+        with self.assertRaisesRegex(CommandRejected, "SECRET_VALUE_FORBIDDEN"):
+            self.execution.prepare(command)
+        with psycopg.connect(DATABASE_URL) as connection:
+            for table in (
+                "execution_requests", "execution_reservation_bindings",
+                "execution_queue_items", "command_receipts", "event_log",
+                "outbox_messages", "audit_records",
+            ):
+                found = connection.execute(
+                    "SELECT EXISTS (SELECT 1 FROM " + table + " WHERE to_jsonb(" + table + ")::text LIKE %s)",
+                    ("%" + canary + "%",),
+                ).fetchone()[0]
+                self.assertFalse(found, table + " persisted the runtime canary")
+
+    def test_e4_derived_snapshot_passes_guard_and_real_execution_admission_continues(self):
+        task_id = stable_id("task", "bridge-stage-a", "node-stage-a")
+        risk_ref_id = "risk-" + task_id
+        admission_snapshot = {
+            "task_id": task_id,
+            "risk": {"ref_id": risk_ref_id},
+            "project_id": "project-" + uuid.uuid4().hex,
+            "execution_request_id": "execution-" + uuid.uuid4().hex,
+            "verification_plan_id": "verification-" + uuid.uuid4().hex,
+        }
+        self.assertFalse(self._guard_result(admission_snapshot))
+        result = self.execution.prepare(self.command("e4-derived-guard"))
+        self.assertEqual("QUEUED", result["request_state"])
 
     def test_success_prepares_request_binds_reservation_queues_event_outbox_receipt(self):
         result = self.execution.prepare(self.command())
