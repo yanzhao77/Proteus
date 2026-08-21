@@ -6,9 +6,9 @@
 
 | Field | Value |
 | --- | --- |
-| Repository HEAD | `b0c8629d2ae5a89ffa3c4f93063e458fd8da5356` |
-| Branch | `docs/e5-e7-authority-correction` |
-| Generated UTC | `2026-08-21T04:07:37Z` |
+| Repository HEAD | `87343487fdabaf7079e258bf173ceaa6368d4286` |
+| Branch | `fix/p6-secret-guard-policy-1787290349` |
+| Generated UTC | `2026-08-21T06:19:12Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -212,6 +212,7 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E2.x Phase | **COMPLETE / LIVE VERIFIED** |
 | P6 Authority Gate | **CLOSED** |
 | P6 Functional Revalidation | **PASS** |
+| P6 Secret Guard Policy Repair | **PASS — Stage A; structured JSONB guard, runtime canary evidence, and no E8 continuation** |
 | E3 Proposal / Master Plan | **PASS** |
 | E3 Phase | **COMPLETE** |
 | E4 Approval Bridge | **PASS / COMPLETE** |
@@ -299,7 +300,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | E7 Live Production projection | PASS — source-derived snapshot/live-feed, real PostgreSQL evidence, Product API/FastAPI contracts, 40 frontend tests. |
 | Fresh migration | PASS — 0001→0030 independent PostgreSQL 16 verification. |
 | P6 Golden Todo / autonomous trial | PASS — 14 tests in task-only disposable PostgreSQL. |
-| Full Runtime | PASS — 699 run, 12 skipped, 0 failures in 472.450 seconds. |
+| Full Runtime | PASS — 702 run, 12 skipped, 0 failures in 370.956 seconds (Stage A P6 secret guard repair). |
 | P0–P5 no-DB discovery | PASS — 699 run, 432 skipped, 0 failures. |
 | Frontend production quality | PASS — 40 tests, production build, oxlint 0 warnings / 0 errors. |
 
@@ -341,3 +342,13 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `0b9eea74d2fc4a66fbfb84a430d30bfc9974d75b3bdb472e228714d8e999c2de` | `hermes-runtime/tests/test_e7_live_fastapi.py` | `THIS_E7_DELIVERY` |
 | `43bc8b1b908a5a00036d6f26720fefc036ff4e7e827dbc17ee815f8a9ab3d13b` | `hermes-runtime/tests/test_e7_live_product_api.py` | `THIS_E7_DELIVERY` |
 | `a2c09a9a3fd416edd77528c4201bdd6076fe4cffecaf10e00e95e7658db3e549` | `hermes-runtime/tests/test_e7_live_production_postgres.py` | `THIS_E7_DELIVERY` |
+
+### Stage A P6 Secret Guard Repair SHA-256 Inventory
+| SHA-256 | Path | Inventory treatment |
+| --- | --- | --- |
+| `df32a9885c58d1e5b00ab3054a104fb212c2780ee9a6d8a529ffcbfc68428e49` | `hermes-runtime/migrations/0031_p6_secret_guard_structured_jsonb.sql` | `THIS_P6_SECRET_GUARD_REPAIR` |
+| `dcc8b430fd2d63916e7a68dcbf2b8cf2a37a56d3c5d9988038012045e4c2cdd2` | `hermes-runtime/tests/test_execution_postgres.py` | `THIS_P6_SECRET_GUARD_REPAIR` |
+| `ebb12079042348873239aaf07f18856299fa92e2de851a47d46e225b0ae9212c` | `docs/P6_SECRET_GUARD_FALSE_POSITIVE_POLICY_REPAIR_DESIGN.md` | `THIS_P6_SECRET_GUARD_REPAIR` |
+| `fb682085932006da616ae15acc736aad056987710407f5504b1def7e604cf785` | `docs/P6_SECRET_GUARD_FALSE_POSITIVE_POLICY_REPAIR_DELIVERY_REPORT.md` | `THIS_P6_SECRET_GUARD_REPAIR` |
+
+Stage A adds only forward migration `0031` and structured P6 secret-guard evidence. It preserves E4 durable identity, all prior authority semantics, and the E8 NOT ENTERED boundary. Real PostgreSQL evidence: focused guard/admission 3/3 PASS; P6 Execution/permissions/recovery plus E4 durable 47/47 PASS; P6 standalone 14/14 PASS; Full Runtime 702 run, 12 skipped, 0 failures in 370.956 seconds; frontend 40 PASS, build PASS, lint 0 warnings / 0 errors.
