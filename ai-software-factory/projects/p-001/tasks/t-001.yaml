@@ -3,7 +3,8 @@ title: 后端骨架 + 配置
 epic: backend
 dependsOn: []
 role: backend
-status: pending
+status: done
 outputs: [workspace/backend/app/main.py, workspace/backend/requirements.txt, workspace/backend/.env.example]
 acceptance: ["uvicorn app.main:app 可启动", "/health 返回 200 ok"]
-attempts: 0
+attempts: 1
+evidence: "backend smoke /health 200 + 26 checks"

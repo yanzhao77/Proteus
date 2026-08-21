@@ -1,9 +1,9 @@
 {
   "id": "p-001",
   "title": "示例项目",
-  "status": "IMPLEMENTATION_PLANNING",
+  "status": "INTEGRATION",
   "runStatus": "RUNNING",
-  "revision": 3,
+  "revision": 6,
   "createdAt": "",
   "events": [
     {
@@ -17,6 +17,24 @@
       "type": "plan.created",
       "actor": "factory-manager",
       "note": "implementation-plan.md + 7 tasks DAG"
+    },
+    {
+      "ts": "2026-08-21T12:40:00Z",
+      "type": "architecture.gate.passed",
+      "actor": "factory-manager",
+      "note": "architecture/api-spec/database-schema PASS"
+    },
+    {
+      "ts": "2026-08-21T12:45:00Z",
+      "type": "implementation.started",
+      "actor": "factory-manager",
+      "note": "backend=ae1e5138 frontend=13cd635f parallel"
+    },
+    {
+      "ts": "2026-08-21T13:05:00Z",
+      "type": "implementation.completed",
+      "actor": "factory-manager",
+      "note": "backend 26/26 smoke, frontend build OK; qa=7113123f review=3728161a"
     }
   ],
   "meta": {
@@ -34,9 +52,9 @@
     }
   },
   "event": {
-    "ts": "2026-08-21T12:32:00Z",
-    "type": "plan.created",
+    "ts": "2026-08-21T13:05:00Z",
+    "type": "implementation.completed",
     "actor": "factory-manager",
-    "note": "implementation-plan.md + 7 tasks DAG"
+    "note": "backend 26/26 smoke, frontend build OK; qa=7113123f review=3728161a"
   }
 }
