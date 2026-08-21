@@ -1,0 +1,18 @@
+# 测试用例
+cases:
+  - id: TC-001
+    feature: auth
+    title: 注册成功返回 token
+    setup: 空库
+    steps:
+      - POST /api/v1/auth/register {email, password}
+    expect: 201 + token；DB 存在用户且密码为 hash
+    priority: P0
+  - id: TC-002
+    feature: auth
+    title: 重复邮箱注册返回 409
+    setup: 已有 user@example.com
+    steps:
+      - POST /api/v1/auth/register 同一邮箱
+    expect: 409
+    priority: P0
