@@ -223,6 +223,24 @@ def create_app(
     def live_production_snapshot(project_id: str, request: Request):
         return _factory_dispatch(request, f"/factory-home/productions/{project_id}/live")
 
+    @app.post("/factory-home/productions/{project_id}/commands/{action}")
+    async def factory_home_project_command(project_id: str, action: str, request: Request):
+        return _verified_dispatch(
+            request,
+            "POST",
+            f"/factory-home/productions/{project_id}/commands/{action}",
+            await _json_body(request),
+        )
+
+    @app.get("/factory-home/productions/{project_id}/commands/{command_id}")
+    def factory_home_project_command_receipt(project_id: str, command_id: str, request: Request):
+        return _verified_dispatch(
+            request,
+            "GET",
+            f"/factory-home/productions/{project_id}/commands/{command_id}",
+            {},
+        )
+
     @app.get("/factory-home/productions/{project_id}/live-feed")
     def live_production_feed(project_id: str, request: Request, after: int = 0, limit: int = 50):
         return _factory_dispatch(request, f"/factory-home/productions/{project_id}/live-feed", {"after": after, "limit": limit})
@@ -428,7 +446,13 @@ def _dispatch(
         )
     except ProductApiRejected as exc:
         code = str(exc).split(":", 1)[0]
-        status = 409 if code in {"ENTRY_DRAFT_VERSION_CONFLICT", "ENTRY_DRAFT_IDEMPOTENCY_CONFLICT"} else 422 if code == "ENTRY_DRAFT_VALIDATION_FAILED" else 400
+        status = (
+            404 if code in {"E11_COMMAND_NOT_AVAILABLE", "E11_COMMAND_RECEIPT_NOT_AVAILABLE"}
+            else 503 if code in {"E11_COMMAND_AUTHORITY_UNAVAILABLE", "E11_COMMAND_SCOPE_UNAVAILABLE"}
+            else 409 if code in {"ENTRY_DRAFT_VERSION_CONFLICT", "ENTRY_DRAFT_IDEMPOTENCY_CONFLICT", "VERSION_CONFLICT", "IDEMPOTENCY_CONFLICT", "COMMAND_IN_PROGRESS"}
+            else 422 if code in {"ENTRY_DRAFT_VALIDATION_FAILED", "E11_COMMAND_EXPECTED_VERSION_INVALID", "E11_COMMAND_REASON_REQUIRED", "E11_COMMAND_AUTHORIZATION_REF_INVALID", "CANCELLATION_AUTHORIZATION_REQUIRED"}
+            else 400
+        )
         return _error(code, status, request_id, "request rejected")
     except EntryDraftRejected as exc:
         code = str(exc).split(":", 1)[0]
