@@ -12,10 +12,15 @@ describe('E9-only workspace and authority contracts', () => {
     expect(selector).toContain("import.meta.env.DEV && import.meta.env.VITE_PROTEUS_DEMO === 'true'");
     const fixture = developmentFixtureAdapters(); expect((await fixture.portfolio.listProductions()).kind).toBe('data');
   });
-  it('keeps E11 partial: source-backed snapshots and navigational recovery, but no direct authority mutation', () => {
+  it('keeps E11 partial: source-backed snapshots, navigational recovery, and only receipt-first pause/resume transport', () => {
     for (const field of ['getLiveSnapshot(id)','live.workflow.nodes','live.executionRequests','live.verification.plans','live.evidence.items','live.waiting','live.recovery']) expect(app).toContain(field);
     expect(app).toContain('controlledRecovery'); expect(app).toContain("t('operationsDetail')");
-    for (const forbidden of ['setProjectState','createExecutionRequest','setTaskState','submitGateDecision','adapters.production.pause(','adapters.production.resume(','adapters.production.stop(']) expect(app).not.toContain(forbidden);
+    expect(app).toContain("action: 'pause' | 'resume'");
+    expect(app).toContain('adapters.production.pause(live.project.projectId, metadata)');
+    expect(app).toContain('adapters.production.resume(live.project.projectId, metadata)');
+    expect(app).toContain('RECEIPT_PENDING');
+    expect(app).toContain('data-testid="e11-command-receipt"');
+    for (const forbidden of ['setProjectState','createExecutionRequest','setTaskState','submitGateDecision',"submit('cancel')",'actor:', 'requested_by', 'scope:']) expect(app).not.toContain(forbidden);
   });
   it('does not embed production fixture content or browser credentials', () => { expect(app).not.toContain('demo-gate-001'); expect(app).not.toMatch(/authorization|refresh_token|api[_-]?key/i); });
 });

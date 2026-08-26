@@ -12,7 +12,7 @@ describe('E3 product API adapter', () => {
   it('uses the governed Proposal mutation shape and maps source/hash metadata', async () => {
     const fetchMock = vi.fn().mockResolvedValue(envelope({ availability: 'CURRENT', item: proposal }));
     vi.stubGlobal('fetch', fetchMock);
-    const result = await productApiAdapters().draft.generateProposal('ed-1', { actor: 'ignored', reason: 'review', idempotencyKey: 'idem-e3', expectedVersion: 0 });
+    const result = await productApiAdapters().draft.generateProposal('ed-1', { reason: 'review', idempotencyKey: 'idem-e3', expectedVersion: 0 });
     expect(result).toMatchObject({ kind: 'data' });
     if (result.kind === 'data') {
       expect(result.value.current.contentHash).toBe('a'.repeat(64));
@@ -24,7 +24,7 @@ describe('E3 product API adapter', () => {
   it('uses the governed Master Plan route and never exposes an approval mutation', async () => {
     const fetchMock = vi.fn().mockResolvedValue(envelope({ availability: 'NOT_AVAILABLE', reason: 'ENTRY_PLAN_NOT_AVAILABLE', item: null }));
     vi.stubGlobal('fetch', fetchMock);
-    const result = await productApiAdapters().draft.generateMasterPlan('ed-1', { actor: 'ignored', reason: 'review', idempotencyKey: 'idem-plan', expectedVersion: 0 });
+    const result = await productApiAdapters().draft.generateMasterPlan('ed-1', { reason: 'review', idempotencyKey: 'idem-plan', expectedVersion: 0 });
     expect(result).toMatchObject({ kind: 'not_implemented', message: 'ENTRY_PLAN_NOT_AVAILABLE' });
     expect(fetchMock.mock.calls[0][0]).toBe('/production-drafts/ed-1/proposal/master-plan');
     expect(Object.keys(productApiAdapters().draft)).not.toContain('approve');

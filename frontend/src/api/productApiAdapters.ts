@@ -1,4 +1,4 @@
-import type { ApprovalPreviewViewModel, ApprovalResultViewModel, LiveProductionEventFeedViewModel, LiveProductionEventViewModel, LiveProductionSnapshotViewModel,  AdapterResult, CommandMetadata, DraftListViewModel, DraftViewModel, UnderstandingViewModel, ProposalViewModel, MasterPlanViewModel, FactoryAdapters, GateApi, GateViewModel, ProductionApi, ProductionCardViewModel, ProductionDraftApi, ProductionPortfolioApi, ProductionState } from '../models';
+import type { ApprovalPreviewViewModel, ApprovalResultViewModel, LiveProductionEventFeedViewModel, LiveProductionEventViewModel, LiveProductionSnapshotViewModel,  AdapterResult, CommandMetadata, DraftListViewModel, DraftViewModel, UnderstandingViewModel, ProposalViewModel, MasterPlanViewModel, FactoryAdapters, GateApi, GateViewModel, ProductionApi, ProductionCardViewModel, ProductionDraftApi, ProductionPortfolioApi, ProductionState, ProjectCommandReceiptViewModel } from '../models';
 
 interface ApiEnvelope<T> { data: T | null; error: { code: string; message: string } | null; request_id: string; }
 interface AvailabilityEnvelope { availability: string; reason: string | null; items?: unknown[]; item?: unknown; }
@@ -86,8 +86,27 @@ class ProductApiProduction implements ProductionApi {
   getSnapshot(id: string): Promise<AdapterResult<ProductionCardViewModel>> { return new ProductApiPortfolio().getProduction(id); }
   async getLiveSnapshot(id: string): Promise<AdapterResult<LiveProductionSnapshotViewModel>> { const result = await get<Record<string, unknown>>(`/factory-home/productions/${encodeURIComponent(id)}/live`); return result.kind === 'data' ? { kind: 'data', value: live(result.value) } : result; }
   getLiveEvents(id: string, after: number, limit = 50): Promise<AdapterResult<LiveProductionEventFeedViewModel>> { return liveFeed(`/factory-home/productions/${encodeURIComponent(id)}/live-feed?after=${encodeURIComponent(String(after))}&limit=${encodeURIComponent(String(limit))}`); }
-  pause(_id: string, _metadata: import('../models').CommandMetadata): Promise<AdapterResult<void>> { return pending('ProductionApi.pause'); }
-  resume(_id: string, _metadata: import('../models').CommandMetadata): Promise<AdapterResult<void>> { return pending('ProductionApi.resume'); }
-  stop(_id: string, _metadata: import('../models').CommandMetadata): Promise<AdapterResult<void>> { return pending('ProductionApi.stop'); }
+  private async command(id: string, action: 'pause' | 'resume' | 'cancel', metadata: CommandMetadata): Promise<AdapterResult<ProjectCommandReceiptViewModel>> {
+    const commandId = globalThis.crypto?.randomUUID?.() ?? `e11-${Date.now()}-${metadata.idempotencyKey}`;
+    const payload: Record<string, unknown> = {
+      command_id: commandId,
+      expected_version: metadata.expectedVersion,
+      idempotency_key: metadata.idempotencyKey,
+      reason: metadata.reason,
+    };
+    if (action === 'cancel' && metadata.authorizationRef) payload.authorization_ref = metadata.authorizationRef;
+    const result = await post<Record<string, unknown>>(`/factory-home/productions/${encodeURIComponent(id)}/commands/${action}`, payload);
+    if (result.kind !== 'data') return result;
+    const raw = result.value;
+    return { kind: 'data', value: {
+      commandId: String(raw.command_id), receiptStatus: String(raw.receipt_status), resultCode: String(raw.result_code),
+      targetVersion: typeof raw.target_version === 'number' ? raw.target_version : null,
+      eventIds: Array.isArray(raw.event_ids) ? raw.event_ids.map(String) : [],
+      projectionStatus: String(raw.projection_status),
+    } };
+  }
+  pause(id: string, metadata: CommandMetadata): Promise<AdapterResult<ProjectCommandReceiptViewModel>> { return this.command(id, 'pause', metadata); }
+  resume(id: string, metadata: CommandMetadata): Promise<AdapterResult<ProjectCommandReceiptViewModel>> { return this.command(id, 'resume', metadata); }
+  stop(id: string, metadata: CommandMetadata): Promise<AdapterResult<ProjectCommandReceiptViewModel>> { return this.command(id, 'cancel', metadata); }
 }
 export const productApiAdapters = (): FactoryAdapters => ({ mode: 'product_api', draft: new ProductApiDrafts(), portfolio: new ProductApiPortfolio(), gates: new ProductApiGates(), production: new ProductApiProduction() });
