@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `c5dd19e6c6f7c86cae6ed5ec0910e631d9ec72c5` |
 | Branch | `e8-production-entry-trial` |
-| Generated UTC | `2026-08-26T05:06:14Z` |
+| Generated UTC | `2026-08-26T06:40:15Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -224,7 +224,7 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E8 Production Entry Trial | **PASS / COMPLETE** — same-project real vertical trial. |
 | E9 Global Design System | **PASS / COMPLETE** — semantic tokens, themes, typography, density and localization. |
 | E10 Identity / Workspace Shell | **PASS / COMPLETE** — OIDC-derived opaque session and authenticated Product API shell. |
-| E11 Project Operations Workspace | **PASS / COMPLETE** — E7 source-derived DAG/execution/verification/evidence/recovery workspace; no E12. |
+| E11 Project Operations Workspace | **DELIVERED — source-derived read-only operations projection** | **Historical Wave A delivery snapshot only; not the current acceptance authority. Controlled user command transport was not part of this accepted scope.** |
 
 ## 12. Documentation/Metadata-Only Correction Record
 
