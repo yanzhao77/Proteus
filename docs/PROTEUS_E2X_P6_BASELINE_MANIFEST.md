@@ -394,7 +394,7 @@ E8 preserves migrations `0001–0032`, E4 durable identity, the P6 authority sta
 | `2e48a3e9ad6b1bac8bfcaa21080d3807bd95b949a646324603ef1b3d899868c5` | `docs/E10_IDENTITY_SESSION_WORKSPACE_SHELL_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `b74efdc853ee3df01cbf89f67b1b5a5534f119ecf98fd1615eb3f70d512e9fa4` | `docs/E11_PROJECT_OPERATIONS_WORKSPACE_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `47929d5502bb08ec7783027c29805438bbe89bf4b12bf96c335f4468bd31d07b` | `docs/E8_PRODUCTION_ENTRY_TRIAL_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `94e25ffdfa0fd24961e558ed113a3e19a1e40df0ee3025298bac2ae015d73858` | `docs/E9_E11_WAVE_A_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
+| `6daa0cf29f63dbaddfea11a00f1d7e23abbc08cc493170d3fbb131f8d6db43ea` | `docs/E9_E11_WAVE_A_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `a63b24bc3ec3d0f1cd3b07e5b0e59915c7c3bf5270802124822b323a1dd8f529` | `docs/E9_E11_WAVE_A_IMPLEMENTATION_CONTRACT.md` | THIS_E9_E11_WAVE_A |
 | `5ee30e15c1381dfcaffe7c659230ded5b5f8b2de00e43ebfbfbdb6d2d8d08bb8` | `docs/E9_GLOBAL_DESIGN_SYSTEM_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `23f68375ead5fce15134c5c46542e6e728aac7a62c1646fa8bf45fc83d0d4208` | `frontend/src/App.test.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |

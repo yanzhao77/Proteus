@@ -24,7 +24,7 @@
 | frontend build | PASS |
 | oxlint | `0 warnings / 0 errors` |
 
-浏览器预览服务已在隔离用户桌面启动，但隔离浏览器无法路由到用户桌面的私网预览地址，且桌面本机HTTP smoke在约定时限内未完成。因此本报告不将其记作浏览器视觉 PASS，也不以旧浏览器结果替代；页面交互由本轮 JSDOM Vitest 覆盖，最终PR CI与clean checkout验证仍为合并前提。
+浏览器验收已在**沙箱干净检出** `d02811ead9dec4b4e78d54deef87457d2c972db4` 的 Vite preview 完成。Home 显示 stable workspace navigation、`Session required` 与不伪造 portfolio 的显式 Product API failure；Display settings 实测支持 Dark、`zh-CN` 与 density controls；Projects、Gate Inbox、New production 与 canonical E11 operations route 均可导航。无认证/无 snapshot 时不会伪造 Project、Draft、Gate、Execution、Verification、Evidence 或 Recovery fact；E11 明确声明无 direct authority mutation。此前用户桌面私网预览不可由隔离浏览器路由的限制，已由该干净检出浏览器验收替代。
 
 ## Stop Boundary
 
