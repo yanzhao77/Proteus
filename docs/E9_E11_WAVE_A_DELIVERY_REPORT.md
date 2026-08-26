@@ -29,3 +29,7 @@
 ## Stop Boundary
 
 本波次不修改 migrations `0001–0032`、E1–E8 authority semantics、P0–P6 Recovery/Worker/Scheduler/Execution/Verifier/Gate authority、业务 schema、role 或 grant。没有真实 provider、模型、生产部署、credential 或 fixture data 进入 production build。E12、E13、E14、E15 与 E16 未进入。
+
+## Current Acceptance Qualification
+
+After the E9-only closure, the correct current statement is: **E9 PASS / ACCEPTANCE COMPLETE; E10 delivered as previously merged; E11 PARTIAL / ACCEPTANCE GAP; E9–E11 Wave A NOT COMPLETE.** The missing E11 condition is a compliant OIDC-user-callable existing authority semantic command and its authoritative receipt/replay/conflict/projection evidence. No substitute authority path was introduced.

@@ -13,7 +13,7 @@ describe('E9 global workspace rendering', () => {
 
   it('renders an explicit unavailable or failed data state instead of inventing a portfolio', async () => {
     render(<MemoryRouter initialEntries={['/productions']}><App /></MemoryRouter>);
-    expect(await screen.findByText(/data request failed|not available for your current scope/i)).toBeInTheDocument();
+    expect(await screen.findByText(/request unavailable|session required/i)).toBeInTheDocument();
     expect(screen.queryByText(/0%/)).not.toBeInTheDocument();
   });
 

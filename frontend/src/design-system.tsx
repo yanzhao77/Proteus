@@ -1,89 +1,86 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { UiContext, useUi, type UiContextValue, type UiDensity, type UiLocale, type UiTheme } from './ui-context';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { formatBytes, formatDate as intlDate, formatDuration, formatNumber, formatPercent, isRtl, localeNames, message, supportedLocales, type MessageKey, type UiLocale } from './i18n';
+import { UiContext, useUi, type FontSize, type LineHeight, type MonoFont, type UiAccent, type UiContextValue, type UiDensity, type UiFont, type UiTheme } from './ui-context';
 
-const COPY: Record<UiLocale, Record<string, string>> = {
-  'en-US': {
-    appName: 'Proteus', workspace: 'Software Production Workspace', home: 'Home', productions: 'Projects', gates: 'Gate inbox', newEntry: 'New production', drafts: 'Drafts',
-    operations: 'Operations', settings: 'Display settings', theme: 'Theme', locale: 'Language', density: 'Density', system: 'System', light: 'Light', dark: 'Dark',
-    comfortable: 'Comfortable', compact: 'Compact', loading: 'Loading authoritative data', pending: 'Awaiting an authoritative source', error: 'Data request failed',
-    stale: 'Snapshot is stale', unavailable: 'Not available for your current scope', empty: 'Nothing to show yet', retry: 'Retry', open: 'Open', review: 'Review',
-    productionWorkspace: 'Project operations', readOnly: 'Read-only projection', evidence: 'Evidence', verification: 'Verification', execution: 'Execution', workflow: 'Workflow DAG', recovery: 'Recovery',
-    controlledRecovery: 'Open controlled recovery', noDirectCommand: 'Recovery actions remain controlled by existing authority workflows.', signedOut: 'Session required',
-    statusCurrent: 'Current', statusStale: 'Stale', statusDegraded: 'Degraded', statusUnavailable: 'Unavailable', statusRunning: 'Running', statusWaiting: 'Waiting', statusSuccess: 'Completed', statusWarning: 'Attention', statusFailure: 'Failed', statusBlocked: 'Blocked',
-  },
-  'zh-CN': {
-    appName: 'Proteus', workspace: '软件生产工作区', home: '首页', productions: '项目', gates: '门禁收件箱', newEntry: '新建生产', drafts: '草稿',
-    operations: '运营工作区', settings: '显示设置', theme: '主题', locale: '语言', density: '密度', system: '跟随系统', light: '浅色', dark: '深色',
-    comfortable: '舒适', compact: '紧凑', loading: '正在加载权威数据', pending: '正在等待权威数据源', error: '数据请求失败',
-    stale: '快照已过期', unavailable: '当前权限范围不可用', empty: '暂时没有可显示内容', retry: '重试', open: '打开', review: '审查',
-    productionWorkspace: '项目运营', readOnly: '只读投影', evidence: '证据', verification: '验证', execution: '执行', workflow: '工作流 DAG', recovery: '恢复',
-    controlledRecovery: '打开受控恢复入口', noDirectCommand: '恢复操作仍由既有 authority workflow 控制。', signedOut: '需要会话',
-    statusCurrent: '当前', statusStale: '陈旧', statusDegraded: '降级', statusUnavailable: '不可用', statusRunning: '运行中', statusWaiting: '等待中', statusSuccess: '已完成', statusWarning: '需关注', statusFailure: '失败', statusBlocked: '受阻',
-  },
-};
-
-const getStored = <T extends string>(key: string, fallback: T): T => {
-  try { return (window.localStorage.getItem(key) as T | null) ?? fallback; } catch { return fallback; }
-};
-
+const preferenceKey = 'proteus.e9.preferences.v2';
+const themes: UiTheme[] = ['system', 'light', 'dark', 'high-contrast-light', 'high-contrast-dark', 'protanopia-safe', 'deuteranopia-safe', 'tritanopia-safe', 'monochrome', 'print'];
+const accents: UiAccent[] = ['cyan', 'violet', 'amber'];
+const densities: UiDensity[] = ['compact', 'comfortable', 'spacious'];
+const fonts: UiFont[] = ['system', 'cjk', 'serif'];
+const monoFonts: MonoFont[] = ['jetbrains', 'system'];
+const fontSizes: FontSize[] = ['small', 'default', 'large', 'extra-large'];
+const lineHeights: LineHeight[] = ['compact', 'default', 'relaxed'];
+type Preferences = { theme: UiTheme; locale: UiLocale; accent: UiAccent; density: UiDensity; uiFont: UiFont; monoFont: MonoFont; fontSize: FontSize; lineHeight: LineHeight; reducedMotion: boolean };
+const defaults: Preferences = { theme: 'system', locale: 'en-US', accent: 'cyan', density: 'comfortable', uiFont: 'system', monoFont: 'jetbrains', fontSize: 'default', lineHeight: 'default', reducedMotion: false };
+function readPreferences(): Preferences {
+  try {
+    const raw = window.localStorage.getItem(preferenceKey);
+    if (!raw) return defaults;
+    const candidate = JSON.parse(raw) as Partial<Preferences>;
+    return {
+      theme: themes.includes(candidate.theme as UiTheme) ? candidate.theme as UiTheme : defaults.theme,
+      locale: supportedLocales.includes(candidate.locale as UiLocale) ? candidate.locale as UiLocale : defaults.locale,
+      accent: accents.includes(candidate.accent as UiAccent) ? candidate.accent as UiAccent : defaults.accent,
+      density: densities.includes(candidate.density as UiDensity) ? candidate.density as UiDensity : defaults.density,
+      uiFont: fonts.includes(candidate.uiFont as UiFont) ? candidate.uiFont as UiFont : defaults.uiFont,
+      monoFont: monoFonts.includes(candidate.monoFont as MonoFont) ? candidate.monoFont as MonoFont : defaults.monoFont,
+      fontSize: fontSizes.includes(candidate.fontSize as FontSize) ? candidate.fontSize as FontSize : defaults.fontSize,
+      lineHeight: lineHeights.includes(candidate.lineHeight as LineHeight) ? candidate.lineHeight as LineHeight : defaults.lineHeight,
+      reducedMotion: Boolean(candidate.reducedMotion),
+    };
+  } catch { return defaults; }
+}
+function resolveTheme(theme: UiTheme, systemDark: boolean): Exclude<UiTheme, 'system'> { return theme === 'system' ? (systemDark ? 'dark' : 'light') : theme; }
 export function UiProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<UiTheme>(() => getStored('proteus.ui.theme', 'system'));
-  const [locale, setLocale] = useState<UiLocale>(() => getStored('proteus.ui.locale', 'en-US'));
-  const [density, setDensity] = useState<UiDensity>(() => getStored('proteus.ui.density', 'comfortable'));
+  const initial = typeof window === 'undefined' ? defaults : readPreferences();
+  const [preferences, setPreferences] = useState<Preferences>(initial);
+  const [systemDark, setSystemDark] = useState(() => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const resolvedTheme = resolveTheme(preferences.theme, systemDark);
   useEffect(() => {
-    const resolved = theme === 'system' ? (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
-    document.documentElement.dataset.theme = resolved;
-    document.documentElement.dataset.locale = locale;
-    document.documentElement.dataset.density = density;
-    try { window.localStorage.setItem('proteus.ui.theme', theme); window.localStorage.setItem('proteus.ui.locale', locale); window.localStorage.setItem('proteus.ui.density', density); } catch { /* UI preferences are optional. */ }
-  }, [theme, locale, density]);
+    if (typeof window.matchMedia !== 'function') return undefined;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const change = () => setSystemDark(media.matches);
+    media.addEventListener('change', change);
+    return () => media.removeEventListener('change', change);
+  }, []);
+  useEffect(() => {
+    const update = (event: StorageEvent) => { if (event.key === preferenceKey) setPreferences(readPreferences()); };
+    window.addEventListener('storage', update);
+    return () => window.removeEventListener('storage', update);
+  }, []);
+  useEffect(() => {
+    const root = document.documentElement;
+    root.lang = preferences.locale;
+    root.dir = isRtl(preferences.locale) ? 'rtl' : 'ltr';
+    root.dataset.theme = resolvedTheme;
+    root.dataset.accent = preferences.accent;
+    root.dataset.density = preferences.density;
+    root.dataset.font = preferences.uiFont;
+    root.dataset.monoFont = preferences.monoFont;
+    root.dataset.fontSize = preferences.fontSize;
+    root.dataset.lineHeight = preferences.lineHeight;
+    root.dataset.reducedMotion = String(preferences.reducedMotion);
+    document.title = `${message(preferences.locale, 'appName')} — ${message(preferences.locale, 'workspace')}`;
+    try { window.localStorage.setItem(preferenceKey, JSON.stringify(preferences)); } catch { /* browser presentation preferences are optional */ }
+  }, [preferences, resolvedTheme]);
+  const update = <K extends keyof Preferences>(key: K, value: Preferences[K]) => setPreferences((current) => ({ ...current, [key]: value }));
   const value = useMemo<UiContextValue>(() => ({
-    theme, locale, density, setTheme, setLocale, setDensity,
-    t: (key) => COPY[locale][key] ?? COPY['en-US'][key] ?? key,
-    formatDate: (value) => value ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—',
-  }), [theme, locale, density]);
+    ...preferences, resolvedTheme,
+    setTheme: (theme) => update('theme', theme), setLocale: (locale) => update('locale', locale), setAccent: (accent) => update('accent', accent), setDensity: (density) => update('density', density), setUiFont: (uiFont) => update('uiFont', uiFont), setMonoFont: (monoFont) => update('monoFont', monoFont), setFontSize: (fontSize) => update('fontSize', fontSize), setLineHeight: (lineHeight) => update('lineHeight', lineHeight), setReducedMotion: (reducedMotion) => update('reducedMotion', reducedMotion),
+    t: (key, values) => message(preferences.locale, key, values), formatDate: (value) => intlDate(preferences.locale, value), formatNumber: (number) => formatNumber(preferences.locale, number), formatPercent: (number) => formatPercent(preferences.locale, number), formatDuration: (seconds) => formatDuration(preferences.locale, seconds), formatBytes: (bytes) => formatBytes(preferences.locale, bytes),
+  }), [preferences, resolvedTheme]);
   return <UiContext.Provider value={value}>{children}</UiContext.Provider>;
 }
-
-const icons: Record<string, string> = {
-  home: 'M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
-  grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
-  gate: 'M5 3h14v18H5zM8 7h8M8 11h8M8 15h5',
-  plus: 'M12 5v14M5 12h14',
-  settings: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-5 1.2 2.3 2.5.7 2.1-1.5 1.8 1.8-1.5 2.1.7 2.5L21 12l-2.3 1.2-.7 2.5 1.5 2.1-1.8 1.8-2.1-1.5-2.5.7L12 21l-1.2-2.3-2.5-.7-2.1 1.5-1.8-1.8 1.5-2.1-.7-2.5L3 12l2.3-1.2.7-2.5-1.5-2.1 1.8-1.8 2.1 1.5 2.5-.7z',
-  arrow: 'M5 12h13M13 6l6 6-6 6',
-  info: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM12 10v6M12 7h.01',
-  refresh: 'M20 11a8 8 0 1 0 1 5M20 4v7h-7',
-  shield: 'M12 3 20 6v5c0 5-3.4 8-8 10-4.6-2-8-5-8-10V6z',
-  close: 'm6 6 12 12M18 6 6 18',
-};
-export function Icon({ name, className = '' }: { name: keyof typeof icons; className?: string }) {
-  return <svg aria-hidden="true" className={`ui-icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={icons[name]} /></svg>;
-}
-export function IconButton({ label, icon, onClick, pressed }: { label: string; icon: keyof typeof icons; onClick?: () => void; pressed?: boolean }) {
-  return <button type="button" className="ui-icon-button" aria-label={label} aria-pressed={pressed} data-tooltip={label} onClick={onClick}><Icon name={icon} /></button>;
-}
-
-const statusKey = (value: string) => {
-  const normalized = value.toLowerCase();
-  if (normalized.includes('current') || normalized.includes('complete') || normalized.includes('accept')) return 'success';
-  if (normalized.includes('run')) return 'running';
-  if (normalized.includes('wait') || normalized.includes('pause')) return 'waiting';
-  if (normalized.includes('stale')) return 'warning';
-  if (normalized.includes('fail') || normalized.includes('error')) return 'failure';
-  if (normalized.includes('block') || normalized.includes('not_available')) return 'blocked';
-  return 'neutral';
-};
-export function StatusBadge({ value }: { value: string }) {
-  const kind = statusKey(value);
-  return <span className="ui-status" data-status={kind}><span aria-hidden="true" className="ui-status-mark">{kind === 'success' ? '✓' : kind === 'failure' ? '!' : kind === 'waiting' ? '◌' : kind === 'running' ? '↻' : '•'}</span><span>{value.replaceAll('_', ' ')}</span></span>;
-}
-export function ViewState({ kind, title, detail, onRetry }: { kind: 'loading' | 'pending' | 'error' | 'stale' | 'unavailable' | 'empty'; title?: string; detail?: string; onRetry?: () => void }) {
-  const { t } = useUi();
-  const fallback = { loading: t('loading'), pending: t('pending'), error: t('error'), stale: t('stale'), unavailable: t('unavailable'), empty: t('empty') }[kind];
-  return <section className="ui-view-state" data-state={kind}><Icon name={kind === 'error' ? 'info' : kind === 'stale' ? 'refresh' : kind === 'unavailable' ? 'shield' : 'info'} /><div><h2>{title ?? fallback}</h2>{detail && <p>{detail}</p>}{onRetry && <button className="ui-button secondary" onClick={onRetry}>{t('retry')}</button>}</div></section>;
-}
+const icons = { home: 'M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z', gate: 'M5 3h14v18H5zM8 7h8M8 11h8M8 15h5', plus: 'M12 5v14M5 12h14', settings: 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-5 1.2 2.3 2.5.7 2.1-1.5 1.8 1.8-1.5 2.1.7 2.5L21 12l-2.3 1.2-.7 2.5 1.5 2.1-1.8 1.8-2.1-1.5-2.5.7L12 21l-1.2-2.3-2.5-.7-2.1 1.5-1.8-1.8 1.5-2.1-.7-2.5L3 12l2.3-1.2.7-2.5-1.5-2.1 1.8-1.8 2.1 1.5 2.5-.7z', arrow: 'M5 12h13M13 6l6 6-6 6', info: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM12 10v6M12 7h.01', refresh: 'M20 11a8 8 0 1 0 1 5M20 4v7h-7', shield: 'M12 3 20 6v5c0 5-3.4 8-8 10-4.6-2-8-5-8-10V6z', close: 'm6 6 12 12M18 6 6 18' } as const;
+export function Icon({ name, className = '' }: { name: keyof typeof icons; className?: string }) { return <svg aria-hidden="true" className={`ui-icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={icons[name]} /></svg>; }
+export function IconButton({ label, icon, onClick, pressed }: { label: string; icon: keyof typeof icons; onClick?: () => void; pressed?: boolean }) { return <button type="button" className="ui-icon-button" aria-label={label} aria-pressed={pressed} data-tooltip={label} onClick={onClick}><Icon name={icon} /></button>; }
+const statusKey = (value: string) => { const normalized = value.toLowerCase(); if (normalized.includes('current') || normalized.includes('complete') || normalized.includes('accept') || normalized === 'true') return 'success'; if (normalized.includes('run')) return 'running'; if (normalized.includes('wait') || normalized.includes('pause')) return 'waiting'; if (normalized.includes('stale')) return 'warning'; if (normalized.includes('fail') || normalized.includes('error') || normalized === 'false') return 'failure'; if (normalized.includes('block') || normalized.includes('not_available')) return 'blocked'; return 'neutral'; };
+export function StatusBadge({ value }: { value: string }) { const kind = statusKey(value); return <span className="ui-status" data-status={kind} aria-label={`${kind}: ${value}`}><span aria-hidden="true" className="ui-status-mark">{kind === 'success' ? '✓' : kind === 'failure' ? '!' : kind === 'waiting' ? '◌' : kind === 'running' ? '↻' : '•'}</span><span>{value.replaceAll('_', ' ')}</span></span>; }
+export function ViewState({ kind, title, detail, onRetry }: { kind: 'loading' | 'pending' | 'error' | 'stale' | 'unavailable' | 'empty'; title?: string; detail?: string; onRetry?: () => void }) { const { t } = useUi(); const fallback: Record<typeof kind, MessageKey> = { loading: 'loading', pending: 'pending', error: 'dataRequestFailed', stale: 'stale', unavailable: 'unavailable', empty: 'empty' }; return <section className="ui-view-state" data-state={kind} role="status" aria-live="polite"><Icon name={kind === 'error' ? 'info' : kind === 'stale' ? 'refresh' : kind === 'unavailable' ? 'shield' : 'info'} /><div><h2>{title ?? t(fallback[kind])}</h2>{detail && <p>{detail}</p>}{onRetry && <button className="ui-button secondary" onClick={onRetry}>{t('retry')}</button>}</div></section>; }
+function PreferenceSelect<T extends string>({ label, value, values, names, onChange }: { label: string; value: T; values: readonly T[]; names: Record<T, string>; onChange: (value: T) => void }) { return <label>{label}<select value={value} onChange={(event) => onChange(event.target.value as T)}>{values.map((entry) => <option key={entry} value={entry}>{names[entry]}</option>)}</select></label>; }
 export function PreferencePanel({ onClose }: { onClose: () => void }) {
-  const { theme, locale, density, setTheme, setLocale, setDensity, t } = useUi();
-  return <aside className="ui-preferences" aria-label={t('settings')}><header><div><span className="ui-kicker">WORKSPACE</span><h2>{t('settings')}</h2></div><IconButton icon="close" label="Close" onClick={onClose} /></header><label>{t('theme')}<select value={theme} onChange={(event) => setTheme(event.target.value as UiTheme)}><option value="system">{t('system')}</option><option value="light">{t('light')}</option><option value="dark">{t('dark')}</option></select></label><label>{t('locale')}<select value={locale} onChange={(event) => setLocale(event.target.value as UiLocale)}><option value="en-US">English</option><option value="zh-CN">简体中文</option></select></label><label>{t('density')}<select value={density} onChange={(event) => setDensity(event.target.value as UiDensity)}><option value="comfortable">{t('comfortable')}</option><option value="compact">{t('compact')}</option></select></label></aside>;
+  const ui = useUi(); const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => { closeRef.current?.focus(); }, []);
+  const labels: Record<UiTheme, MessageKey> = { system: 'system', light: 'light', dark: 'dark', 'high-contrast-light': 'highContrastLight', 'high-contrast-dark': 'highContrastDark', 'protanopia-safe': 'protanopiaSafe', 'deuteranopia-safe': 'deuteranopiaSafe', 'tritanopia-safe': 'tritanopiaSafe', monochrome: 'monochrome', print: 'print' };
+  return <aside className="ui-preferences" role="dialog" aria-modal="true" aria-label={ui.t('displaySettings')} onKeyDown={(event) => { if (event.key === 'Escape') onClose(); }}><header><div><span className="ui-kicker">{ui.t('workspace')}</span><h2>{ui.t('displaySettings')}</h2></div><button ref={closeRef} type="button" className="ui-icon-button" aria-label={ui.t('close')} onClick={onClose}><Icon name="close" /></button></header><PreferenceSelect label={ui.t('theme')} value={ui.theme} values={themes} names={Object.fromEntries(themes.map((theme) => [theme, ui.t(labels[theme])])) as Record<UiTheme, string>} onChange={ui.setTheme}/><PreferenceSelect label={ui.t('locale')} value={ui.locale} values={supportedLocales} names={localeNames} onChange={ui.setLocale}/><PreferenceSelect label={ui.t('accent')} value={ui.accent} values={accents} names={{ cyan: 'Cyan', violet: 'Violet', amber: 'Amber' }} onChange={ui.setAccent}/><PreferenceSelect label={ui.t('uiFont')} value={ui.uiFont} values={fonts} names={{ system: 'Inter / system', cjk: 'CJK / system', serif: 'Serif / system' }} onChange={ui.setUiFont}/><PreferenceSelect label={ui.t('monoFont')} value={ui.monoFont} values={monoFonts} names={{ jetbrains: 'JetBrains Mono', system: 'System monospace' }} onChange={ui.setMonoFont}/><PreferenceSelect label={ui.t('fontSize')} value={ui.fontSize} values={fontSizes} names={{ small: ui.t('small'), default: ui.t('default'), large: ui.t('large'), 'extra-large': ui.t('extraLarge') }} onChange={ui.setFontSize}/><PreferenceSelect label={ui.t('lineHeight')} value={ui.lineHeight} values={lineHeights} names={{ compact: ui.t('compact'), default: ui.t('default'), relaxed: ui.t('relaxed') }} onChange={ui.setLineHeight}/><PreferenceSelect label={ui.t('density')} value={ui.density} values={densities} names={{ compact: ui.t('compact'), comfortable: ui.t('comfortable'), spacious: ui.t('spacious') }} onChange={ui.setDensity}/><label className="ui-checkbox"><input type="checkbox" checked={ui.reducedMotion} onChange={(event) => ui.setReducedMotion(event.target.checked)}/>{ui.t('reducedMotion')}</label></aside>;
 }

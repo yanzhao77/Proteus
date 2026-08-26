@@ -273,3 +273,7 @@ Proteus/
 ## License
 
 Proteus 使用 [Apache License 2.0](LICENSE)。
+
+## E9-only Acceptance Closure Status
+
+The E9 design-system acceptance scope is **PASS / COMPLETE**: 22 full locale catalogs, ten themes, typography and display preferences, RTL/CJK, accessibility, and browser-responsive evidence are delivered. E10 remains delivered. **E11 is PARTIAL / ACCEPTANCE GAP** because its current Project Operations workspace is read-only and no compliant OIDC-facing authority command exists for the requested controlled operations. Accordingly, **the E9–E11 Wave A is not COMPLETE**, and E12–E16 remain not entered.

@@ -28,3 +28,7 @@ E9 将 Factory Home、Entry Draft、Draft detail、Understanding、Clarification
 | oxlint | `0 warnings / 0 errors` |
 
 > E9 不创建 migration，且不进入 E10 之外的任何 authority 变化。
+
+## E9-only Acceptance Closure Addendum
+
+The original Wave A delivery is supplemented by the E9-only closure. E9 is now **PASS / ACCEPTANCE COMPLETE** for the 22-locale catalog, ten-theme preference system, fonts, RTL/CJK, accessibility, responsive production-browser matrix, and regression gates recorded in `E9_ONLY_ACCEPTANCE_CLOSURE_DELIVERY_REPORT.md`. This addendum does not extend E11 authority; E11 remains **PARTIAL / ACCEPTANCE GAP**.

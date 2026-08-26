@@ -28,3 +28,7 @@
 | 新增 migration | 无；head 仍为 `0032` |
 
 > E11 不改变 E7 read model、E4 durable identity、P0–P6 authority state machine、schema、role 或 grant；不进入 E12–E16。
+
+## Acceptance Gap Status
+
+The E11 operations display remains delivered as a read-only source-derived workspace, but its acceptance status is **PARTIAL / ACCEPTANCE GAP**. It cannot be marked complete until an independently authorized authority/product-transport phase provides a compliant existing semantic command for the required controlled operation. The E9-only closure intentionally does not create, proxy, impersonate, or bypass such a command.
