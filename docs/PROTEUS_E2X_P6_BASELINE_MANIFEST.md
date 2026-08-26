@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `c5dd19e6c6f7c86cae6ed5ec0910e631d9ec72c5` |
 | Branch | `e8-production-entry-trial` |
-| Generated UTC | `2026-08-21T11:01:24Z` |
+| Generated UTC | `2026-08-26T05:06:14Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -75,20 +75,20 @@
 | `68fac9e49f1efae93cbcb642ed05fd127f6caf05ecc0686e4aae3be93bbdb1e0` | `frontend/postcss.config.cjs` | untracked |
 | `61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66` | `frontend/public/favicon.svg` | untracked |
 | `b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a` | `frontend/public/icons.svg` | untracked |
-| `23f68375ead5fce15134c5c46542e6e728aac7a62c1646fa8bf45fc83d0d4208` | `frontend/src/App.test.tsx` | untracked |
-| `bb3096f1baf8f89508ea457e8f62e2f8549aec26292eb4d49c4cf912ed44ef28` | `frontend/src/App.tsx` | untracked |
+| `e1c00d63482d211b464b7c0125ebf3c69131cabf99480ef6d9a20c5c3a2a7e28` | `frontend/src/App.test.tsx` | untracked |
+| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | untracked |
 | `88373435dec7e3b4ff01056626185b23e773bd78994617a26045776fefbdca03` | `frontend/src/api/adapters.test.ts` | untracked |
 | `530afeca26fc55e4d2041bbf4b68de3fb22a008bc1468fd80a6bd8ede070ebf3` | `frontend/src/api/adapters.ts` | untracked |
 | `5b232fc3e607d3db6563fe89eb57f2a8337a49395328bde13035564b03cbd2ac` | `frontend/src/api/fixtureAdapters.ts` | untracked |
 | `9788864a7ae3ea8f1f15463514ba2545018fb67b687cf3d4a2afcab1a3441564` | `frontend/src/api/index.ts` | untracked |
 | `4e64d28ef8c6428c6e239f0f8132d216cd1ee723ef01928244eedced95ff56d4` | `frontend/src/api/productApiAdapters.test.ts` | untracked |
 | `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | untracked |
-| `d452f25b81d814195121e22b5838604b3c566ba2ffc93b6e7c02f8b230976d0b` | `frontend/src/contract.test.ts` | untracked |
-| `2b91f6f3bc360041371947a78c768de59ea45df066a7e6d0ef58b5250e4c7a68` | `frontend/src/main.tsx` | untracked |
+| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | untracked |
+| `2d88d94d785db89ef6f96b75efe8ebc22cd8038d8665a0efac7df1c36c868ef9` | `frontend/src/main.tsx` | untracked |
 | `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | untracked |
-| `77e3b9c5fac20e39900243684ede2f9758208ed35a2a6710ba5f025688fbc5ba` | `frontend/src/styles/index.css` | untracked |
+| `15c3409c8e8be7d358ddabecbeb77e1e5e367ccda4a26088864b8a23be8bca4b` | `frontend/src/styles/index.css` | untracked |
 | `91a3c8962a0edcb956206a501d943fe99e1c78c6d4d8b5c9a948a3362c75978c` | `frontend/src/test/setup.ts` | untracked |
-| `0903c5a57f5cea7ba1e052e557bf4ffe4eaaeddf5b6712d81e0e213f5ddddb2a` | `frontend/src/theme.test.ts` | untracked |
+| `264abfb71739889e10d8f702a136f23710dc1e552cfd23f7b660f90b3da19c60` | `frontend/src/theme.test.ts` | untracked |
 | `5d9f2ae5892685f9325aaee283404f6b26cd0b9927211596dc6cc2f1e209a8df` | `frontend/tailwind.config.ts` | untracked |
 | `2804b10bdf9413b5f36f9ec640fdbe2a538f802ad60014dd94fd6f8b5f63f07e` | `frontend/tsconfig.app.json` | untracked |
 | `770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808` | `frontend/tsconfig.json` | untracked |
@@ -246,7 +246,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `42d45a1bfa95cec7b8404dcc1be89742116adb6c56749f582ef2c1b61a12dae2` | `docs/E3_PROPOSAL_MASTER_PLAN_DESIGN.md` | `THIS_E3_DELIVERY` |
 | `08d82df6c06802c0403236638f007edee6f0e3f5bb76ddf50d36301b60ffde05` | `docs/E3_PROPOSAL_MASTER_PLAN_IMPLEMENTATION.md` | `THIS_E3_DELIVERY` |
 | `c7cd5eb58d8d2e1670d1a460782568f350498d74c87ab93fe6297cf9840670f3` | `docs/E3_PROPOSAL_MASTER_PLAN_DELIVERY_REPORT.md` | `THIS_E3_DELIVERY` |
-| `bb3096f1baf8f89508ea457e8f62e2f8549aec26292eb4d49c4cf912ed44ef28` | `frontend/src/App.tsx` | `THIS_E3_DELIVERY` |
+| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E3_DELIVERY` |
 | `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | `THIS_E3_DELIVERY` |
 | `530afeca26fc55e4d2041bbf4b68de3fb22a008bc1468fd80a6bd8ede070ebf3` | `frontend/src/api/adapters.ts` | `THIS_E3_DELIVERY` |
 | `5b232fc3e607d3db6563fe89eb57f2a8337a49395328bde13035564b03cbd2ac` | `frontend/src/api/fixtureAdapters.ts` | `THIS_E3_DELIVERY` |
@@ -273,7 +273,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `e4b956f250162b03c0a99e9ef7b74e25097d2f994567bd31d97d7f03064910ff` | `docs/E4_APPROVAL_BRIDGE_DESIGN.md` | `THIS_E4_DELIVERY` |
 | `08b500e8d1b29a2ae9b29114a44fcd14f2e6730a0980fd515663ae6a4c7cffbc` | `docs/E4_APPROVAL_BRIDGE_IMPLEMENTATION.md` | `THIS_E4_DELIVERY` |
 | `a15a0fffb7c3a35bc249ca9401c75ce3a6a9450b87ccce1f8edeee7f83281bf1` | `docs/E4_APPROVAL_BRIDGE_RECON_REPORT.md` | `THIS_E4_DELIVERY` |
-| `bb3096f1baf8f89508ea457e8f62e2f8549aec26292eb4d49c4cf912ed44ef28` | `frontend/src/App.tsx` | `THIS_E4_DELIVERY` |
+| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E4_DELIVERY` |
 | `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | `THIS_E4_DELIVERY` |
 | `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | `THIS_E4_DELIVERY` |
 | `473c71eadb1d1a2ad7a062d8e1d2b5add646a75f3e3cb5a164a62bc93992668f` | `hermes-runtime/migrations/0030_e4_approval_bridge.sql` | `THIS_E4_DELIVERY` |
@@ -324,21 +324,21 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | --- | --- |
 | `9751256b07d7b8d4e3baefcaa933f991655bdc8d7ed3dbbdd9b5938efdd5e033` | `docs/E6_FACTORY_HOME_RESUME_DELIVERY_REPORT.md` | `THIS_E6_DELIVERY` |
 | `4394ca12de5bfcc156953c1fbf86f5a2911f772a0e4a6a86cf48cea90e29033b` | `docs/E6_FACTORY_HOME_RESUME_DESIGN.md` | `THIS_E6_DELIVERY` |
-| `bb3096f1baf8f89508ea457e8f62e2f8549aec26292eb4d49c4cf912ed44ef28` | `frontend/src/App.tsx` | `THIS_E6_DELIVERY` |
+| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E6_DELIVERY` |
 | `9788864a7ae3ea8f1f15463514ba2545018fb67b687cf3d4a2afcab1a3441564` | `frontend/src/api/index.ts` | `THIS_E6_DELIVERY` |
-| `d452f25b81d814195121e22b5838604b3c566ba2ffc93b6e7c02f8b230976d0b` | `frontend/src/contract.test.ts` | `THIS_E6_DELIVERY` |
+| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | `THIS_E6_DELIVERY` |
 
 ### E7 Delivery SHA-256 Inventory
 | SHA-256 | Path | Inventory treatment |
 | --- | --- |
 | `7c044c37b784ee857dd1c4cca9b29eab6635d156d6e33d66f1209ca268ae795d` | `docs/E7_LIVE_PRODUCTION_PROJECTION_DELIVERY_REPORT.md` | `THIS_E7_DELIVERY` |
 | `aea6b11dbdde8b90748d2563e8accdd38a7ae9444b184e86b4c1c832f4e18054` | `docs/E7_LIVE_PRODUCTION_PROJECTION_DESIGN.md` | `THIS_E7_DELIVERY` |
-| `bb3096f1baf8f89508ea457e8f62e2f8549aec26292eb4d49c4cf912ed44ef28` | `frontend/src/App.tsx` | `THIS_E7_DELIVERY` |
+| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E7_DELIVERY` |
 | `530afeca26fc55e4d2041bbf4b68de3fb22a008bc1468fd80a6bd8ede070ebf3` | `frontend/src/api/adapters.ts` | `THIS_E7_DELIVERY` |
 | `5b232fc3e607d3db6563fe89eb57f2a8337a49395328bde13035564b03cbd2ac` | `frontend/src/api/fixtureAdapters.ts` | `THIS_E7_DELIVERY` |
 | `4e64d28ef8c6428c6e239f0f8132d216cd1ee723ef01928244eedced95ff56d4` | `frontend/src/api/productApiAdapters.test.ts` | `THIS_E7_DELIVERY` |
 | `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | `THIS_E7_DELIVERY` |
-| `d452f25b81d814195121e22b5838604b3c566ba2ffc93b6e7c02f8b230976d0b` | `frontend/src/contract.test.ts` | `THIS_E7_DELIVERY` |
+| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | `THIS_E7_DELIVERY` |
 | `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | `THIS_E7_DELIVERY` |
 | `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E7_DELIVERY` |
 | `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E7_DELIVERY` |
@@ -390,27 +390,58 @@ E8 preserves migrations `0001–0032`, E4 durable identity, the P6 authority sta
 > `THIS_E9_E11_WAVE_A` records the Global Product Workspace delivery. The manifest remains non-self-referential and excludes disposable databases, DSNs, test virtual environments, browser preview logs and user-owned REVIEW_REQUIRED material.
 | SHA-256 | Path | Inventory treatment |
 | --- | --- | --- |
-| `0e0c52668ac219987f15e3d1c95513f727291e47934a555f86c906acbaaaf08e` | `README.md` | THIS_E9_E11_WAVE_A |
+| `0c6b915f393282f15e44d9a27a0ba451d77617ee050f15b5593986495f709418` | `README.md` | THIS_E9_E11_WAVE_A |
 | `2e48a3e9ad6b1bac8bfcaa21080d3807bd95b949a646324603ef1b3d899868c5` | `docs/E10_IDENTITY_SESSION_WORKSPACE_SHELL_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
-| `b74efdc853ee3df01cbf89f67b1b5a5534f119ecf98fd1615eb3f70d512e9fa4` | `docs/E11_PROJECT_OPERATIONS_WORKSPACE_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
+| `c13e38a326b22043c0ba66609246a914dfb48a7681bb314125020de9b3a5bb71` | `docs/E11_PROJECT_OPERATIONS_WORKSPACE_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `47929d5502bb08ec7783027c29805438bbe89bf4b12bf96c335f4468bd31d07b` | `docs/E8_PRODUCTION_ENTRY_TRIAL_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `6daa0cf29f63dbaddfea11a00f1d7e23abbc08cc493170d3fbb131f8d6db43ea` | `docs/E9_E11_WAVE_A_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
+| `4e7a7321e22a103fc7c62b36ebb97f70778475ba60924bcd4708fbea81b80e66` | `docs/E9_E11_WAVE_A_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `a63b24bc3ec3d0f1cd3b07e5b0e59915c7c3bf5270802124822b323a1dd8f529` | `docs/E9_E11_WAVE_A_IMPLEMENTATION_CONTRACT.md` | THIS_E9_E11_WAVE_A |
-| `5ee30e15c1381dfcaffe7c659230ded5b5f8b2de00e43ebfbfbdb6d2d8d08bb8` | `docs/E9_GLOBAL_DESIGN_SYSTEM_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
-| `23f68375ead5fce15134c5c46542e6e728aac7a62c1646fa8bf45fc83d0d4208` | `frontend/src/App.test.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `bb3096f1baf8f89508ea457e8f62e2f8549aec26292eb4d49c4cf912ed44ef28` | `frontend/src/App.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `c25a8745c8cc7e4cf347d62b281cc46412f29905a6a5c124e8fa5159f205fb24` | `docs/E9_GLOBAL_DESIGN_SYSTEM_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
+| `e1c00d63482d211b464b7c0125ebf3c69131cabf99480ef6d9a20c5c3a2a7e28` | `frontend/src/App.test.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `af6104eeb8a33c671edd2cb879d0715a1884189c27d82c636dc3f1201a3dcd61` | `frontend/src/api/e11OperationsAdapters.test.ts` | THIS_E9_E11_WAVE_A |
 | `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `056067f4bf872de26abd4c046440fbad1cd83f7e49d4fcc7bf08ce47625e249f` | `frontend/src/api/session.test.ts` | THIS_E9_E11_WAVE_A |
 | `e91dfaa5076ebc6f12b9d93cd26584a28167eb9db600e9f135df0d75da990454` | `frontend/src/api/session.ts` | THIS_E9_E11_WAVE_A |
-| `d452f25b81d814195121e22b5838604b3c566ba2ffc93b6e7c02f8b230976d0b` | `frontend/src/contract.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `ed9799ee57e233f0e2e71e82d3aaebe5b68006eecc5815ab4ce1056b1798c17b` | `frontend/src/design-system.tsx` | THIS_E9_E11_WAVE_A |
+| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `ab4020e7966ecb48b734a8a676225e9545a6fab3319082aa2c16d2cd8f57e5e7` | `frontend/src/design-system.tsx` | THIS_E9_E11_WAVE_A |
 | `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `77e3b9c5fac20e39900243684ede2f9758208ed35a2a6710ba5f025688fbc5ba` | `frontend/src/styles/index.css` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `0903c5a57f5cea7ba1e052e557bf4ffe4eaaeddf5b6712d81e0e213f5ddddb2a` | `frontend/src/theme.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `6da3cb940fc13bf49f8621c622845c13a4170e4b5c8d3f6131207a251043e04f` | `frontend/src/ui-context.ts` | THIS_E9_E11_WAVE_A |
+| `15c3409c8e8be7d358ddabecbeb77e1e5e367ccda4a26088864b8a23be8bca4b` | `frontend/src/styles/index.css` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `264abfb71739889e10d8f702a136f23710dc1e552cfd23f7b660f90b3da19c60` | `frontend/src/theme.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `55642f2f8ec6c59fa17765ece7150408eb16e33d9eb25dcdcf26f9a0e90cf9ff` | `frontend/src/ui-context.ts` | THIS_E9_E11_WAVE_A |
 | `038e4f4a4fb870852ea92f032b274d5651cfadaca5ecee0b8f6d954dcdfa0294` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `bd309d331b735a32418a6eb0b74a0bc31e20acfcae30f488eaff8d4414f6c9ef` | `hermes-runtime/src/hermes_runtime/infrastructure/oidc_session.py` | THIS_E9_E11_WAVE_A |
 | `831b609b6e6ea39335b1cd8c28e03f1527d5b45b751bd3e0cc1cdc024998de10` | `hermes-runtime/tests/test_e10_oidc_session.py` | THIS_E9_E11_WAVE_A |
 
 Wave A introduces no migration: head remains `0032_p6_execution_prepare_structured_secret_guard.sql`. It preserves E1–E8 and P0–P6 authority. Real PostgreSQL evidence: no-DB `707 run / 438 skipped / 0 failures`; Full Runtime `707 run / 12 skipped / 0 failures` in `471.213s`; local RS256 session `2/2 PASS`; focused OIDC/Factory Home/E7 regression `24/24 PASS`; frontend `31/31 PASS`, production build PASS and oxlint `0/0`. E12–E16 are not entered.
+
+## E9-only Acceptance Closure SHA-256 Inventory
+
+> `THIS_E9_ONLY_CLOSURE` records E9 presentation acceptance only. E11 remains `PARTIAL / ACCEPTANCE GAP`; no E11 authority command, migration, role, or grant is included.
+
+| SHA-256 | Path | Classification |
+|---|---|---|
+| `b7e1a804aeb29cb32a7b69e80073e9f45e0a4ec66ef930bd4cffe72f7d47597f` | `docs/E9_E11_GLOBAL_PRODUCT_WORKSPACE_ACCEPTANCE_CLOSURE_DESIGN.md` | THIS_E9_ONLY_CLOSURE |
+| `37acd6e462df1feec3acdf7a03daf60fde6061f95246fd07fda316a869e4c6ec` | `docs/E9_ONLY_ACCEPTANCE_CLOSURE_DESIGN.md` | THIS_E9_ONLY_CLOSURE |
+| `72e4bc003ffea7918edc8f764d39b7a9a1a99d0371f5a12304b7dfc4291d39c4` | `docs/E9_ONLY_ACCEPTANCE_CLOSURE_DELIVERY_REPORT.md` | THIS_E9_ONLY_CLOSURE |
+| `e27a4c3cc81fb9555b2d548a975f3468df64cd5620c233bb162241539fcffd00` | `docs/evidence/e9-only-acceptance/BROWSER_ACCEPTANCE_FINDINGS.md` | THIS_E9_ONLY_CLOSURE |
+| `a647de224c4137bb4988fe3a601081d50a46bd278fe1b075bedff167afc30740` | `docs/evidence/e9-only-acceptance/mobile_320.png` | THIS_E9_ONLY_CLOSURE |
+| `4735416dc96ebcc7643b09075b728863ef68e7f1dcc3a172680f2a4bca1ee2dd` | `docs/evidence/e9-only-acceptance/tablet_768.png` | THIS_E9_ONLY_CLOSURE |
+| `d64528701d6cab40b69395e81753c1f76923ca9d311f8df029799da3efe9ceb9` | `docs/evidence/e9-only-acceptance/desktop_1024.png` | THIS_E9_ONLY_CLOSURE |
+| `66b675156fd194a352754b764a20e6893787b4c68285f52cd8df1d062f752326` | `frontend/src/i18n.ts` | THIS_E9_ONLY_CLOSURE |
+| `228a34a4c1b6e20ca94e32cf95f2a132d48f9d4f174c99ef8c4fd4d8d5f5064f` | `frontend/src/i18n.test.tsx` | THIS_E9_ONLY_CLOSURE |
+
+
+## E9-only Acceptance Closure — Current Status
+
+> This current status supersedes any earlier Wave A wording that characterized E9–E11 collectively as complete.
+
+| Scope | Current status | Authority qualification |
+|---|---|---|
+| E9 Global Design System | PASS / ACCEPTANCE COMPLETE | 22 full locale catalogs; ten themes; font/density/motion preferences; RTL/CJK; accessibility; responsive browser evidence. |
+| E10 Identity Session Workspace Shell | DELIVERED / unchanged in this closure | Regressed only; opaque server-side session transport is unchanged. |
+| E11 Project Operations Workspace | PARTIAL / ACCEPTANCE GAP | Existing E7 projection is read-only. No compliant OIDC-user-callable controlled-operation semantic command exists. |
+| E9–E11 Wave A | NOT COMPLETE | E11 authority acceptance is outstanding. |
+| E12–E16 | NOT ENTERED | Outside this closure. |
+
+E9-only gates: frontend `66/66 PASS`, TypeScript/build PASS, oxlint `0/0`, no-DB `707 run / 438 skipped / 0 failures`, Full Runtime `707 run / 12 skipped / 0 failures` in `401.911s`. No new migration; head remains `0032_p6_execution_prepare_structured_secret_guard.sql`.
