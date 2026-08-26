@@ -3,21 +3,23 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import App from './App';
 
-describe('Factory Home authority safety', () => {
-  it('renders the Production Entry prompt without claiming a production exists', async () => {
+describe('E9 global workspace rendering', () => {
+  it('renders the stable Home workspace and the production creation entry without claiming a project exists', async () => {
     render(<MemoryRouter initialEntries={['/home']}><App /></MemoryRouter>);
-    expect(await screen.findByRole('heading', { name: 'What do you want to build?' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /create draft/i })).toBeDisabled();
+    expect(await screen.findByRole('heading', { name: 'Home' })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /new production/i }).some((link) => link.getAttribute('href') === '/new')).toBe(true);
     expect(screen.queryByText(/production created/i)).not.toBeInTheDocument();
   });
-  it('renders the explicit pending boundary when no authority adapter exists', async () => {
+
+  it('renders an explicit unavailable or failed data state instead of inventing a portfolio', async () => {
     render(<MemoryRouter initialEntries={['/productions']}><App /></MemoryRouter>);
-    expect(await screen.findByText(/portfolio load failed/i)).toBeInTheDocument();
-    expect(screen.getByText(/does not invent production state/i)).toBeInTheDocument();
+    expect(await screen.findByText(/data request failed|not available for your current scope/i)).toBeInTheDocument();
+    expect(screen.queryByText(/0%/)).not.toBeInTheDocument();
   });
-  it('keeps the primary CTA at the required 44px target through its shared class', async () => {
+
+  it('exposes accessible workspace navigation and display settings', async () => {
     render(<MemoryRouter initialEntries={['/home']}><App /></MemoryRouter>);
-    const button = await screen.findByRole('button', { name: /create draft/i });
-    expect(button).toHaveClass('factory-button-primary');
+    expect(await screen.findByRole('navigation', { name: 'Workspace navigation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Display settings' })).toBeInTheDocument();
   });
 });
