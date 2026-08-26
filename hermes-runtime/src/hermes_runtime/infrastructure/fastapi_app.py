@@ -3,7 +3,7 @@ from typing import Any, Mapping, Optional
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -13,7 +13,8 @@ from hermes_runtime.application.readiness import ReadinessCheck, StaticReadiness
 from hermes_runtime.application.human_gate_ui import HumanGateUiRenderer
 from hermes_runtime.application.factory_workspace_ui import FactoryWorkspaceRenderer
 from hermes_runtime.domain.models import Actor, ActorType
-from hermes_runtime.infrastructure.oidc import OidcRejected, OidcTokenVerifier
+from hermes_runtime.infrastructure.oidc import OidcRejected, OidcTokenVerifier, VerifiedIdentity
+from hermes_runtime.infrastructure.oidc_session import InMemoryOidcSessionStore, OpaqueSession
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.domain.entry_understanding import EntryUnderstandingRejected, EntryUnderstandingValidationError
 from hermes_runtime.domain.entry_proposal_master_plan import EntryE3Rejected
@@ -56,6 +57,8 @@ def create_app(
     allowed_cors_origins: Optional[list] = None,
     max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
     oidc_verifier: Optional[OidcTokenVerifier] = None,
+    oidc_session_ttl_seconds: int = 900,
+    session_cookie_secure: bool = True,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -77,11 +80,13 @@ def create_app(
     app.state.accepting_requests = True
     app.state.max_body_bytes = max_body_bytes
     app.state.oidc_verifier = oidc_verifier
+    app.state.oidc_sessions = InMemoryOidcSessionStore(ttl_seconds=oidc_session_ttl_seconds)
+    app.state.session_cookie_secure = session_cookie_secure
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_cors_origins or [],
-        allow_credentials=False,
+        allow_credentials=bool(allowed_cors_origins),
         allow_methods=["GET", "POST"],
         allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
     )
@@ -104,6 +109,32 @@ def create_app(
             return response
         except Exception:
             return _error("INTERNAL_ERROR", 500, request_id, "internal server error")
+
+    @app.post("/session")
+    def create_session(request: Request):
+        identity = _bearer_identity(request)
+        request_id = request.headers.get("X-Request-ID", "req-missing")
+        if identity is None:
+            return _error("SESSION_AUTH_REQUIRED", 401, request_id, "verified bearer identity required")
+        session = request.app.state.oidc_sessions.issue(identity)
+        response = JSONResponse(status_code=201, content={"data": {"authenticated": True, "subject": session.subject, "issuer": session.issuer, "expires_at": session.expires_at}, "error": None})
+        response.set_cookie("hermes_session", session.session_id, httponly=True, secure=request.app.state.session_cookie_secure, samesite="lax", max_age=max(1, session.expires_at - int(__import__("time").time())) )
+        return response
+
+    @app.get("/session")
+    def read_session(request: Request):
+        request_id = request.headers.get("X-Request-ID", "req-missing")
+        session = _opaque_session(request)
+        if session is None:
+            return _error("SESSION_REQUIRED", 401, request_id, "session required")
+        return {"data": {"authenticated": True, "subject": session.subject, "issuer": session.issuer, "expires_at": session.expires_at}, "error": None}
+
+    @app.delete("/session")
+    def delete_session(request: Request):
+        request.app.state.oidc_sessions.revoke(request.cookies.get("hermes_session"))
+        response = Response(status_code=204)
+        response.delete_cookie("hermes_session", httponly=True, secure=request.app.state.session_cookie_secure, samesite="lax")
+        return response
 
     @app.get("/livez")
     def livez():
@@ -336,23 +367,36 @@ def _factory_dispatch(request: Request, path: str, query: Optional[Mapping[str, 
     return _verified_dispatch(request, "GET", path, query or {})
 
 
+def _opaque_session(request: Request) -> Optional[OpaqueSession]:
+    return request.app.state.oidc_sessions.get(request.cookies.get("hermes_session"))
+
+
+def _bearer_identity(request: Request) -> Optional[VerifiedIdentity]:
+    verifier = request.app.state.oidc_verifier
+    authorization = request.headers.get("Authorization", "")
+    if verifier is None or not authorization.startswith("Bearer ") or not authorization[7:].strip():
+        return None
+    try:
+        return verifier.verify(authorization[7:].strip())
+    except OidcRejected:
+        return None
+
+
 def _verified_dispatch(request: Request, method: str, path: str, body: Mapping[str, Any]):
     request_id = request.headers.get("X-Request-ID", "req-missing")
-    verifier = request.app.state.oidc_verifier
-    if verifier is None:
+    if request.app.state.oidc_verifier is None:
         return _error("FACTORY_HOME_IDENTITY_UNAVAILABLE", 503, request_id, "factory home identity unavailable")
-    authorization = request.headers.get("Authorization", "")
-    if not authorization.startswith("Bearer ") or not authorization[7:].strip():
+    session = _opaque_session(request)
+    identity = None if session is not None else _bearer_identity(request)
+    if session is None and identity is None:
         return _error("FACTORY_HOME_AUTH_REQUIRED", 401, request_id, "factory home authentication required")
-    try:
-        identity = verifier.verify(authorization[7:].strip())
-    except OidcRejected:
-        return _error("FACTORY_HOME_AUTH_INVALID", 401, request_id, "factory home authentication rejected")
+    subject = session.subject if session is not None else identity.subject
+    actor = session.actor if session is not None else identity.actor
     header_actor_id = request.headers.get("X-Hermes-Actor-ID")
     header_actor_type = request.headers.get("X-Hermes-Actor-Type")
-    if (header_actor_id and header_actor_id != identity.subject) or (header_actor_type and header_actor_type != "user"):
+    if (header_actor_id and header_actor_id != subject) or (header_actor_type and header_actor_type != "user"):
         return _error("FACTORY_HOME_ACTOR_MISMATCH", 401, request_id, "factory home actor mismatch")
-    return _dispatch(request, method, path, body, actor_override=identity.actor, verified_identity_subject=identity.subject)
+    return _dispatch(request, method, path, body, actor_override=actor, verified_identity_subject=subject)
 
 
 def _dispatch(
