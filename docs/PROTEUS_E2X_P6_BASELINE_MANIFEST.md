@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `c5dd19e6c6f7c86cae6ed5ec0910e631d9ec72c5` |
 | Branch | `e8-production-entry-trial` |
-| Generated UTC | `2026-08-27T04:14:48Z` |
+| Generated UTC | `2026-08-27T07:19:39Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -224,8 +224,8 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E8 Production Entry Trial | **PASS / COMPLETE** — same-project real vertical trial. |
 | E9 Global Design System | **PASS / COMPLETE** — semantic tokens, themes, typography, density and localization. |
 | E10 Identity / Workspace Shell | **PASS / COMPLETE** — OIDC-derived opaque session and authenticated Product API shell. |
-| E11 Project Operations Workspace | **PARTIAL / ACCEPTANCE GAP — implementation delivery candidate verified; PR pending review; not merged** |
-| E9–E11 Wave A | **NOT COMPLETE** — historical Wave A did not include E11 command authority; this candidate is not merged. |
+| E11 Project Operations Workspace | **PASS / COMPLETE** — trusted Control Plane transport and bounded E7 receipt reconciliation are merged to master; CI, real browser E2E, PostgreSQL durable evidence and post-merge master verification passed. |
+| E9–E11 Wave A | **PASS / COMPLETE** — E9 Global Design System, E10 Identity / Workspace Shell and E11 Project Operations Workspace are merged and accepted by the current evidence authority. |
 | E12–E16 | **NOT ENTERED** |
 
 ## 12. Documentation/Metadata-Only Correction Record
