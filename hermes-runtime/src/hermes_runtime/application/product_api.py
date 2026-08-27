@@ -6,6 +6,10 @@ from hermes_runtime.application.entry_understanding_api import UnavailableEntryU
 from hermes_runtime.application.entry_proposal_master_plan_api import UnavailableEntryProposalMasterPlanApi
 from hermes_runtime.application.entry_approval_bridge import UnavailableEntryApprovalBridgeApi
 from hermes_runtime.application.entry_draft_api import EntryDraftApi, UnavailableEntryDraftApi
+from hermes_runtime.application.user_project_command_transport import (
+    UnavailableUserProjectCommandTransport,
+    UserProjectCommandRejected,
+)
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
 from hermes_runtime.domain.product_api import (
@@ -52,6 +56,7 @@ class ProductApiFacade:
         entry_proposal_master_plan_api=None,
         entry_approval_bridge_api=None,
         live_production_read_model=None,
+        user_project_command_transport=None,
     ) -> None:
         self._read_model = read_model
         self._command_gateway = command_gateway
@@ -61,6 +66,7 @@ class ProductApiFacade:
         self._entry_proposal_master_plan_api = entry_proposal_master_plan_api or UnavailableEntryProposalMasterPlanApi()
         self._entry_approval_bridge_api = entry_approval_bridge_api or UnavailableEntryApprovalBridgeApi()
         self._live_production_read_model = live_production_read_model or UnavailableLiveProductionReadModel()
+        self._user_project_command_transport = user_project_command_transport or UnavailableUserProjectCommandTransport()
 
     def handle(self, request: ProductApiRequest) -> ProductApiResponse:
         reject_forbidden_authority_shape(request)
@@ -83,6 +89,30 @@ class ProductApiFacade:
             return self._safe(200, self._live_production_read_model.snapshot(parts[2], actor_scope))
         if method == "GET" and len(parts) == 4 and parts[0] == "factory-home" and parts[1] == "productions" and parts[3] == "live-feed":
             return self._safe(200, self._live_production_read_model.events(parts[2], actor_scope, request.body.get("after", 0), request.body.get("limit", 50)))
+        if method == "POST" and len(parts) == 5 and parts[:2] == ["factory-home", "productions"] and parts[3] == "commands":
+            payload = self._project_command_payload(request)
+            try:
+                response = self._user_project_command_transport.submit(
+                    action=parts[4],
+                    project_id=parts[2],
+                    verified_identity_subject=request.verified_identity_subject,
+                    actor=request.actor,
+                    **payload,
+                )
+            except UserProjectCommandRejected as exc:
+                raise ProductApiRejected(str(exc)) from exc
+            return self._safe(202, response)
+        if method == "GET" and len(parts) == 5 and parts[:2] == ["factory-home", "productions"] and parts[3] == "commands":
+            try:
+                response = self._user_project_command_transport.receipt(
+                    project_id=parts[2],
+                    command_id=parts[4],
+                    verified_identity_subject=request.verified_identity_subject,
+                    actor=request.actor,
+                )
+            except UserProjectCommandRejected as exc:
+                raise ProductApiRejected(str(exc)) from exc
+            return self._safe(200, response)
         if method == "GET" and parts == ["factory-home", "gates"]:
             return self._safe(200, self._factory_home_read_model.gate_attention(actor_scope))
         if method == "GET" and parts == ["factory-home", "drafts"]:
@@ -248,6 +278,33 @@ class ProductApiFacade:
         if not isinstance(key, str) or not isinstance(reason, str) or not isinstance(expected, int) or expected < 0:
             raise ProductApiRejected("E2_UNDERSTANDING_VALIDATION_FAILED")
         return {"idempotency_key": key, "reason": reason, "expected_version": expected}
+    @staticmethod
+    def _project_command_payload(request: ProductApiRequest) -> Mapping[str, Any]:
+        body = dict(request.body)
+        forbidden = {"actor", "requested_by", "project_id", "command_type", "executor"}
+        if forbidden.intersection(body):
+            raise ProductApiRejected("E11_COMMAND_CLIENT_AUTHORITY_FIELD_FORBIDDEN")
+        command_id = body.get("command_id")
+        idempotency_key = body.get("idempotency_key") or request.headers.get("Idempotency-Key")
+        expected_version = body.get("expected_version")
+        reason = body.get("reason")
+        if not isinstance(command_id, str) or not command_id.strip() or not isinstance(idempotency_key, str) or not idempotency_key.strip():
+            raise ProductApiRejected("E11_COMMAND_METADATA_MISSING")
+        if not isinstance(expected_version, int) or expected_version < 0:
+            raise ProductApiRejected("E11_COMMAND_EXPECTED_VERSION_INVALID")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ProductApiRejected("E11_COMMAND_REASON_REQUIRED")
+        authorization_ref = body.get("authorization_ref", "")
+        if not isinstance(authorization_ref, str):
+            raise ProductApiRejected("E11_COMMAND_AUTHORIZATION_REF_INVALID")
+        return {
+            "command_id": command_id.strip(),
+            "expected_version": expected_version,
+            "idempotency_key": idempotency_key.strip(),
+            "reason": reason.strip(),
+            "authorization_ref": authorization_ref.strip(),
+        }
+
     def _safe(self, status_code: int, body: Mapping[str, Any]) -> ProductApiResponse:
         ensure_safe_response(body)
         return ProductApiResponse(status_code=status_code, body=body)

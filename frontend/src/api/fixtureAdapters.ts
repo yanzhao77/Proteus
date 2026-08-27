@@ -37,10 +37,11 @@ class FixtureGateApi implements GateApi {
 }
 class FixtureProductionApi implements ProductionApi {
   getSnapshot(id: string): Promise<AdapterResult<ProductionCardViewModel>> { return data(cards.find((card) => card.productionId === id) ?? cards[0]); }
-  getLiveSnapshot(_id: string): Promise<AdapterResult<import('../models').LiveProductionSnapshotViewModel>> { return noMutation(); }
-  getLiveEvents(_id: string, _after: number, _limit?: number): Promise<AdapterResult<import('../models').LiveProductionEventFeedViewModel>> { return noMutation(); }
-  pause(): Promise<AdapterResult<void>> { return noMutation(); }
-  resume(): Promise<AdapterResult<void>> { return noMutation(); }
-  stop(): Promise<AdapterResult<void>> { return noMutation(); }
+  getLiveSnapshot(_id: string, _signal?: AbortSignal): Promise<AdapterResult<import('../models').LiveProductionSnapshotViewModel>> { return noMutation(); }
+  getLiveEvents(_id: string, _after: number, _limit?: number, _signal?: AbortSignal): Promise<AdapterResult<import('../models').LiveProductionEventFeedViewModel>> { return noMutation(); }
+  getCommandReceipt(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return noMutation(); }
+  pause(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return noMutation(); }
+  resume(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return noMutation(); }
+  stop(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return noMutation(); }
 }
 export const developmentFixtureAdapters = (): FactoryAdapters => ({ mode: 'development_fixture', draft: new FixtureDraftApi(), portfolio: new FixturePortfolioApi(), gates: new FixtureGateApi(), production: new FixtureProductionApi() });

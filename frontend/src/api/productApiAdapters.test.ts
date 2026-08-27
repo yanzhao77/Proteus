@@ -7,8 +7,12 @@ const envelope = (data: unknown) => ({
   ok: true,
   json: async () => ({ data, error: null, request_id: 'req-1' }),
 });
+const failure = (code: string) => ({
+  ok: false,
+  json: async () => ({ data: null, error: { code, message: `message-${code}` }, request_id: 'req-1' }),
+});
 
-describe('FH-1 Product API read adapters', () => {
+describe('Product API read adapters and E11 user command transport', () => {
   it('parses a source-derived Portfolio while preserving null progress', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({
       availability: 'CURRENT',
@@ -54,21 +58,62 @@ describe('FH-1 Product API read adapters', () => {
     expect(result).toMatchObject({ kind: 'not_implemented', message: 'PORTFOLIO_READ_MODEL_NOT_CONFIGURED' });
   });
 
-  it('does not expose any mutation through the FH-1 read adapter', async () => {
+  it('submits only the approved E11 pause/resume payload over the cookie-backed receipt transport', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(envelope({
+      command_id: 'cmd-1', receipt_status: 'APPLIED', result_code: 'PROJECT_PAUSED',
+      target_version: 2, event_ids: ['event-1'], projection_status: 'AWAITING_E7_RECONCILIATION',
+    }));
+    vi.stubGlobal('fetch', fetchMock);
     const result = await productApiAdapters().production.resume('p-1', {
-      actor: 'a', reason: 'r', idempotencyKey: 'k', expectedVersion: 1,
+      reason: 'operator request', idempotencyKey: 'idem-1', expectedVersion: 1,
     });
-    expect(result.kind).toBe('not_implemented');
+    expect(result).toMatchObject({ kind: 'data', value: {
+      commandId: 'cmd-1', action: null, receiptStatus: 'APPLIED', resultCode: 'PROJECT_PAUSED', targetVersion: 2,
+      eventIds: ['event-1'], projectionStatus: 'AWAITING_E7_RECONCILIATION',
+    } });
+    const [path, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(path).toContain('/factory-home/productions/p-1/commands/resume');
+    expect(options.credentials).toBe('include');
+    const payload = JSON.parse(String(options.body));
+    expect(payload).toMatchObject({ expected_version: 1, idempotency_key: 'idem-1', reason: 'operator request' });
+    expect(Object.keys(payload).sort()).toEqual(['command_id', 'expected_version', 'idempotency_key', 'reason']);
+    for (const forbidden of ['actor', 'requested_by', 'scope', 'project_id', 'command_type', 'executor', 'state', 'new_state']) expect(payload).not.toHaveProperty(forbidden);
   });
   it('maps a source-derived Live Production snapshot without inventing progress or authority controls', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({ availability: 'CURRENT', freshness: 'CURRENT', projection_schema_version: 'e7-live-production-projection/1', snapshot_watermark: 9, item: { production_id: 'p-1', project: { project_id: 'p-1', title: 'Real Project', state: 'IMPLEMENTING', version: 3, updated_at: '2026-08-21T00:00:00Z' }, workflow: { nodes: [{ node_id: 'task-1', title: 'Build', state: 'RUNNING', version: 2, source_identity: 'task-1' }], edges: [] }, execution_requests: [], verification: { plans: [], results: [] }, evidence: { valid_count: 0, invalidated_count: 1, missing_count: 1, items: [] }, gates: [], recovery: [], recent_events: [] } })));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({ availability: 'CURRENT', freshness: 'CURRENT', as_of: '2026-08-21T00:00:00Z', projection_schema_version: 'e7-live-production-projection/1', snapshot_watermark: 9, item: { production_id: 'p-1', project: { project_id: 'p-1', title: 'Real Project', state: 'IMPLEMENTING', version: 3, updated_at: '2026-08-21T00:00:00Z' }, workflow: { nodes: [{ node_id: 'task-1', title: 'Build', state: 'RUNNING', version: 2, source_identity: 'task-1' }], edges: [] }, execution_requests: [], verification: { plans: [], results: [] }, evidence: { valid_count: 0, invalidated_count: 1, missing_count: 1, items: [] }, gates: [], recovery: [], recent_events: [] } })));
     const result = await productApiAdapters().production.getLiveSnapshot('p-1');
     expect(result.kind).toBe('data');
     if (result.kind === 'data') {
       expect(result.value.snapshotWatermark).toBe(9);
       expect(result.value.workflow.nodes[0].sourceIdentity).toBe('task-1');
       expect(result.value.evidence.invalidatedCount).toBe(1);
+      expect(result.value.asOf).toBe('2026-08-21T00:00:00Z');
     }
+  });
+  it('reads an existing creator-scoped E11 receipt with cookie credentials and AbortSignal for post-refresh reconciliation', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(envelope({ availability: 'CURRENT', command_id: 'cmd-1', action: null, receipt_status: 'APPLIED', result_code: 'PROJECT_PAUSED', target_version: 2, event_ids: ['event-1'], projection_status: 'AWAITING_E7_RECONCILIATION' }));
+    vi.stubGlobal('fetch', fetchMock);
+    const controller = new AbortController();
+    const result = await productApiAdapters().production.getCommandReceipt('p-1', 'cmd-1', controller.signal);
+    expect(result).toMatchObject({ kind: 'data', value: { commandId: 'cmd-1', action: null, targetVersion: 2 } });
+    const [path, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(path).toContain('/factory-home/productions/p-1/commands/cmd-1');
+    expect(options.credentials).toBe('include');
+    expect(options.signal).toBe(controller.signal);
+    expect(options.method).toBeUndefined();
+  });
+  it('preserves stable E11 HTTP failures and network timeout as read failures rather than commands', async () => {
+    for (const code of ['UNAUTHORIZED', 'FORBIDDEN', 'E11_COMMAND_NOT_AVAILABLE', 'VERSION_CONFLICT', 'E11_COMMAND_REASON_REQUIRED', 'RATE_LIMITED', 'INTERNAL_ERROR']) {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(failure(code)));
+      await expect(productApiAdapters().production.getCommandReceipt('p-1', 'cmd-1')).resolves.toMatchObject({ kind: 'error', message: code });
+      vi.unstubAllGlobals();
+    }
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new DOMException('timeout', 'AbortError')));
+    await expect(productApiAdapters().production.getLiveSnapshot('p-1')).resolves.toMatchObject({ kind: 'error' });
+  });
+  it('returns a stable E11 read error for a malformed snapshot instead of manufacturing projection facts', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({ availability: 'CURRENT', freshness: 'CURRENT', projection_schema_version: 'e7-live-production-projection/1', snapshot_watermark: 2, item: null })));
+    await expect(productApiAdapters().production.getLiveSnapshot('p-1')).resolves.toMatchObject({ kind: 'error', message: 'E11_PROJECTION_SNAPSHOT_MALFORMED' });
   });
   it('preserves a stale cursor response for snapshot rehydration rather than treating it as a live event stream', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({ availability: 'STALE', reason: 'LIVE_PRODUCTION_CURSOR_AHEAD', items: [], snapshot_watermark: 9 })));

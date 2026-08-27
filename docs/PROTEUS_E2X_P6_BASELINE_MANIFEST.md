@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `c5dd19e6c6f7c86cae6ed5ec0910e631d9ec72c5` |
 | Branch | `e8-production-entry-trial` |
-| Generated UTC | `2026-08-26T06:40:15Z` |
+| Generated UTC | `2026-08-27T04:14:48Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -76,19 +76,19 @@
 | `61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66` | `frontend/public/favicon.svg` | untracked |
 | `b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a` | `frontend/public/icons.svg` | untracked |
 | `e1c00d63482d211b464b7c0125ebf3c69131cabf99480ef6d9a20c5c3a2a7e28` | `frontend/src/App.test.tsx` | untracked |
-| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | untracked |
-| `88373435dec7e3b4ff01056626185b23e773bd78994617a26045776fefbdca03` | `frontend/src/api/adapters.test.ts` | untracked |
-| `530afeca26fc55e4d2041bbf4b68de3fb22a008bc1468fd80a6bd8ede070ebf3` | `frontend/src/api/adapters.ts` | untracked |
-| `5b232fc3e607d3db6563fe89eb57f2a8337a49395328bde13035564b03cbd2ac` | `frontend/src/api/fixtureAdapters.ts` | untracked |
+| `19de605aa7e333e059ff2a2009306654056deeb34a5797161bf4271d773ad732` | `frontend/src/App.tsx` | untracked |
+| `e311ebd401191f57d4fa3221d17c4e0e80247281fe93564e8ef0153447903ceb` | `frontend/src/api/adapters.test.ts` | untracked |
+| `335545533eecd987bb3a74a3f6f67dfd26dd55221e76a5f44748f876d61ac0db` | `frontend/src/api/adapters.ts` | untracked |
+| `cc586c197436da64bb60c6c5dc18fec9c8b7312a9f9d92a92bac67635a2c82d4` | `frontend/src/api/fixtureAdapters.ts` | untracked |
 | `9788864a7ae3ea8f1f15463514ba2545018fb67b687cf3d4a2afcab1a3441564` | `frontend/src/api/index.ts` | untracked |
-| `4e64d28ef8c6428c6e239f0f8132d216cd1ee723ef01928244eedced95ff56d4` | `frontend/src/api/productApiAdapters.test.ts` | untracked |
-| `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | untracked |
-| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | untracked |
+| `16b789bd0bfaf46e45b5262453d479441e3316a3ede7d8d66fd1cef94bf78985` | `frontend/src/api/productApiAdapters.test.ts` | untracked |
+| `9a0618c8eabbb6696c560ce0abac51ad2311e7a428d4ccf9000436d53580ef4b` | `frontend/src/api/productApiAdapters.ts` | untracked |
+| `f04c84cfcdf6cfcd7dd9fdd1e52323e165e3e91e57d1d43651a1541b302a2ee5` | `frontend/src/contract.test.ts` | untracked |
 | `2d88d94d785db89ef6f96b75efe8ebc22cd8038d8665a0efac7df1c36c868ef9` | `frontend/src/main.tsx` | untracked |
-| `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | untracked |
+| `1b553843c7518b2e95bb50f3ff1f82b5d080ad68c8ee35c632ae18c68463d967` | `frontend/src/models.ts` | untracked |
 | `15c3409c8e8be7d358ddabecbeb77e1e5e367ccda4a26088864b8a23be8bca4b` | `frontend/src/styles/index.css` | untracked |
 | `91a3c8962a0edcb956206a501d943fe99e1c78c6d4d8b5c9a948a3362c75978c` | `frontend/src/test/setup.ts` | untracked |
-| `264abfb71739889e10d8f702a136f23710dc1e552cfd23f7b660f90b3da19c60` | `frontend/src/theme.test.ts` | untracked |
+| `4db0501ff5957d9a7933a901d9aa9ba49bc4c424e29ed53c9eab719499ffb9a6` | `frontend/src/theme.test.ts` | untracked |
 | `5d9f2ae5892685f9325aaee283404f6b26cd0b9927211596dc6cc2f1e209a8df` | `frontend/tailwind.config.ts` | untracked |
 | `2804b10bdf9413b5f36f9ec640fdbe2a538f802ad60014dd94fd6f8b5f63f07e` | `frontend/tsconfig.app.json` | untracked |
 | `770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808` | `frontend/tsconfig.json` | untracked |
@@ -99,17 +99,17 @@
 | `c71a112e3a5ef4ad0fa4a4af4f846bff7680c2c742fb3240639de5661bafaaa3` | `hermes-runtime/migrations/0027_e2x_producer_provenance.sql` | untracked |
 | `f44cc6f6d20fd7afea583ed967057d9fcda38d2419376b9b86599d1295bea678` | `hermes-runtime/migrations/0028_p6_recovery_runtime_least_privilege.sql` | untracked |
 | `7cf67da42378ed4b252529c1515beb5e3b0c25567cb2df23413751d10bad0d9c` | `hermes-runtime/scripts/e2x_live_provider_smoke.py` | untracked |
-| `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | modified tracked |
+| `d90f9b00804681028e58df065bf72d8f4528ac5d6e4b95aff4016f2fd5c9005f` | `hermes-runtime/src/hermes_runtime/api_main.py` | modified tracked |
 | `990163cbdca2608474f1565c10ad9a7d457fc105a1080174c4b407a23a9a5c13` | `hermes-runtime/src/hermes_runtime/application/entry_draft_api.py` | untracked |
 | `adb8e5b2fdac14f1e56bb59c6c3ba3e2a84e60a7be08d209c2ed75886c6ea39b` | `hermes-runtime/src/hermes_runtime/application/entry_understanding_api.py` | untracked |
 | `df692928211b3c02d2076de60aee1a8843a1556219ef166be58b50c0eab53446` | `hermes-runtime/src/hermes_runtime/application/factory_home_read_model.py` | untracked |
 | `75f86464264e680c7ee668cf81fa4b784b163e624f97d44971d979c2ae3eb57a` | `hermes-runtime/src/hermes_runtime/application/factory_workspace_ui.py` | untracked |
-| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | modified tracked |
+| `5df38482930086653969486955d2add30ad27ecf2a71367841bd0da15a36c83d` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | modified tracked |
 | `83d28d70225a94295ea0dc0374e5f765ea04053d95a0ec68c28e69d8f5a59511` | `hermes-runtime/src/hermes_runtime/domain/entry_draft.py` | untracked |
 | `0f99b79473e2a6a9ab848ec497ed0e1e6682789bab86ce1e35f5f5505a11f760` | `hermes-runtime/src/hermes_runtime/domain/entry_understanding.py` | untracked |
 | `5ec2765253592709f2433110a3d70966030a1f187bc97cb926a635dfbb447a88` | `hermes-runtime/src/hermes_runtime/domain/product_api.py` | modified tracked |
 | `bcad28c39ed1879dbc6cc6e9b026a33359f03a6895fedf26aee63f70a916ff16` | `hermes-runtime/src/hermes_runtime/domain/understanding_producer.py` | untracked |
-| `038e4f4a4fb870852ea92f032b274d5651cfadaca5ecee0b8f6d954dcdfa0294` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | modified tracked |
+| `7997dfb4f4d3c9e31574dbaac6f2095c9447cdc73677aced8dc9f638754fa0b0` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | modified tracked |
 | `0050a8c928fc20fb09ec21f7017e43fbf2d6908e5dafc14b5a454726394f18be` | `hermes-runtime/src/hermes_runtime/infrastructure/openai_compatible_understanding_provider.py` | untracked |
 | `f46c65937ea921a2a66a1f1768cdf98f48448966f529e0b0468b9c28e29d79f1` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_draft.py` | untracked |
 | `043648bc92ce94ec29c6bd5224d4ee9a508e5e3565d75132b551d9f29a23448d` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_understanding.py` | untracked |
@@ -224,7 +224,9 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E8 Production Entry Trial | **PASS / COMPLETE** — same-project real vertical trial. |
 | E9 Global Design System | **PASS / COMPLETE** — semantic tokens, themes, typography, density and localization. |
 | E10 Identity / Workspace Shell | **PASS / COMPLETE** — OIDC-derived opaque session and authenticated Product API shell. |
-| E11 Project Operations Workspace | **DELIVERED — source-derived read-only operations projection** | **Historical Wave A delivery snapshot only; not the current acceptance authority. Controlled user command transport was not part of this accepted scope.** |
+| E11 Project Operations Workspace | **PARTIAL / ACCEPTANCE GAP — implementation delivery candidate verified; PR pending review; not merged** |
+| E9–E11 Wave A | **NOT COMPLETE** — historical Wave A did not include E11 command authority; this candidate is not merged. |
+| E12–E16 | **NOT ENTERED** |
 
 ## 12. Documentation/Metadata-Only Correction Record
 
@@ -246,19 +248,19 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `42d45a1bfa95cec7b8404dcc1be89742116adb6c56749f582ef2c1b61a12dae2` | `docs/E3_PROPOSAL_MASTER_PLAN_DESIGN.md` | `THIS_E3_DELIVERY` |
 | `08d82df6c06802c0403236638f007edee6f0e3f5bb76ddf50d36301b60ffde05` | `docs/E3_PROPOSAL_MASTER_PLAN_IMPLEMENTATION.md` | `THIS_E3_DELIVERY` |
 | `c7cd5eb58d8d2e1670d1a460782568f350498d74c87ab93fe6297cf9840670f3` | `docs/E3_PROPOSAL_MASTER_PLAN_DELIVERY_REPORT.md` | `THIS_E3_DELIVERY` |
-| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E3_DELIVERY` |
-| `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | `THIS_E3_DELIVERY` |
-| `530afeca26fc55e4d2041bbf4b68de3fb22a008bc1468fd80a6bd8ede070ebf3` | `frontend/src/api/adapters.ts` | `THIS_E3_DELIVERY` |
-| `5b232fc3e607d3db6563fe89eb57f2a8337a49395328bde13035564b03cbd2ac` | `frontend/src/api/fixtureAdapters.ts` | `THIS_E3_DELIVERY` |
-| `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | `THIS_E3_DELIVERY` |
-| `6ae0cf8b9f7a1855470760478c452ccebde7a51742a241d610e8852f3f8e6fd1` | `frontend/src/api/e3ProductApiAdapters.test.ts` | `THIS_E3_DELIVERY` |
+| `19de605aa7e333e059ff2a2009306654056deeb34a5797161bf4271d773ad732` | `frontend/src/App.tsx` | `THIS_E3_DELIVERY` |
+| `1b553843c7518b2e95bb50f3ff1f82b5d080ad68c8ee35c632ae18c68463d967` | `frontend/src/models.ts` | `THIS_E3_DELIVERY` |
+| `335545533eecd987bb3a74a3f6f67dfd26dd55221e76a5f44748f876d61ac0db` | `frontend/src/api/adapters.ts` | `THIS_E3_DELIVERY` |
+| `cc586c197436da64bb60c6c5dc18fec9c8b7312a9f9d92a92bac67635a2c82d4` | `frontend/src/api/fixtureAdapters.ts` | `THIS_E3_DELIVERY` |
+| `9a0618c8eabbb6696c560ce0abac51ad2311e7a428d4ccf9000436d53580ef4b` | `frontend/src/api/productApiAdapters.ts` | `THIS_E3_DELIVERY` |
+| `f0dea83f590c1312556622c91e8e7b3736667be7c98387d92d58b05e19fc8764` | `frontend/src/api/e3ProductApiAdapters.test.ts` | `THIS_E3_DELIVERY` |
 | `fa5896272f2a862d9756d6c2daa48a396c0954257c414b2461b7727d033da950` | `hermes-runtime/migrations/0029_e3_proposal_master_plan.sql` | `THIS_E3_DELIVERY` |
 | `545695a334457741ec91421f9a7370eb59c5acf6fb32f227f4057a7a87d19c4e` | `hermes-runtime/src/hermes_runtime/domain/entry_proposal_master_plan.py` | `THIS_E3_DELIVERY` |
 | `83590b3c54743b7491402c23354ae1f874ff02ba7119271fc315fe9c3c1a4ba8` | `hermes-runtime/src/hermes_runtime/application/entry_proposal_master_plan_api.py` | `THIS_E3_DELIVERY` |
 | `cf362dbd3116736e2810c0c50833769ca239934439bc1fc604561d99222f11af` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_proposal_master_plan.py` | `THIS_E3_DELIVERY` |
-| `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `SUPERSEDED_BY_E4_COMPOSITION` |
-| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E3_DELIVERY` |
-| `038e4f4a4fb870852ea92f032b274d5651cfadaca5ecee0b8f6d954dcdfa0294` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E3_DELIVERY` |
+| `d90f9b00804681028e58df065bf72d8f4528ac5d6e4b95aff4016f2fd5c9005f` | `hermes-runtime/src/hermes_runtime/api_main.py` | `SUPERSEDED_BY_E4_COMPOSITION` |
+| `5df38482930086653969486955d2add30ad27ecf2a71367841bd0da15a36c83d` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E3_DELIVERY` |
+| `7997dfb4f4d3c9e31574dbaac6f2095c9447cdc73677aced8dc9f638754fa0b0` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E3_DELIVERY` |
 | `976ff8808ef181aba0fabc2887b4591bdd6e1a6092db76777f8f382805c51982` | `hermes-runtime/tests/test_e3_proposal_master_plan_domain.py` | `THIS_E3_DELIVERY` |
 | `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E3_DELIVERY` |
 | `22fd45ae9e887d9351e1b42a3207e840d7f29e17da6c1c280a2a0ccedb307407` | `hermes-runtime/tests/test_e3_proposal_master_plan_product_api.py` | `THIS_E3_DELIVERY` |
@@ -273,19 +275,19 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | `e4b956f250162b03c0a99e9ef7b74e25097d2f994567bd31d97d7f03064910ff` | `docs/E4_APPROVAL_BRIDGE_DESIGN.md` | `THIS_E4_DELIVERY` |
 | `08b500e8d1b29a2ae9b29114a44fcd14f2e6730a0980fd515663ae6a4c7cffbc` | `docs/E4_APPROVAL_BRIDGE_IMPLEMENTATION.md` | `THIS_E4_DELIVERY` |
 | `a15a0fffb7c3a35bc249ca9401c75ce3a6a9450b87ccce1f8edeee7f83281bf1` | `docs/E4_APPROVAL_BRIDGE_RECON_REPORT.md` | `THIS_E4_DELIVERY` |
-| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E4_DELIVERY` |
-| `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | `THIS_E4_DELIVERY` |
-| `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | `THIS_E4_DELIVERY` |
+| `19de605aa7e333e059ff2a2009306654056deeb34a5797161bf4271d773ad732` | `frontend/src/App.tsx` | `THIS_E4_DELIVERY` |
+| `9a0618c8eabbb6696c560ce0abac51ad2311e7a428d4ccf9000436d53580ef4b` | `frontend/src/api/productApiAdapters.ts` | `THIS_E4_DELIVERY` |
+| `1b553843c7518b2e95bb50f3ff1f82b5d080ad68c8ee35c632ae18c68463d967` | `frontend/src/models.ts` | `THIS_E4_DELIVERY` |
 | `473c71eadb1d1a2ad7a062d8e1d2b5add646a75f3e3cb5a164a62bc93992668f` | `hermes-runtime/migrations/0030_e4_approval_bridge.sql` | `THIS_E4_DELIVERY` |
-| `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E4_DELIVERY` |
+| `d90f9b00804681028e58df065bf72d8f4528ac5d6e4b95aff4016f2fd5c9005f` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E4_DELIVERY` |
 | `ebdb1d2904b2d93a90ffbd86c521f490bc5db39d9db0e5b97774d52d3c465aab` | `hermes-runtime/src/hermes_runtime/application/durable_approval_bridge_orchestrator.py` | `THIS_E4_DELIVERY` |
 | `2b47387f85e797c4d05fe8b53be683908159003c08e9c8bfb5cf46411e1abeb2` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
 | `91e68c9dba4e61f53a4294a94e1a3319245b00414454c4eede29ee566b856256` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `THIS_E4_DELIVERY` |
-| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E4_DELIVERY` |
+| `5df38482930086653969486955d2add30ad27ecf2a71367841bd0da15a36c83d` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E4_DELIVERY` |
 | `388448255b6d26f5590ad134ee2af6249847d24ed7afd7f57db20809ab285b86` | `hermes-runtime/src/hermes_runtime/domain/entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
-| `038e4f4a4fb870852ea92f032b274d5651cfadaca5ecee0b8f6d954dcdfa0294` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E4_DELIVERY` |
+| `7997dfb4f4d3c9e31574dbaac6f2095c9447cdc73677aced8dc9f638754fa0b0` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E4_DELIVERY` |
 | `ee31ea37f5c8a341da9af56ee31967ef7f00a2e181cb4a210ceab340a664d341` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `THIS_E4_DELIVERY` |
-| `5a65822d7141af709742d362225d3ef1ac89c1adfdc1defc7b6f8a925826c70c` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_project.py` | `THIS_E4_DELIVERY` |
+| `0d504b2c92d9d3cb40b6cec0e72d66cc3d06a31ac0b1d9083b333e05eeb3cb1c` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_project.py` | `THIS_E4_DELIVERY` |
 | `01c81430ddeaafe7f85bc80be7a74e0cb1a87859d04562bbc07e0e53e44a4f48` | `hermes-runtime/tests/test_e3_proposal_master_plan_fastapi.py` | `THIS_E4_DELIVERY` |
 | `eabd49e39995faf61cfa0614cf1e866ae33e4fa7f0c520d24a333a32da947fdf` | `hermes-runtime/tests/test_e4_approval_bridge_domain.py` | `THIS_E4_DELIVERY` |
 | `3e10f003b5d2e27b7f82026e46a6e7a1a500a512e04486e074035362571e33d0` | `hermes-runtime/tests/test_e4_approval_bridge_fastapi.py` | `THIS_E4_DELIVERY` |
@@ -314,7 +316,7 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | --- | --- |
 | `e9b322215e60984212f918375ab58c13de010cd29249734b4ba07a31ea2acb24` | `docs/E5_PRODUCT_API_READ_MODEL_DELIVERY_REPORT.md` | `THIS_E5_DELIVERY` |
 | `38dd53b93a9dd1e9adbbb72a8a4ff14947d293442a882b71be7c2dbb1a545297` | `docs/E5_PRODUCT_API_READ_MODEL_DESIGN.md` | `THIS_E5_DELIVERY` |
-| `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E5_DELIVERY` |
+| `d90f9b00804681028e58df065bf72d8f4528ac5d6e4b95aff4016f2fd5c9005f` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E5_DELIVERY` |
 | `440bef63b2d74cff73b5f82e76b574b1effd152bd05dd8e5da96602cd14478eb` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_factory_home_read_model.py` | `THIS_E5_DELIVERY` |
 | `568739c3a7a27d830c45ac2f6695eecc66501c7b3ff960719c435c42c046070d` | `hermes-runtime/tests/test_e5_product_read_model_postgres.py` | `THIS_E5_DELIVERY` |
 | `855df2838b325d83297a5b94af2fa8ad4eb8f8e6abb69e4b40834f0714b62490` | `hermes-runtime/tests/test_factory_home_read_model.py` | `THIS_E5_DELIVERY` |
@@ -324,25 +326,25 @@ E4 is limited to explicit approval, deterministic lowering, receipt-first durabl
 | --- | --- |
 | `9751256b07d7b8d4e3baefcaa933f991655bdc8d7ed3dbbdd9b5938efdd5e033` | `docs/E6_FACTORY_HOME_RESUME_DELIVERY_REPORT.md` | `THIS_E6_DELIVERY` |
 | `4394ca12de5bfcc156953c1fbf86f5a2911f772a0e4a6a86cf48cea90e29033b` | `docs/E6_FACTORY_HOME_RESUME_DESIGN.md` | `THIS_E6_DELIVERY` |
-| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E6_DELIVERY` |
+| `19de605aa7e333e059ff2a2009306654056deeb34a5797161bf4271d773ad732` | `frontend/src/App.tsx` | `THIS_E6_DELIVERY` |
 | `9788864a7ae3ea8f1f15463514ba2545018fb67b687cf3d4a2afcab1a3441564` | `frontend/src/api/index.ts` | `THIS_E6_DELIVERY` |
-| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | `THIS_E6_DELIVERY` |
+| `f04c84cfcdf6cfcd7dd9fdd1e52323e165e3e91e57d1d43651a1541b302a2ee5` | `frontend/src/contract.test.ts` | `THIS_E6_DELIVERY` |
 
 ### E7 Delivery SHA-256 Inventory
 | SHA-256 | Path | Inventory treatment |
 | --- | --- |
 | `7c044c37b784ee857dd1c4cca9b29eab6635d156d6e33d66f1209ca268ae795d` | `docs/E7_LIVE_PRODUCTION_PROJECTION_DELIVERY_REPORT.md` | `THIS_E7_DELIVERY` |
 | `aea6b11dbdde8b90748d2563e8accdd38a7ae9444b184e86b4c1c832f4e18054` | `docs/E7_LIVE_PRODUCTION_PROJECTION_DESIGN.md` | `THIS_E7_DELIVERY` |
-| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | `THIS_E7_DELIVERY` |
-| `530afeca26fc55e4d2041bbf4b68de3fb22a008bc1468fd80a6bd8ede070ebf3` | `frontend/src/api/adapters.ts` | `THIS_E7_DELIVERY` |
-| `5b232fc3e607d3db6563fe89eb57f2a8337a49395328bde13035564b03cbd2ac` | `frontend/src/api/fixtureAdapters.ts` | `THIS_E7_DELIVERY` |
-| `4e64d28ef8c6428c6e239f0f8132d216cd1ee723ef01928244eedced95ff56d4` | `frontend/src/api/productApiAdapters.test.ts` | `THIS_E7_DELIVERY` |
-| `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | `THIS_E7_DELIVERY` |
-| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | `THIS_E7_DELIVERY` |
-| `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | `THIS_E7_DELIVERY` |
-| `9e928cf5e5336bf0d028a019907ed1edbd3656e88d61cb6e34f59f3b4cab0e30` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E7_DELIVERY` |
-| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E7_DELIVERY` |
-| `038e4f4a4fb870852ea92f032b274d5651cfadaca5ecee0b8f6d954dcdfa0294` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E7_DELIVERY` |
+| `19de605aa7e333e059ff2a2009306654056deeb34a5797161bf4271d773ad732` | `frontend/src/App.tsx` | `THIS_E7_DELIVERY` |
+| `335545533eecd987bb3a74a3f6f67dfd26dd55221e76a5f44748f876d61ac0db` | `frontend/src/api/adapters.ts` | `THIS_E7_DELIVERY` |
+| `cc586c197436da64bb60c6c5dc18fec9c8b7312a9f9d92a92bac67635a2c82d4` | `frontend/src/api/fixtureAdapters.ts` | `THIS_E7_DELIVERY` |
+| `16b789bd0bfaf46e45b5262453d479441e3316a3ede7d8d66fd1cef94bf78985` | `frontend/src/api/productApiAdapters.test.ts` | `THIS_E7_DELIVERY` |
+| `9a0618c8eabbb6696c560ce0abac51ad2311e7a428d4ccf9000436d53580ef4b` | `frontend/src/api/productApiAdapters.ts` | `THIS_E7_DELIVERY` |
+| `f04c84cfcdf6cfcd7dd9fdd1e52323e165e3e91e57d1d43651a1541b302a2ee5` | `frontend/src/contract.test.ts` | `THIS_E7_DELIVERY` |
+| `1b553843c7518b2e95bb50f3ff1f82b5d080ad68c8ee35c632ae18c68463d967` | `frontend/src/models.ts` | `THIS_E7_DELIVERY` |
+| `d90f9b00804681028e58df065bf72d8f4528ac5d6e4b95aff4016f2fd5c9005f` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E7_DELIVERY` |
+| `5df38482930086653969486955d2add30ad27ecf2a71367841bd0da15a36c83d` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E7_DELIVERY` |
+| `7997dfb4f4d3c9e31574dbaac6f2095c9447cdc73677aced8dc9f638754fa0b0` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E7_DELIVERY` |
 | `16c17f8164167e050152502fe6e10876f253cd10396098ab6a5df7f4ae3f345a` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_live_production_read_model.py` | `THIS_E7_DELIVERY` |
 | `0b9eea74d2fc4a66fbfb84a430d30bfc9974d75b3bdb472e228714d8e999c2de` | `hermes-runtime/tests/test_e7_live_fastapi.py` | `THIS_E7_DELIVERY` |
 | `43bc8b1b908a5a00036d6f26720fefc036ff4e7e827dbc17ee815f8a9ab3d13b` | `hermes-runtime/tests/test_e7_live_product_api.py` | `THIS_E7_DELIVERY` |
@@ -378,7 +380,7 @@ Stage A2 changes no historical migration, E4 durable identity, P6 authority stat
 | SHA-256 | Path | Inventory treatment |
 | --- | --- | --- |
 | `91e68c9dba4e61f53a4294a94e1a3319245b00414454c4eede29ee566b856256` | `hermes-runtime/src/hermes_runtime/application/entry_approval_bridge_saga.py` | `THIS_E8_COMPLETION` — command type alignment for the existing E4 GraphPatch port. |
-| `437cc867291327211b480885dcbbcf0b593f210866e5be81b1dc247431209884` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E8_COMPLETION` — safe ApprovalPreview DTO, without frozen blueprint disclosure. |
+| `5df38482930086653969486955d2add30ad27ecf2a71367841bd0da15a36c83d` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E8_COMPLETION` — safe ApprovalPreview DTO, without frozen blueprint disclosure. |
 | `69f29448614012d3a8775f890fe7453bc74d964e94ccb8274ae50a7b926534a4` | `hermes-runtime/src/hermes_runtime/trial/driver.py` | `THIS_E8_COMPLETION` — P6 existing-entry continuation adapter and read-only stage observer. |
 | `505b54450180297aa56c1522e15e299af61d78a68563e909645cf64d4c821e6b` | `hermes-runtime/tests/test_e8_production_entry_trial.py` | `THIS_E8_COMPLETION` — fresh PostgreSQL same-project vertical acceptance. |
 | `e9380e406c12d27fd82fb9f6a51771264861052d23241d396800b06f8405ec3a` | `docs/E8_PRODUCTION_ENTRY_TRIAL_DESIGN.md` | `THIS_E8_COMPLETION` |
@@ -398,18 +400,18 @@ E8 preserves migrations `0001–0032`, E4 durable identity, the P6 authority sta
 | `a63b24bc3ec3d0f1cd3b07e5b0e59915c7c3bf5270802124822b323a1dd8f529` | `docs/E9_E11_WAVE_A_IMPLEMENTATION_CONTRACT.md` | THIS_E9_E11_WAVE_A |
 | `c25a8745c8cc7e4cf347d62b281cc46412f29905a6a5c124e8fa5159f205fb24` | `docs/E9_GLOBAL_DESIGN_SYSTEM_DELIVERY_REPORT.md` | THIS_E9_E11_WAVE_A |
 | `e1c00d63482d211b464b7c0125ebf3c69131cabf99480ef6d9a20c5c3a2a7e28` | `frontend/src/App.test.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `57d8276b4f845688934772fe0b4b983d424ea9fa31cdd2f581265ac865818006` | `frontend/src/App.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `19de605aa7e333e059ff2a2009306654056deeb34a5797161bf4271d773ad732` | `frontend/src/App.tsx` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `af6104eeb8a33c671edd2cb879d0715a1884189c27d82c636dc3f1201a3dcd61` | `frontend/src/api/e11OperationsAdapters.test.ts` | THIS_E9_E11_WAVE_A |
-| `e74c1394049fc768f8364536fa1c02119ddbb4b6217154077448d804c252464c` | `frontend/src/api/productApiAdapters.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `9a0618c8eabbb6696c560ce0abac51ad2311e7a428d4ccf9000436d53580ef4b` | `frontend/src/api/productApiAdapters.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `056067f4bf872de26abd4c046440fbad1cd83f7e49d4fcc7bf08ce47625e249f` | `frontend/src/api/session.test.ts` | THIS_E9_E11_WAVE_A |
 | `e91dfaa5076ebc6f12b9d93cd26584a28167eb9db600e9f135df0d75da990454` | `frontend/src/api/session.ts` | THIS_E9_E11_WAVE_A |
-| `40ef1e926bdce0b76696c22849aa9642b01625f56e2bf31f345eae5737d2e30e` | `frontend/src/contract.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `f04c84cfcdf6cfcd7dd9fdd1e52323e165e3e91e57d1d43651a1541b302a2ee5` | `frontend/src/contract.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `ab4020e7966ecb48b734a8a676225e9545a6fab3319082aa2c16d2cd8f57e5e7` | `frontend/src/design-system.tsx` | THIS_E9_E11_WAVE_A |
-| `0e5f6beece95c2f85527d135600065326f4ea642cf6892fd8715a9d589c5b1c0` | `frontend/src/models.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `1b553843c7518b2e95bb50f3ff1f82b5d080ad68c8ee35c632ae18c68463d967` | `frontend/src/models.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `15c3409c8e8be7d358ddabecbeb77e1e5e367ccda4a26088864b8a23be8bca4b` | `frontend/src/styles/index.css` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
-| `264abfb71739889e10d8f702a136f23710dc1e552cfd23f7b660f90b3da19c60` | `frontend/src/theme.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `4db0501ff5957d9a7933a901d9aa9ba49bc4c424e29ed53c9eab719499ffb9a6` | `frontend/src/theme.test.ts` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `55642f2f8ec6c59fa17765ece7150408eb16e33d9eb25dcdcf26f9a0e90cf9ff` | `frontend/src/ui-context.ts` | THIS_E9_E11_WAVE_A |
-| `038e4f4a4fb870852ea92f032b274d5651cfadaca5ecee0b8f6d954dcdfa0294` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
+| `7997dfb4f4d3c9e31574dbaac6f2095c9447cdc73677aced8dc9f638754fa0b0` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | THIS_E9_E11_WAVE_A — replaces the prior hash because this existing file is modified by Wave A. |
 | `bd309d331b735a32418a6eb0b74a0bc31e20acfcae30f488eaff8d4414f6c9ef` | `hermes-runtime/src/hermes_runtime/infrastructure/oidc_session.py` | THIS_E9_E11_WAVE_A |
 | `831b609b6e6ea39335b1cd8c28e03f1527d5b45b751bd3e0cc1cdc024998de10` | `hermes-runtime/tests/test_e10_oidc_session.py` | THIS_E9_E11_WAVE_A |
 
@@ -432,16 +434,33 @@ Wave A introduces no migration: head remains `0032_p6_execution_prepare_structur
 | `228a34a4c1b6e20ca94e32cf95f2a132d48f9d4f174c99ef8c4fd4d8d5f5064f` | `frontend/src/i18n.test.tsx` | THIS_E9_ONLY_CLOSURE |
 
 
-## E9-only Acceptance Closure — Current Status
+## E9-only Acceptance Closure — Historical Status
 
-> This current status supersedes any earlier Wave A wording that characterized E9–E11 collectively as complete.
+> This is the historical E9-only closure snapshot. Section 11 is the sole current status authority; the later E11 implementation candidate remains unmerged and is not final acceptance.
 
 | Scope | Current status | Authority qualification |
 |---|---|---|
 | E9 Global Design System | PASS / ACCEPTANCE COMPLETE | 22 full locale catalogs; ten themes; font/density/motion preferences; RTL/CJK; accessibility; responsive browser evidence. |
 | E10 Identity Session Workspace Shell | DELIVERED / unchanged in this closure | Regressed only; opaque server-side session transport is unchanged. |
-| E11 Project Operations Workspace | PARTIAL / ACCEPTANCE GAP | Existing E7 projection is read-only. No compliant OIDC-user-callable controlled-operation semantic command exists. |
-| E9–E11 Wave A | NOT COMPLETE | E11 authority acceptance is outstanding. |
+| E11 Project Operations Workspace | HISTORICAL E9-ONLY SNAPSHOT | At this closure only the E7 read-only projection existed. Current E11 status is governed by Section 11. |
+| E9–E11 Wave A | HISTORICAL NOT COMPLETE | This historical closure does not state the later E11 implementation candidate as accepted. |
 | E12–E16 | NOT ENTERED | Outside this closure. |
 
 E9-only gates: frontend `66/66 PASS`, TypeScript/build PASS, oxlint `0/0`, no-DB `707 run / 438 skipped / 0 failures`, Full Runtime `707 run / 12 skipped / 0 failures` in `401.911s`. No new migration; head remains `0032_p6_execution_prepare_structured_secret_guard.sql`.
+
+## E11 User Command Transport Implementation Candidate SHA-256 Inventory
+
+> `THIS_E11_IMPLEMENTATION_CANDIDATE` records the unmerged, verified E11 delivery candidate. The manifest never hashes itself or ephemeral test environments. This inventory does not change final acceptance authority.
+
+| SHA-256 | Path | Classification |
+|---|---|---|
+| `e5b263e3668e9c6cb6a7628bea9a58c61415688056b91910a0b23ea08d4f1ac9` | `docs/E11_USER_COMMAND_TRANSPORT_IMPLEMENTATION_DELIVERY_REPORT.md` | THIS_E11_IMPLEMENTATION_CANDIDATE |
+| `f83af5ca0918a06ea2de59fb58cbd808d07772609f74b1b6082281b742ad4a24` | `hermes-runtime/src/hermes_runtime/application/user_project_command_transport.py` | THIS_E11_IMPLEMENTATION_CANDIDATE |
+| `a8ea9da894888be8d6ee55c721b090d4307a1cc64ecd2feae2e4abb2241cef44` | `hermes-runtime/tests/test_e11_fastapi_transport.py` | THIS_E11_IMPLEMENTATION_CANDIDATE |
+| `7fbf980338e617c6763ec3129154e0f7fd26dc1fe36f9e79bde3d01b06aad2b0` | `hermes-runtime/tests/test_e11_user_project_command_postgres.py` | THIS_E11_IMPLEMENTATION_CANDIDATE |
+| `6653e52b959d0d0861070923a5b4243e5d6828ebfd2751f0e3d7d09b5a769ced` | `hermes-runtime/tests/test_user_project_command_transport.py` | THIS_E11_IMPLEMENTATION_CANDIDATE |
+| `8708184f6deb2fd48352f4fc6b941adbbb6ab3061aabedb7d89a138ba66b8466` | `docs/E11_USER_COMMAND_TRANSPORT_RECONCILIATION_DELIVERY.md` | THIS_E11_RECONCILIATION_CANDIDATE |
+| `b2127dd890e0a4315f7156ed616cffe3524ca3c435ed667e1391422507cb545a` | `frontend/src/e11Operations.test.tsx` | THIS_E11_RECONCILIATION_CANDIDATE |
+| `8166169b1e5392811c4ce38577c5a3b262b6a2b4234f6b41f355f78b5c345a5a` | `frontend/src/e11Reconciliation.test.ts` | THIS_E11_RECONCILIATION_CANDIDATE |
+| `d4f2005a8124afb3070b985ce29edbdc2deb13537542c38225bcba7398e741b3` | `frontend/src/e11Reconciliation.ts` | THIS_E11_RECONCILIATION_CANDIDATE |
+| `cf98872e167fd108fbacf0f3a42a8dba2073cdbfe9ce73787f3ddc7428a60082` | `hermes-runtime/tests/test_e11_post_command_e7_reconciliation_postgres.py` | THIS_E11_RECONCILIATION_CANDIDATE |

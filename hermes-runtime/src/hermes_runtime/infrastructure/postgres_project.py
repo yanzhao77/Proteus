@@ -102,6 +102,34 @@ class PostgresProjectStore(PostgresGraphStore):
                 raise CommandRejected("PROJECT_NOT_FOUND")
             return self._project_from_row(row)
 
+    def read_command_receipt(self, command_id: str, project_id: str) -> Optional[CommandReceipt]:
+        """Read an existing Project command receipt without performing authority work."""
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT command_type, status, result
+                FROM command_receipts
+                WHERE command_id = %s
+                  AND project_id = %s
+                  AND command_type IN ('project.pause', 'project.resume', 'project.cancel')
+                """,
+                (command_id, project_id),
+            ).fetchone()
+        if not row:
+            return None
+        command_type, status, result = row
+        payload = dict(result or {})
+        if status == "APPLIED":
+            return self._receipt_from_json(payload)
+        return CommandReceipt(
+            command_id,
+            status,
+            str(payload.get("result_code", "COMMAND_IN_PROGRESS")),
+            None,
+            (),
+            {"project_id": project_id, "command_type": command_type},
+        )
+
     def create_project(self, command: CreateProject) -> CommandReceipt:
         request_hash = self._command_hash(command)
         try:
