@@ -1,8 +1,8 @@
 # E11 User Command Transport 实现交付报告
 
-**Generated UTC：** `2026-08-26T10:00:20Z`
+**Generated UTC：** Updated by the current manifest reseal.
 **实现基线：** `e3cf282ed21ad461cfd5532c4a684486bbcd71fb`（PR #29 合并后的 `master`）
-**交付状态：** **IMPLEMENTED / VERIFIED / DELIVERY CANDIDATE — PR NOT YET PUBLISHED；NOT MERGED；NOT ACCEPTED AS FINAL**
+**交付状态：** **IMPLEMENTED / VERIFIED / DELIVERY CANDIDATE — PR #30 OPEN；NOT MERGED；NOT ACCEPTED AS FINAL**
 
 > 本报告记录已获授权的 E11 实现分支结果。它不授权合并，也不将 E11 写为最终完成。最终状态仍须等待实现 PR 审查、标准合并，以及合并后核验。
 
@@ -32,7 +32,7 @@
 | 同 key、同请求 replay | PASS：返回同一 authoritative receipt，不新增 event/outbox。 |
 | 同 key、不同请求 | PASS：返回既有 `IDEMPOTENCY_CONFLICT`，不新增 event/outbox。 |
 | 并发同 key | PASS：两个请求收敛至一个 receipt、一条 authority event 和一条 outbox message。 |
-| E7 协调 | PASS：receipt 响应显式要求后续 snapshot/live-feed reconciliation，不将 authority receipt 当作 projection state。 |
+| E7 协调 | PASS：receipt 之后以有界、可取消的 creator-scoped E7 snapshot/live-feed 读取协调；仅在 `CURRENT`、兼容schema且数值Project version达到 receipt target version 时更新UI的source-derived snapshot。 |
 
 ## 3. 验证结果
 
@@ -42,19 +42,27 @@
 |---|---|---|
 | E11 无数据库契约 | public API boundary、transport unit、FastAPI local RS256/opaque session、E10、E7、Project/Recovery domain | **29 / 29 PASS** |
 | E11 PostgreSQL | pause/resume、receipt read、scope denial、stale version、replay、冲突与并发收敛 | **6 / 6 PASS** |
-| 相关 PostgreSQL 回归 | Project、guard facts、E7 projection、Recovery、Project/Recovery/P6 permissions | **81 / 81 PASS** |
-| 前端 | Vitest | **66 / 66 PASS** |
-| 前端产物 | Vite production build | **PASS** |
-| 前端静态检查 | oxlint | **0 errors**；仅有 5 个既有长文件显示 warning。 |
-| 完整运行时 | `unittest discover -s tests`，fresh PostgreSQL 16 与 Golden Todo 受控前置 | **721 run / 12 skipped / 0 failures**，`409.186 s` |
+| E11→E7 PostgreSQL | receipt target version、creator-scoped current snapshot、bounded live-feed与receipt event id | **1 / 1 PASS** |
+| 相关 PostgreSQL 回归 | Project、guard facts、E7 projection、Recovery、Project/Recovery/P6 permissions | **64 / 64 PASS** |
+| 前端 | Vitest（含协调helper、Operations interaction、adapter error matrix） | **80 / 80 PASS** |
+| 前端产物 | TypeScript `--noEmit` 与 Vite production build | **PASS** |
+| 前端静态检查 | oxlint | **0 warnings / 0 errors** |
+| 浏览器验证 | sandbox browser 与远程隔离开发机预览网络隔离；未发出命令请求。等效渲染与互动路径由Operations component test覆盖。 | **ENVIRONMENT-BLOCKED** |
+| 完整运行时 | `unittest discover -s tests`，fresh PostgreSQL 16 与 Golden Todo 受控前置 | **722 run / 12 skipped / 0 failures**，`666.583 s` |
 
 首次完整运行的失败仅揭示 Golden Todo 测试环境缺少同 cluster 的 `todo` 测试角色/模板数据库及其既有测试虚拟环境；在按仓库 CI 预置条件恢复后，相关 bootstrap 模块 `13 / 13 PASS`，最终完整运行时回归通过。该处理没有修改仓库代码、migration、权限或测试预期。
 
-## 4. 交付文件与安全审计
+## 4. 本轮协调修复
+
+本轮修复关闭了PR #30初审发现的“仅提示协调、未执行协调”的缺口。`e11Reconciliation.ts` 是纯前端有界协调helper，最多四次读取；event feed只提供stale/gap诊断，不能取代snapshot确认。`Operations` 以AbortController与epoch避免unmount、后续命令或URL恢复中的陈旧异步结果覆盖新状态；它会将receipt id写入URL，并在新mount时通过既有receipt GET恢复。
+
+`uncertain` 是安全终态而非重试命令：版本未达到、HTTP稳定错误、超时、畸形snapshot、schema不兼容或cursor异常均保留最后source-derived snapshot及redacted receipt correlation，不制造进度、状态或已应用主张。协调细节及完整验证矩阵见[6]。
+
+## 5. 交付文件与安全审计
 
 本候选交付只包含 E11 transport、既有 facade/FastAPI/store 接线、最小前端 adapter/UI、受影响的前端契约更新和 E11 测试。检查结果为 `git diff --check` 通过；受保护的 migration、roles/ACL/grants/schema、E4 identity 与 E12 路径均无变更；新增 proxy 源文件中未发现对 projects、event log 或 outbox 的直接 DML。候选源码也通过基础 credential-like pattern scan，未发现私钥、API key、Bearer token 或 password assignment。
 
-## 5. 当前状态与后续受权边界
+## 6. 当前状态与后续受权边界
 
 | 范围 | 当前状态 |
 |---|---|
@@ -74,3 +82,4 @@
 [3]: [E11 User Command Transport Acceptance Matrix](E11_USER_COMMAND_TRANSPORT_ACCEPTANCE_MATRIX.md)
 [4]: [E11 Authority Decision](E11_USER_COMMAND_TRANSPORT_AUTHORITY_DECISION.md)
 [5]: [E11 trusted transport implementation](../hermes-runtime/src/hermes_runtime/application/user_project_command_transport.py)
+[6]: [E11 post-command E7 projection reconciliation delivery](E11_USER_COMMAND_TRANSPORT_RECONCILIATION_DELIVERY.md)

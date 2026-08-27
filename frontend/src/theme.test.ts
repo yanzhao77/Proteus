@@ -48,9 +48,11 @@ describe('E9-only locale, theme and typography acceptance matrix', () => {
   });
   it('does not add fabricated progress, remote fonts, credentials, or authority paths beyond E11 pause/resume receipts', () => {
     expect(css).not.toMatch(/particle|rotate\(/); expect(app).not.toMatch(/authorization|refresh_token|api[_-]?key/i);
-    expect(app).toContain("action: 'pause' | 'resume'");
+    expect(app).toContain("type E11CommandAction = 'pause' | 'resume'");
     expect(app).toContain('adapters.production.pause(live.project.projectId, metadata)');
     expect(app).toContain('adapters.production.resume(live.project.projectId, metadata)');
+    expect(app).toContain('reconcileE11Receipt');
+    expect(app).toContain('AWAITING E7 RECONCILIATION');
     for (const forbidden of ['setProjectState','createExecutionRequest','submitGateDecision',"submit('cancel')",'actor:', 'requested_by', 'scope:']) expect(app).not.toContain(forbidden);
   });
 });
