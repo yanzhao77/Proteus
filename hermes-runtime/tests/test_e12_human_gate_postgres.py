@@ -24,7 +24,16 @@ from hermes_runtime.infrastructure.postgres_factory_home_read_model import Postg
 from hermes_runtime.infrastructure.postgres_human_gate import PostgresHumanGateStore
 from hermes_runtime.infrastructure.fastapi_app import create_app
 from hermes_runtime.infrastructure.oidc import OidcConfig, OidcTokenVerifier, StaticJwksProvider
-from tests import test_human_gate_postgres as human_gate_fixture
+from importlib.util import module_from_spec, spec_from_file_location
+
+_fixture_spec = spec_from_file_location(
+    '_e12_human_gate_postgres_fixture',
+    Path(__file__).with_name('test_human_gate_postgres.py'),
+)
+if _fixture_spec is None or _fixture_spec.loader is None:
+    raise RuntimeError('E12 Human Gate PostgreSQL fixture is unavailable')
+human_gate_fixture = module_from_spec(_fixture_spec)
+_fixture_spec.loader.exec_module(human_gate_fixture)
 
 DATABASE_URL = os.environ.get('HERMES_TEST_DATABASE_URL')
 

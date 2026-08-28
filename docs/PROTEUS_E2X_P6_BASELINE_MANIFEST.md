@@ -8,7 +8,7 @@
 | --- | --- |
 | Repository HEAD | `c5dd19e6c6f7c86cae6ed5ec0910e631d9ec72c5` |
 | Branch | `e8-production-entry-trial` |
-| Generated UTC | `2026-08-28T03:05:08Z` |
+| Generated UTC | `2026-08-28T03:25:01Z` |
 | Manifest self-hash | **Excluded intentionally** to avoid self-reference. |
 | Commit operation | **Not performed.** This is an inventory, not a staging action. |
 
@@ -472,7 +472,7 @@ E9-only gates: frontend `66/66 PASS`, TypeScript/build PASS, oxlint `0/0`, no-DB
 | `6aa388e24722d2f808346d15a160547c57d9856740ca461d42c90f0fc8291d08` | `docs/E12_HUMAN_GATE_DECISION_CENTER_IMPLEMENTATION_DELIVERY_REPORT.md` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `b9d49c8074d81684459eb3f3b433ffd65fc63c189af99f0a085120ddf764933d` | `hermes-runtime/src/hermes_runtime/application/user_human_gate_transport.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `edd0e160ea5e1d52f49eeabfd1c14223be8956199d231cda4a3ab9a13271ec9d` | `hermes-runtime/tests/test_e12_fastapi_transport.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
-| `bc4c23e9fcef018b16684d7b1db63ccbcfa31de24857e69e4e981fcf2d6f5063` | `hermes-runtime/tests/test_e12_human_gate_postgres.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
+| `ff36e182d02d15be4fcef90593c8659dd3f9e26ce21d56ad1849b6332c7b8172` | `hermes-runtime/tests/test_e12_human_gate_postgres.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `8d6d231c101bc1a622fcc161e0161fa0cc0d415ac5069a5ca2ed6e9c8c6b035d` | `hermes-runtime/tests/test_user_human_gate_transport.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `c274e99d6c91f5931d8bb988f3813c33003285bf3231fae74181026b8239d3a3` | `frontend/src/e12GateDecisionCenter.test.tsx` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `a922802988f2717ff6078242f6af7c4f3097a9dea3781dfd3a7c874c3b80e6d2` | `hermes-runtime/src/hermes_runtime/application/human_gate_product.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
