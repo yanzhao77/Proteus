@@ -60,33 +60,15 @@ class FastApiServiceHostTests(unittest.TestCase):
         self.assertNotIn("/events", schema_text)
         self.assertNotIn("arbitrary_command", schema_text)
 
-    def test_authority_changing_route_requires_content_type_idempotency_and_metadata(self):
-        missing_idem = self.client.post(
+    def test_human_gate_decision_fails_closed_without_verified_transport_configuration(self):
+        response = self.client.post(
             "/human-gates/gate-1/decisions",
-            json={
-                "command_id": "cmd-1",
-                "expected_version": 1,
-                "actor": {"type": "user", "id": "user-1"},
-                "reason": "approve",
-                "decision": "APPROVE",
-            },
+            headers={"Idempotency-Key": "idem-1"},
+            json={"command_id": "cmd-1", "gate_decision_id": "decision-1", "expected_gate_version": 1, "reason": "approve", "decision": "APPROVE"},
         )
-        self.assertEqual(400, missing_idem.status_code)
-
-        accepted = self.client.post(
-            "/human-gates/gate-1/decisions",
-            headers={"Idempotency-Key": "idem-1", "X-Request-ID": "req-2"},
-            json={
-                "command_id": "cmd-1",
-                "expected_version": 1,
-                "actor": {"type": "user", "id": "user-1"},
-                "reason": "approve",
-                "decision": "APPROVE",
-            },
-        )
-        self.assertEqual(202, accepted.status_code)
-        self.assertEqual("idem-1", self.gateway.payloads[0]["idempotency_key"])
-
+        self.assertEqual(503, response.status_code)
+        self.assertEqual("FACTORY_HOME_IDENTITY_UNAVAILABLE", response.json()["error"]["code"])
+        self.assertEqual([], self.gateway.payloads)
     def test_errors_are_redacted_and_body_size_is_bounded(self):
         too_large = self.client.post(
             "/human-gates/gate-1/decisions",

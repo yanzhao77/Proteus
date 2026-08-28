@@ -156,48 +156,35 @@ def create_app(
 
     @app.get("/human-gates/{gate_request_id}")
     def human_gate(gate_request_id: str, request: Request):
-        return _dispatch(request, "GET", f"/human-gates/{gate_request_id}", {})
+        return _verified_dispatch(request, "GET", f"/factory-home/gates/{gate_request_id}", {})
 
     @app.get("/ui/human-gates", response_class=HTMLResponse)
     def human_gate_inbox(request: Request):
-        response = request.app.state.product_api.handle(
-            ProductApiRequest(
-                method="GET",
-                path="/human-gates/gate-1",
-                headers=dict(request.headers),
-                body={},
-                actor=_actor_from_headers_or_body(request, {}),
-            )
-        )
-        return HTMLResponse(request.app.state.gate_ui.render_inbox((response.body,)))
+        return HTMLResponse(request.app.state.gate_ui.render_inbox(()))
 
     @app.get("/ui/human-gates/{gate_request_id}", response_class=HTMLResponse)
     def human_gate_detail(gate_request_id: str, request: Request):
+        actor = _actor_from_headers_or_body(request, {})
         response = request.app.state.product_api.handle(
-            ProductApiRequest(
-                method="GET",
-                path=f"/human-gates/{gate_request_id}",
-                headers=dict(request.headers),
-                body={},
-                actor=_actor_from_headers_or_body(request, {}),
-            )
+            ProductApiRequest("GET", f"/human-gates/{gate_request_id}", dict(request.headers), {}, actor)
         )
-        return HTMLResponse(request.app.state.gate_ui.render_detail(response.body))
+        return HTMLResponse(request.app.state.gate_ui.render_detail(response.body if response.status_code == 200 else {}))
+
+    @app.get("/factory-home/gates/{gate_request_id}")
+    def factory_home_gate_detail(gate_request_id: str, request: Request):
+        return _verified_dispatch(request, "GET", f"/factory-home/gates/{gate_request_id}", {})
+
+    @app.post("/factory-home/gates/{gate_request_id}/decisions")
+    async def factory_home_gate_decision(gate_request_id: str, request: Request):
+        return _verified_dispatch(
+            request, "POST", f"/factory-home/gates/{gate_request_id}/decisions", await _json_body(request)
+        )
 
     @app.post("/human-gates/{gate_request_id}/decisions")
-    def submit_gate_decision(
-        gate_request_id: str,
-        body: GateDecisionDto,
-        request: Request,
-        idempotency_key: str = Header(default="", alias="Idempotency-Key"),
-    ):
-        if request.headers.get("content-type", "").split(";")[0] != "application/json":
-            raise HTTPException(status_code=415, detail="CONTENT_TYPE_UNSUPPORTED")
-        if not idempotency_key:
-            raise HTTPException(status_code=400, detail="API_IDEMPOTENCY_KEY_MISSING")
-        payload = body.model_dump()
-        payload["idempotency_key"] = idempotency_key
-        return _dispatch(request, "POST", f"/human-gates/{gate_request_id}/decisions", payload)
+    async def submit_gate_decision(gate_request_id: str, request: Request):
+        return _verified_dispatch(
+            request, "POST", f"/factory-home/gates/{gate_request_id}/decisions", await _json_body(request)
+        )
 
     @app.get("/projects/{project_id}/reconcile-findings")
     def reconcile_findings(project_id: str, request: Request):
@@ -450,7 +437,11 @@ def _dispatch(
             404 if code in {"E11_COMMAND_NOT_AVAILABLE", "E11_COMMAND_RECEIPT_NOT_AVAILABLE"}
             else 503 if code in {"E11_COMMAND_AUTHORITY_UNAVAILABLE", "E11_COMMAND_SCOPE_UNAVAILABLE"}
             else 409 if code in {"ENTRY_DRAFT_VERSION_CONFLICT", "ENTRY_DRAFT_IDEMPOTENCY_CONFLICT", "VERSION_CONFLICT", "IDEMPOTENCY_CONFLICT", "COMMAND_IN_PROGRESS"}
-            else 422 if code in {"ENTRY_DRAFT_VALIDATION_FAILED", "E11_COMMAND_EXPECTED_VERSION_INVALID", "E11_COMMAND_REASON_REQUIRED", "E11_COMMAND_AUTHORIZATION_REF_INVALID", "CANCELLATION_AUTHORIZATION_REQUIRED"}
+            else 404 if code == "E12_GATE_NOT_AVAILABLE"
+            else 503 if code in {"E12_GATE_AUTHORITY_UNAVAILABLE", "E12_GATE_SCOPE_UNAVAILABLE"}
+            else 403 if code in {"E12_GATE_APPROVER_NOT_AUTHORIZED", "GATE_APPROVER_UNAUTHORIZED", "GATE_SELF_APPROVAL_FORBIDDEN", "GATE_SCOPE_MISMATCH"}
+            else 409 if code in {"GATE_VERSION_CONFLICT", "GATE_REQUEST_STALE", "GATE_REQUEST_EXPIRED", "EXPECTED_VERSION_CONFLICT", "IDEMPOTENCY_PAYLOAD_CONFLICT"}
+            else 422 if code in {"ENTRY_DRAFT_VALIDATION_FAILED", "E11_COMMAND_EXPECTED_VERSION_INVALID", "E11_COMMAND_REASON_REQUIRED", "E11_COMMAND_AUTHORIZATION_REF_INVALID", "CANCELLATION_AUTHORIZATION_REQUIRED", "E12_GATE_EXPECTED_VERSION_INVALID", "E12_GATE_DECISION_REASON_REQUIRED", "E12_GATE_DECISION_FORBIDDEN", "E12_GATE_DECISION_METADATA_MISSING", "E12_GATE_DECISION_SCHEMA_INVALID", "E12_GATE_CLIENT_AUTHORITY_FIELD_FORBIDDEN", "GATE_EVIDENCE_INVALID"}
             else 400
         )
         return _error(code, status, request_id, "request rejected")

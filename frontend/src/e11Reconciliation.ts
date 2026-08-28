@@ -1,4 +1,4 @@
-import type { AdapterResult, LiveProductionEventFeedViewModel, LiveProductionSnapshotViewModel, ProjectCommandReceiptViewModel } from '../models';
+import type { AdapterResult, LiveProductionEventFeedViewModel, LiveProductionSnapshotViewModel, ProjectCommandReceiptViewModel } from './models';
 
 export const E11_PROJECTION_SCHEMA_VERSION = 'e7-live-production-projection/1';
 export const E11_RECONCILIATION_MAX_ATTEMPTS = 4;

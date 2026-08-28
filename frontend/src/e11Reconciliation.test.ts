@@ -58,6 +58,7 @@ describe('E11 receipt-to-E7 projection reconciliation', () => {
     const reader = new Reader([data(snapshot(1, 1))], [data(eventFeed({ after: 1, nextCursor: 2, snapshotWatermark: 2, items: [{ eventId: 'event-2', productionSequence: 2, aggregateType: 'project', aggregateId: 'project-1', aggregateVersion: 2, eventKind: 'project.paused', occurredAt: null, schemaVersion: 'event/1' }] }))]);
     const result = await reconcileE11Receipt(reader, context(), new AbortController().signal, { maxAttempts: 2, wait: noWait });
     expect(result.kind).toBe('uncertain');
+    if (result.kind !== 'uncertain') throw new Error('expected uncertain reconciliation outcome');
     expect(result.code).toBe('E11_EVENT_FEED_STALE');
   });
 

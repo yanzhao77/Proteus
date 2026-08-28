@@ -14,6 +14,17 @@ export interface GateViewModel {
   gateId: string; productionName: string | null; action: string; risk: 'low' | 'medium' | 'high' | 'critical' | 'not_available';
   reason: string; evidenceCount: number | null; expiresAt: string | null; freshness: Freshness;
 }
+export interface GateDetailViewModel extends GateViewModel {
+  projectId: string; requestType: string; riskRef: string | null; status: string; version: number;
+  evidenceRefs: string[]; asOf: string | null;
+  audit: { decisionId: string; decision: string; status: string; issuedAt: string | null; expiresAt: string | null }[];
+}
+export interface GateDecisionMetadata { reason: string; expectedGateVersion: number; }
+export interface GateDecisionReceiptViewModel {
+  commandId: string; gateRequestId: string; gateDecisionId: string; receiptStatus: string;
+  resultCode: string; requestState: string; requestVersion: number | null; decision: string;
+  eventIds: string[]; completionClaim: string;
+}
 export interface DraftRevisionViewModel { revisionId: string; revisionNumber: number; title: string; rawInput: string; createdBy: string; draftVersion: number; createdAt: string; }
 export interface DraftViewModel { draftId: string; title: string; state: 'DRAFT' | 'SUBMITTED' | 'ARCHIVED'; idea: string; latestRevision: number; createdAt: string; updatedAt: string; version: number; freshness: Freshness; revisions?: DraftRevisionViewModel[]; }
 export interface DraftListViewModel { draftId: string; title: string; state: 'DRAFT' | 'SUBMITTED' | 'ARCHIVED'; latestRevision: number; createdAt: string; updatedAt: string; version: number; freshness: Freshness; }
@@ -42,7 +53,7 @@ export interface MasterPlanContentViewModel { goal: string; requirements: { key:
 export interface MasterPlanRevisionViewModel { revisionId: string; revisionNumber: number; contentHash: string; compiler: string; schemaVersion: string; proposalRevisionId: string; content: MasterPlanContentViewModel; createdAt: string; }
 export interface MasterPlanViewModel { masterPlanId: string; proposalId: string; draftId: string; version: number; latestRevision: number; current: MasterPlanRevisionViewModel; revisions: MasterPlanRevisionViewModel[]; preApprovalOnly: boolean; }
 export interface ProductionPortfolioApi { listProductions(): Promise<AdapterResult<ProductionCardViewModel[]>>; getProduction(id: string): Promise<AdapterResult<ProductionCardViewModel>>; }
-export interface GateApi { listGates(): Promise<AdapterResult<GateViewModel[]>>; getGate(id: string): Promise<AdapterResult<GateViewModel>>; submitDecision(id: string, decision: 'APPROVE' | 'REJECT', metadata: CommandMetadata): Promise<AdapterResult<void>>; }
+export interface GateApi { listGates(): Promise<AdapterResult<GateViewModel[]>>; getGate(id: string): Promise<AdapterResult<GateDetailViewModel>>; submitDecision(id: string, decision: 'APPROVE' | 'REJECT', metadata: GateDecisionMetadata): Promise<AdapterResult<GateDecisionReceiptViewModel>>; }
 export interface LiveProductionEventViewModel { eventId: string; productionSequence: number; aggregateType: string; aggregateId: string; aggregateVersion: number | null; eventKind: string; occurredAt: string | null; schemaVersion: string; }
 export interface LiveProductionSnapshotViewModel { productionId: string; project: { projectId: string; title: string; state: string; version: number; updatedAt: string | null }; snapshotWatermark: number; projectionSchemaVersion: string; workflow: { nodes: { nodeId: string; title: string; state: string; version: number; sourceIdentity: string }[]; edges: { edgeId: string; taskId: string; dependsOnTaskId: string; sourceIdentity: string | null }[] }; executionRequests: { executionRequestId: string; taskId: string; state: string; version: number }[]; verification: { plans: { planId: string; taskId: string; status: string; version: number }[]; results: { verificationId: string; taskId: string; verdict: string; authorityStatus: string }[] }; evidence: { validCount: number; invalidatedCount: number; missingCount: number; items: { evidenceId: string; valid: boolean; artifactHash: string; mediaType: string }[] }; gates: { gateId: string; status: string; reason: string; reviewLink: string }[]; waiting: { waitingRecordId: string; taskId: string; type: string; reason: string; state: string; gateId: string | null }[]; recovery: { findingId: string; kind: string; status: string; observedSequence: number | null }[]; recentEvents: LiveProductionEventViewModel[]; freshness: string; asOf: string | null; }
 export interface LiveProductionEventFeedViewModel { availability: string; reason: string | null; items: LiveProductionEventViewModel[]; after: number; nextCursor: number; snapshotWatermark: number; projectionSchemaVersion: string; }

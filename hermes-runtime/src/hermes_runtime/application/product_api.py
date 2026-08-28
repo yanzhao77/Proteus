@@ -10,6 +10,10 @@ from hermes_runtime.application.user_project_command_transport import (
     UnavailableUserProjectCommandTransport,
     UserProjectCommandRejected,
 )
+from hermes_runtime.application.user_human_gate_transport import (
+    UnavailableUserHumanGateTransport,
+    UserHumanGateRejected,
+)
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
 from hermes_runtime.domain.product_api import (
@@ -57,6 +61,7 @@ class ProductApiFacade:
         entry_approval_bridge_api=None,
         live_production_read_model=None,
         user_project_command_transport=None,
+        user_human_gate_transport=None,
     ) -> None:
         self._read_model = read_model
         self._command_gateway = command_gateway
@@ -67,6 +72,8 @@ class ProductApiFacade:
         self._entry_approval_bridge_api = entry_approval_bridge_api or UnavailableEntryApprovalBridgeApi()
         self._live_production_read_model = live_production_read_model or UnavailableLiveProductionReadModel()
         self._user_project_command_transport = user_project_command_transport or UnavailableUserProjectCommandTransport()
+        self._human_gate_transport_configured = user_human_gate_transport is not None
+        self._user_human_gate_transport = user_human_gate_transport or UnavailableUserHumanGateTransport()
 
     def handle(self, request: ProductApiRequest) -> ProductApiResponse:
         reject_forbidden_authority_shape(request)
@@ -114,7 +121,30 @@ class ProductApiFacade:
                 raise ProductApiRejected(str(exc)) from exc
             return self._safe(200, response)
         if method == "GET" and parts == ["factory-home", "gates"]:
-            return self._safe(200, self._factory_home_read_model.gate_attention(actor_scope))
+            if not self._human_gate_transport_configured:
+                return self._safe(200, self._factory_home_read_model.gate_attention(actor_scope))
+            try:
+                return self._safe(200, {"availability": "CURRENT", "items": self._user_human_gate_transport.list(
+                    verified_identity_subject=request.verified_identity_subject, actor=request.actor
+                )})
+            except UserHumanGateRejected as exc:
+                raise ProductApiRejected(str(exc)) from exc
+        if method == "GET" and len(parts) == 3 and parts[:2] == ["factory-home", "gates"]:
+            try:
+                return self._safe(200, self._user_human_gate_transport.detail(
+                    gate_request_id=parts[2], verified_identity_subject=request.verified_identity_subject, actor=request.actor
+                ))
+            except UserHumanGateRejected as exc:
+                raise ProductApiRejected(str(exc)) from exc
+        if method == "POST" and len(parts) == 4 and parts[:2] == ["factory-home", "gates"] and parts[3] == "decisions":
+            payload = self._gate_decision_payload(request)
+            try:
+                response = self._user_human_gate_transport.submit(
+                    gate_request_id=parts[2], verified_identity_subject=request.verified_identity_subject, actor=request.actor, **payload
+                )
+            except UserHumanGateRejected as exc:
+                raise ProductApiRejected(str(exc)) from exc
+            return self._safe(202, response)
         if method == "GET" and parts == ["factory-home", "drafts"]:
             subject = self._draft_subject(request)
             return self._safe(200, self._entry_draft_api.list(subject))
@@ -278,6 +308,39 @@ class ProductApiFacade:
         if not isinstance(key, str) or not isinstance(reason, str) or not isinstance(expected, int) or expected < 0:
             raise ProductApiRejected("E2_UNDERSTANDING_VALIDATION_FAILED")
         return {"idempotency_key": key, "reason": reason, "expected_version": expected}
+    @staticmethod
+    def _gate_decision_payload(request: ProductApiRequest) -> Mapping[str, Any]:
+        body = dict(request.body)
+        forbidden = {
+            "actor", "requester", "approver", "project_id", "task_id", "action_scope",
+            "authorization_ref", "assertion", "assertion_id", "assertion_hash", "current_gate_version",
+            "evidence_refs", "constraints", "expires_at", "executor",
+        }
+        if forbidden.intersection(body):
+            raise ProductApiRejected("E12_GATE_CLIENT_AUTHORITY_FIELD_FORBIDDEN")
+        allowed = {"command_id", "gate_decision_id", "idempotency_key", "expected_gate_version", "decision", "reason"}
+        if set(body) - allowed:
+            raise ProductApiRejected("E12_GATE_DECISION_SCHEMA_INVALID")
+        key = body.get("idempotency_key") or request.headers.get("Idempotency-Key")
+        command_id = body.get("command_id")
+        decision_id = body.get("gate_decision_id")
+        version = body.get("expected_gate_version")
+        decision = body.get("decision")
+        reason = body.get("reason")
+        if not all(isinstance(value, str) and value.strip() for value in (key, command_id, decision_id)):
+            raise ProductApiRejected("E12_GATE_DECISION_METADATA_MISSING")
+        if not isinstance(version, int) or version < 1:
+            raise ProductApiRejected("E12_GATE_EXPECTED_VERSION_INVALID")
+        if decision not in {"APPROVE", "REJECT"}:
+            raise ProductApiRejected("E12_GATE_DECISION_FORBIDDEN")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ProductApiRejected("E12_GATE_DECISION_REASON_REQUIRED")
+        return {
+            "command_id": command_id.strip(), "gate_decision_id": decision_id.strip(),
+            "idempotency_key": key.strip(), "expected_gate_version": version,
+            "decision": decision, "reason": reason.strip(),
+        }
+
     @staticmethod
     def _project_command_payload(request: ProductApiRequest) -> Mapping[str, Any]:
         body = dict(request.body)

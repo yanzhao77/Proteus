@@ -71,22 +71,6 @@ class HumanGateProductFacade:
         return self._safe_gate_payload(self._presentation_store.get_gate_request(gate_request_id))
 
     def submit_decision(self, request: ProductGateDecisionRequest) -> Mapping[str, Any]:
-        if request.expected_gate_version != request.current_gate_version:
-            raise HumanGateRejected("GATE_VERSION_CONFLICT")
-        validate_assertion_window(request.assertion, request.now)
-        validate_approver(
-            request.requester,
-            request.approver,
-            request.assertion,
-            request.project_id,
-            request.task_id or None,
-            request.gate_request_id,
-            request.action_scope,
-        )
-        invalid_refs = self._evidence_query.invalid_evidence_refs(request.project_id, request.evidence_refs)
-        if invalid_refs:
-            raise HumanGateRejected("GATE_EVIDENCE_INVALID")
-
         command = SubmitHumanGateDecision(
             command_id=request.command_id,
             idempotency_key=request.idempotency_key,
@@ -105,6 +89,27 @@ class HumanGateProductFacade:
             actor_type=request.approver.actor_type.value,
             actor_id=request.approver.actor_id,
         )
+        replay_reader = getattr(self._decision_sink, "replay_decision_receipt", None)
+        if replay_reader is None:
+            replay_reader = getattr(self._presentation_store, "replay_decision_receipt", lambda _command: None)
+        replay = replay_reader(command)
+        if replay is not None:
+            return replay
+        if request.expected_gate_version != request.current_gate_version:
+            raise HumanGateRejected("GATE_VERSION_CONFLICT")
+        validate_assertion_window(request.assertion, request.now)
+        validate_approver(
+            request.requester,
+            request.approver,
+            request.assertion,
+            request.project_id,
+            request.task_id or None,
+            request.gate_request_id,
+            request.action_scope,
+        )
+        invalid_refs = self._evidence_query.invalid_evidence_refs(request.project_id, request.evidence_refs)
+        if invalid_refs:
+            raise HumanGateRejected("GATE_EVIDENCE_INVALID")
         return self._decision_sink.submit_decision(command)
 
     def apply_resume(self, *_args: Any, **_kwargs: Any) -> Mapping[str, Any]:
