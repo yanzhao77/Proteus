@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, Sequence, Tuple
 
 import psycopg
 from psycopg.rows import dict_row
@@ -15,7 +15,7 @@ from hermes_runtime.application.human_gates import (
     SubmitHumanGateDecision,
     SupersedeHumanGateRequest,
 )
-from hermes_runtime.domain.human_gate import hash_payload
+from hermes_runtime.domain.human_gate import AuthorizationAssertion, hash_payload
 from hermes_runtime.infrastructure.postgres_recovery import PostgresRecoveryStore
 
 
@@ -89,6 +89,110 @@ class PostgresHumanGateStore(PostgresRecoveryStore):
                     "test-verification:" + assertion_id,
                 ),
             )
+
+    def current_time(self) -> str:
+        with self._connect(row_factory=dict_row) as connection:
+            row = connection.execute("SELECT clock_timestamp() AS now").fetchone()
+        return str(row["now"])
+
+    def list_gate_requests(self, project_ids: Sequence[str]) -> Tuple[Mapping[str, Any], ...]:
+        if not project_ids:
+            return ()
+        query = """
+            SELECT g.gate_request_id, g.project_id, p.title AS production_name,
+                   g.task_id, g.action_scope, g.request_type, g.requester_type,
+                   g.requester_id, g.risk_assessment_id, g.reason, g.supporting_evidence_refs,
+                   jsonb_array_length(g.supporting_evidence_refs) AS evidence_count,
+                   g.expires_at, g.request_state, g.version, g.created_at, g.updated_at
+            FROM public.human_gate_requests g
+            JOIN public.projects p ON p.project_id = g.project_id
+            WHERE g.project_id = ANY(%s) AND g.request_state = 'REQUESTED'
+            ORDER BY g.expires_at ASC, g.gate_request_id ASC
+        """
+        with self._connect(row_factory=dict_row) as connection:
+            rows = connection.execute(query, (list(project_ids),)).fetchall()
+        return tuple(self._gate_row(connection=None, row=row) for row in rows)
+
+    def get_gate_request(self, gate_request_id: str, project_ids: Sequence[str]) -> Optional[Mapping[str, Any]]:
+        if not project_ids:
+            return None
+        query = """
+            SELECT g.gate_request_id, g.project_id, p.title AS production_name,
+                   g.task_id, g.action_scope, g.request_type, g.requester_type,
+                   g.requester_id, g.risk_assessment_id, g.reason, g.supporting_evidence_refs,
+                   jsonb_array_length(g.supporting_evidence_refs) AS evidence_count,
+                   g.expires_at, g.request_state, g.version, g.created_at, g.updated_at
+            FROM public.human_gate_requests g
+            JOIN public.projects p ON p.project_id = g.project_id
+            WHERE g.gate_request_id = %s AND g.project_id = ANY(%s)
+        """
+        with self._connect(row_factory=dict_row) as connection:
+            row = connection.execute(query, (gate_request_id, list(project_ids))).fetchone()
+            if row is None:
+                return None
+            return self._gate_row(connection, row)
+
+    def get_active_approver_assertion(
+        self, gate_request_id: str, project_ids: Sequence[str], subject: str
+    ) -> Optional[AuthorizationAssertion]:
+        if not project_ids or not subject:
+            return None
+        query = """
+            SELECT a.assertion_id, a.issuer, a.subject, a.role, a.project_id,
+                   a.task_id, a.gate_request_id, a.action_scope, a.valid_from,
+                   a.valid_until, a.assertion_hash, a.revoked_at
+            FROM public.human_gate_authorization_assertions a
+            JOIN public.human_gate_requests g ON g.gate_request_id = a.gate_request_id
+            WHERE a.gate_request_id = %s
+              AND a.project_id = ANY(%s)
+              AND a.subject = %s
+              AND a.role = 'approver'
+            ORDER BY a.valid_until DESC, a.assertion_id ASC
+            LIMIT 1
+        """
+        with self._connect(row_factory=dict_row) as connection:
+            row = connection.execute(query, (gate_request_id, list(project_ids), subject)).fetchone()
+        if row is None:
+            return None
+        return AuthorizationAssertion(
+            assertion_id=str(row['assertion_id']), issuer=str(row['issuer']),
+            subject=str(row['subject']), role=str(row['role']), project_id=str(row['project_id']),
+            task_id=str(row['task_id']) if row['task_id'] is not None else None,
+            gate_request_id=str(row['gate_request_id']), action_scope=str(row['action_scope']),
+            valid_from=str(row['valid_from']), valid_until=str(row['valid_until']),
+            assertion_hash=str(row['assertion_hash']), revoked=row['revoked_at'] is not None,
+        )
+
+    def invalid_evidence_refs(self, project_id: str, evidence_refs: Tuple[str, ...]) -> Tuple[str, ...]:
+        if not evidence_refs:
+            return ()
+        query = """
+            SELECT evidence_fact_id
+            FROM public.project_evidence_facts
+            WHERE project_id = %s
+              AND evidence_fact_id = ANY(%s)
+              AND valid = TRUE
+              AND superseded_by IS NULL
+              AND (expires_at IS NULL OR expires_at > clock_timestamp())
+        """
+        with self._connect(row_factory=dict_row) as connection:
+            found = {str(row['evidence_fact_id']) for row in connection.execute(query, (project_id, list(evidence_refs))).fetchall()}
+        return tuple(ref for ref in evidence_refs if ref not in found)
+
+    @staticmethod
+    def _gate_row(connection, row: Mapping[str, Any]) -> Mapping[str, Any]:
+        values = dict(row)
+        values['supporting_evidence_refs'] = tuple(str(item) for item in (values.get('supporting_evidence_refs') or ()))
+        values['decisions'] = ()
+        if connection is not None:
+            decisions = connection.execute(
+                """SELECT gate_decision_id, decision, decision_state, issued_at, expires_at
+                   FROM public.human_gate_decisions WHERE gate_request_id=%s
+                   ORDER BY issued_at DESC, gate_decision_id ASC""",
+                (values['gate_request_id'],),
+            ).fetchall()
+            values['decisions'] = tuple(dict(item) for item in decisions)
+        return values
 
     def request_gate(self, command: RequestHumanGate) -> Mapping[str, Any]:
         payload = {
@@ -191,17 +295,15 @@ class PostgresHumanGateStore(PostgresRecoveryStore):
             ),
         )
 
-    def submit_decision(self, command: SubmitHumanGateDecision) -> Mapping[str, Any]:
-        payload = {
+    @staticmethod
+    def _decision_payload(command: SubmitHumanGateDecision) -> Mapping[str, Any]:
+        return {
             "command": "human_gate.decide",
             "project_id": command.project_id,
             "gate_decision_id": command.gate_decision_id,
             "gate_request_id": command.gate_request_id,
             "decision": command.decision,
-            "approver": {
-                "type": command.approver.actor_type.value,
-                "id": command.approver.actor_id,
-            },
+            "approver": {"type": command.approver.actor_type.value, "id": command.approver.actor_id},
             "authorization_ref": command.authorization_ref,
             "assertion_id": command.assertion_id,
             "assertion_hash": command.assertion_hash,
@@ -212,6 +314,28 @@ class PostgresHumanGateStore(PostgresRecoveryStore):
             "actor_id": command.actor_id,
             "reason": command.reason,
         }
+
+    def replay_decision_receipt(self, command: SubmitHumanGateDecision) -> Optional[Mapping[str, Any]]:
+        candidate_hash = hash_payload(self._decision_payload(command))
+        with self._connect(row_factory=dict_row) as connection:
+            row = connection.execute(
+                """SELECT command_id, request_hash, status, result
+                   FROM public.command_receipts
+                   WHERE project_id=%s AND command_type='human_gate.decide' AND idempotency_key=%s
+                   ORDER BY created_at DESC LIMIT 1""",
+                (command.project_id, command.idempotency_key),
+            ).fetchone()
+        if row is None:
+            return None
+        if str(row['request_hash']) != candidate_hash:
+            raise CommandRejected("IDEMPOTENCY_PAYLOAD_CONFLICT")
+        if str(row['status']) != 'APPLIED':
+            raise CommandRejected("COMMAND_IN_PROGRESS")
+        result = row['result'] or {}
+        return dict(result.get('response') or result)
+
+    def submit_decision(self, command: SubmitHumanGateDecision) -> Mapping[str, Any]:
+        payload = self._decision_payload(command)
         return self._call_human_gate(
             """SELECT public.hermes_submit_human_gate_decision(
                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,

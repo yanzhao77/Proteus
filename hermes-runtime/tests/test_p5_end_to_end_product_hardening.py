@@ -157,7 +157,8 @@ class P5EndToEndProductHardeningTests(unittest.TestCase):
                 "decision": "APPROVE",
             },
         )
-        self.assertEqual(202, decision.status_code)
+        self.assertEqual(503, decision.status_code)
+        self.assertEqual("FACTORY_HOME_IDENTITY_UNAVAILABLE", decision.json()["error"]["code"])
 
         s3_store = S3ContentAddressedArtifactStore(FakeS3(), S3ArtifactConfig("bucket"))
         artifact = s3_store.put(
@@ -215,14 +216,13 @@ class P5EndToEndProductHardeningTests(unittest.TestCase):
 
         client = TestClient(create_app(ProductApiFacade(ReadModel(), Gateway())))
         self.assertEqual(405, client.patch("/projects/project-1/status", json={"state": "ACCEPTED"}).status_code)
-        self.assertEqual(
-            400,
-            client.post(
-                "/human-gates/gate-1/decisions",
-                headers={"Idempotency-Key": "idem-1"},
-                json={"command_id": "cmd", "expected_version": "stale", "actor": {"type": "user", "id": "user-1"}, "reason": "x", "decision": "APPROVE"},
-            ).status_code,
+        denied = client.post(
+            "/human-gates/gate-1/decisions",
+            headers={"Idempotency-Key": "idem-1"},
+            json={"command_id": "cmd", "gate_decision_id": "decision", "expected_gate_version": 1, "reason": "x", "decision": "APPROVE"},
         )
+        self.assertEqual(503, denied.status_code)
+        self.assertEqual("FACTORY_HOME_IDENTITY_UNAVAILABLE", denied.json()["error"]["code"])
 
         s3 = FakeS3()
         store = S3ContentAddressedArtifactStore(s3, S3ArtifactConfig("bucket"))

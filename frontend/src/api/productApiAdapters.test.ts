@@ -12,7 +12,7 @@ const failure = (code: string) => ({
   json: async () => ({ data: null, error: { code, message: `message-${code}` }, request_id: 'req-1' }),
 });
 
-describe('Product API read adapters and E11 user command transport', () => {
+describe('Product API read adapters, E11 transport, and E12 Human Gate decisions', () => {
   it('parses a source-derived Portfolio while preserving null progress', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(envelope({
       availability: 'CURRENT',
@@ -48,6 +48,25 @@ describe('Product API read adapters and E11 user command transport', () => {
       expect(result.value[0].risk).toBe('not_available');
       expect(result.value[0].evidenceCount).toBeNull();
     }
+  });
+
+  it('uses the verified E12 Gate Inbox and decision receipt transport without client authority fields', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(envelope({ availability: 'CURRENT', items: [{ gate_id: 'gate-1', project_id: 'project-1', production_name: 'Real Project', action: 'project:resume', request_type: 'approval', risk_ref: 'risk-1', reason: 'review', evidence_refs: ['evidence-1'], evidence_count: 1, expires_at: '2099-01-01T00:00:00Z', status: 'REQUESTED', version: 3, as_of: '2026-08-27T00:00:00Z', freshness: 'NOT_AVAILABLE', audit: [] }] }))
+      .mockResolvedValueOnce(envelope({ availability: 'CURRENT', gate_id: 'gate-1', project_id: 'project-1', production_name: 'Real Project', action: 'project:resume', request_type: 'approval', risk_ref: 'risk-1', reason: 'review', evidence_refs: ['evidence-1'], evidence_count: 1, expires_at: '2099-01-01T00:00:00Z', status: 'REQUESTED', version: 3, as_of: '2026-08-27T00:00:00Z', freshness: 'NOT_AVAILABLE', audit: [] }))
+      .mockResolvedValueOnce(envelope({ availability: 'CURRENT', command_id: 'cmd-1', gate_request_id: 'gate-1', gate_decision_id: 'decision-1', receipt_status: 'APPLIED', result_code: 'HUMAN_GATE_APPROVED', request_state: 'APPROVED', request_version: 4, decision: 'APPROVE', event_ids: ['event-1'], completion_claim: 'GATE_DECISION_RECEIPT_IS_NOT_PROJECT_RESUME' }));
+    vi.stubGlobal('fetch', fetchMock);
+    const api = productApiAdapters();
+    expect(await api.gates.listGates()).toMatchObject({ kind: 'data', value: [{ gateId: 'gate-1' }] });
+    expect(await api.gates.getGate('gate-1')).toMatchObject({ kind: 'data', value: { version: 3, evidenceRefs: ['evidence-1'] } });
+    expect(await api.gates.submitDecision('gate-1', 'APPROVE', { reason: 'reviewed', expectedGateVersion: 3 })).toMatchObject({ kind: 'data', value: { resultCode: 'HUMAN_GATE_APPROVED', receiptStatus: 'APPLIED' } });
+    const [path, options] = fetchMock.mock.calls[2] as [string, RequestInit];
+    expect(path).toContain('/factory-home/gates/gate-1/decisions');
+    expect(options.credentials).toBe('include'); expect(options.method).toBe('POST');
+    const payload = JSON.parse(String(options.body));
+    expect(Object.keys(payload).sort()).toEqual(['command_id', 'decision', 'expected_gate_version', 'gate_decision_id', 'idempotency_key', 'reason']);
+    expect(payload.decision).toBe('APPROVE'); expect(payload.expected_gate_version).toBe(3);
+    for (const forbidden of ['actor', 'requester', 'approver', 'project_id', 'task_id', 'action_scope', 'authorization_ref', 'assertion_id', 'assertion_hash', 'evidence_refs', 'constraints', 'state']) expect(payload).not.toHaveProperty(forbidden);
   });
 
   it('treats unavailable scope as unavailable, not as an empty portfolio', async () => {

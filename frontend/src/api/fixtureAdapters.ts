@@ -32,8 +32,8 @@ class FixturePortfolioApi implements ProductionPortfolioApi {
 }
 class FixtureGateApi implements GateApi {
   listGates(): Promise<AdapterResult<GateViewModel[]>> { return data(gates); }
-  getGate(id: string): Promise<AdapterResult<GateViewModel>> { return data(gates.find((gate) => gate.gateId === id) ?? gates[0]); }
-  submitDecision(): Promise<AdapterResult<void>> { return noMutation(); }
+  getGate(id: string): Promise<AdapterResult<import('../models').GateDetailViewModel>> { const gate = gates.find((item) => item.gateId === id) ?? gates[0]; return data({ ...gate, projectId: 'demo-project-001', requestType: 'approval', riskRef: null, status: 'REQUESTED', version: 1, evidenceRefs: [], asOf: null, audit: [] }); }
+  submitDecision(): Promise<AdapterResult<import('../models').GateDecisionReceiptViewModel>> { return noMutation(); }
 }
 class FixtureProductionApi implements ProductionApi {
   getSnapshot(id: string): Promise<AdapterResult<ProductionCardViewModel>> { return data(cards.find((card) => card.productionId === id) ?? cards[0]); }

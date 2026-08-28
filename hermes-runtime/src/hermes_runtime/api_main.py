@@ -13,6 +13,13 @@ from hermes_runtime.application.user_project_command_transport import (
     UnavailableUserProjectCommandTransport,
     UserProjectCommandTransport,
 )
+from hermes_runtime.application.human_gate_product import HumanGateProductFacade
+from hermes_runtime.application.human_gates import HumanGateAuthority
+from hermes_runtime.application.user_human_gate_transport import (
+    UnavailableUserHumanGateTransport,
+    UserHumanGateTransport,
+)
+from hermes_runtime.infrastructure.postgres_human_gate import PostgresHumanGateStore
 from hermes_runtime.infrastructure.understanding_provider_registry import build_understanding_producer_from_env
 from hermes_runtime.application.readiness import StaticReadinessCheck
 from hermes_runtime.application.factory_home_read_model import UnavailableFactoryHomeReadModel
@@ -83,6 +90,7 @@ def build_app():
     entry_understanding_api = PostgresEntryUnderstandingStore(database_url, build_understanding_producer_from_env()) if database_url and oidc_verifier else UnavailableEntryUnderstandingApi()
     entry_proposal_master_plan_api = PostgresEntryProposalMasterPlanStore(database_url) if database_url and oidc_verifier else UnavailableEntryProposalMasterPlanApi()
     user_project_command_transport = UnavailableUserProjectCommandTransport()
+    user_human_gate_transport = UnavailableUserHumanGateTransport()
     if database_url and oidc_verifier:
         _bridge_store = PostgresEntryApprovalBridgeStore(database_url)
         _project_store = PostgresProjectStore(database_url)
@@ -90,13 +98,20 @@ def build_app():
         user_project_command_transport = UserProjectCommandTransport(
             _control_plane, _creator_scope, _project_store
         )
+        _human_gate_store = PostgresHumanGateStore(database_url)
+        _human_gate_product = HumanGateProductFacade(
+            _human_gate_store, HumanGateAuthority(_human_gate_store), _human_gate_store
+        )
+        user_human_gate_transport = UserHumanGateTransport(
+            _human_gate_store, _creator_scope, _human_gate_product
+        )
         entry_approval_bridge_api = DurableApprovalBridgeOrchestrator(
             _bridge_store, ApprovalBridgeSaga(_control_plane, _bridge_store)
         )
     else:
         entry_approval_bridge_api = UnavailableEntryApprovalBridgeApi()
     return create_app(
-        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api, live_production_read_model, user_project_command_transport),
+        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api, live_production_read_model, user_project_command_transport, user_human_gate_transport),
         StaticReadinessCheck(database_ready=bool(database_url)),
         allowed_cors_origins=origins,
         oidc_verifier=oidc_verifier,

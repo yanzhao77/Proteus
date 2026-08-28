@@ -24,16 +24,16 @@ class PendingPortfolioApi implements ProductionPortfolioApi {
 }
 class PendingGateApi implements GateApi {
   listGates(): Promise<AdapterResult<GateViewModel[]>> { return pending('GateApi.listGates'); }
-  getGate(): Promise<AdapterResult<GateViewModel>> { return pending('GateApi.getGate'); }
-  submitDecision(): Promise<AdapterResult<void>> { return pending('GateApi.submitDecision'); }
+  getGate(): Promise<AdapterResult<import('../models').GateDetailViewModel>> { return pending('GateApi.getGate'); }
+  submitDecision(): Promise<AdapterResult<import('../models').GateDecisionReceiptViewModel>> { return pending('GateApi.submitDecision'); }
 }
 class PendingProductionApi implements ProductionApi {
   getSnapshot(): Promise<AdapterResult<ProductionCardViewModel>> { return pending('ProductionApi.getSnapshot'); }
   getLiveSnapshot(_id: string, _signal?: AbortSignal): Promise<AdapterResult<import('../models').LiveProductionSnapshotViewModel>> { return pending('ProductionApi.getLiveSnapshot'); }
   getLiveEvents(_id: string, _after: number, _limit?: number, _signal?: AbortSignal): Promise<AdapterResult<import('../models').LiveProductionEventFeedViewModel>> { return pending('ProductionApi.getLiveEvents'); }
   getCommandReceipt(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return pending('ProductionApi.getCommandReceipt'); }
-  pause(): Promise<AdapterResult<void>> { return pending('ProductionApi.pause'); }
-  resume(): Promise<AdapterResult<void>> { return pending('ProductionApi.resume'); }
-  stop(): Promise<AdapterResult<void>> { return pending('ProductionApi.stop'); }
+  pause(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return pending('ProductionApi.pause'); }
+  resume(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return pending('ProductionApi.resume'); }
+  stop(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return pending('ProductionApi.stop'); }
 }
 export const authorityPendingAdapters = (): FactoryAdapters => ({ mode: 'authority_pending', draft: new PendingDraftApi(), portfolio: new PendingPortfolioApi(), gates: new PendingGateApi(), production: new PendingProductionApi() });
