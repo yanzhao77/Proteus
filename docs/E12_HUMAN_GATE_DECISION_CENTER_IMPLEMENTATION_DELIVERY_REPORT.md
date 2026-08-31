@@ -56,6 +56,8 @@ This is an implementation candidate only. It is intentionally uncommitted, unpub
 
 No E13, E14, E15, or E16 work has been started.
 
+> **Current status update (2026-08-31):** This document is a historical delivery artifact. E13 Proposal / Master Plan Editor is now **PASS / COMPLETE** (PR #34 merged). E14–E16 remain **NOT ENTERED**. See `docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md` §11 for current authority.
+
 ## References
 
 [1]: E11 trusted transport delivery and reconciliation evidence, [`E11_USER_COMMAND_TRANSPORT_IMPLEMENTATION_DELIVERY_REPORT.md`](E11_USER_COMMAND_TRANSPORT_IMPLEMENTATION_DELIVERY_REPORT.md).
