@@ -480,3 +480,34 @@ E9-only gates: frontend `66/66 PASS`, TypeScript/build PASS, oxlint `0/0`, no-DB
 | `3ee62eae487d6d74f180b9bc509c0dc399109f0c0b770511a42202b3f4d0ceea` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_human_gate.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `69a00845f8a71043269d6822e5f3267505aebe43894b582308499cb5ed9b4823` | `hermes-runtime/tests/test_fastapi_service_host.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
 | `50f79e4ffdb5857b5de25edf1ebc6df9ae0d3c308c07ccd24a4a438590bbab59` | `hermes-runtime/tests/test_p5_end_to_end_product_hardening.py` | THIS_E12_IMPLEMENTATION_CANDIDATE |
+
+## E13 Proposal / Master Plan Editor Implementation Candidate SHA-256 Inventory
+
+> `THIS_E13_IMPLEMENTATION_CANDIDATE` records the isolated, verified E13 implementation candidate. It is not committed, published, merged, or final acceptance authority. The manifest never hashes itself or ephemeral test environments.
+
+| SHA-256 | Path | Classification |
+|---|---|---|
+| `59a0374022ea02a4dc840e6d437a87b23ae009713edaa999ce390c0d5ef41733` | `docs/E13_PROPOSAL_MASTER_PLAN_EDITOR_IMPLEMENTATION_DELIVERY_REPORT.md` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `10b1af3ab38120de0dc111c0e4956a6b89bf94111c62734f40b04433aa9d0959` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `117b1a4b9aaa8660438b86048e249901c51deebe2757b09a03de6ee38bcb8896` | `frontend/src/e13ProposalPlanEditor.test.tsx` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `1442fbf272e13fe3967a7de1d04c8480981cdc3fea8f5a0f2db41301da9256c9` | `hermes-runtime/tests/test_e13_proposal_master_plan_editor.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `1f4c9f5e7e1deec41687d50ebf00a56eafd8633cdd5f10aaae5f3aaaea6f2f68` | `hermes-runtime/src/hermes_runtime/api_main.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `245480ee37c3b7359eee2c4d8f5268fa946d2e7d112d118567e37b06ebf09a3a` | `frontend/vite.config.ts` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `2926c2cc40d8fbdd15fba4e14aafa8c5f42e5f4404039b7e39afa1ecf078c54e` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_proposal_master_plan.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `432531b3e3d93f3ffe8f4202b6187f6d7519909c9d3c93bef9ebd52d5b8855ac` | `frontend/src/App.tsx` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `5b491c505ee0f4d1a4360b03057f69d80ffdae25f6699de7f5159e912ecb9d79` | `hermes-runtime/src/hermes_runtime/infrastructure/postgres_entry_approval_bridge.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `627604b3ef19e5ed3f67f295e6df6b3c40d4aa13d8699d53c6c5e71474b55697` | `frontend/src/i18n.ts` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `644f16cb89a73e73af19110baa7f938ec0427a7d8442de5f8f6e88e13f0f9d4e` | `hermes-runtime/migrations/0033_e13_editor_command_types.sql` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `68e5f1045484702c37144bff80ffa21520b459b90fdd45ff4b44891dde1984c1` | `hermes-runtime/src/hermes_runtime/infrastructure/fastapi_app.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `6fc40fc58bf4bfe172cf73dc8d277038016cec55885d1b136abab3b28ea7860d` | `frontend/src/models.ts` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `7669bd1acdc55c99cbfaea4ae17b3220d3f923be25867fc9da04ca6cc0b38e75` | `frontend/package.json` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `86abfeb85772369b3adac77eee96fa445d92fdffdbc8e980a9f81abedbcb5c09` | `frontend/src/api/productApiAdapters.ts` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `86fb60721c63586017d92d83378c334f14ff151dc9c873de5ce742c4097730be` | `frontend/playwright.config.ts` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `89673e503a306973e49f57f5c38ef9def69aa87b519f6935b825adb0360d96a6` | `hermes-runtime/src/hermes_runtime/domain/entry_proposal_master_plan.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `d127c7fb114cf8efa438406b4b011e813ab466e64b7af0d2620a852a506317be` | `frontend/src/e13ProposalPlanEditor.tsx` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `e215773c4e0fd637860a99af7a6ae70b1bed670519888fb041944384e4a8d4e2` | `hermes-runtime/src/hermes_runtime/application/entry_proposal_master_plan_api.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `e6f86480c1508f5858cedeba47487bb6b6ce1d42b9580d43135281d4024115a1` | `frontend/e2e/e13-editor.spec.ts` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `f2919462c7701ce01d558f65e57c7dd1b14b2eb57b02817c22cdcc6149f49a2e` | `frontend/pnpm-lock.yaml` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `8bbdff060cbde2ed78edbd48edd30ee33a586248ca7591b332244184c78ed8d9` | `frontend/.gitignore` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+
+The manifest itself (`docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md`) is not hashed.

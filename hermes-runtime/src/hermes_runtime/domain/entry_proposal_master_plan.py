@@ -301,6 +301,224 @@ def compile_master_plan(proposal_content: Mapping[str, Any], proposal_hash: str,
     return MasterPlanCandidate(content=_normalise(content), content_hash=canonical_content_hash(content))
 
 
+PROPOSAL_EDITABLE_KEYS = (
+    "product_statement", "target_outcome", "scope_in", "scope_out",
+    "requirements", "assumptions", "unresolved_items", "complexity_band", "candidate_architecture",
+)
+PROPOSAL_COMPILER_EDITOR = "proposal-editor-v1"
+MASTER_PLAN_COMPILER_EDITOR = "master-plan-editor-v1"
+VALID_COMPLEXITY_BANDS = ("LOW", "MEDIUM", "HIGH", "REVIEW_REQUIRED")
+
+
+def _as_str_list(value: object, code: str) -> list[str]:
+    if not isinstance(value, list):
+        _reject(code)
+    result: list[str] = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            _reject(code)
+        result.append(item.strip())
+    return result
+
+
+def _as_str(value: object, code: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        _reject(code)
+    return value.strip()
+
+
+def validate_editable_proposal_fields(raw: object) -> Mapping[str, Any]:
+    """Strict schema for a user-edited Proposal revision; rejects unknown keys and invalid shapes."""
+    if not isinstance(raw, Mapping):
+        _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    unknown = set(raw) - set(PROPOSAL_EDITABLE_KEYS)
+    if unknown:
+        _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields: dict[str, Any] = {}
+    fields["product_statement"] = _as_str(raw.get("product_statement"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields["target_outcome"] = _as_str(raw.get("target_outcome"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields["scope_in"] = _as_str_list(raw.get("scope_in", []), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields["scope_out"] = _as_str_list(raw.get("scope_out", []), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    requirements = raw.get("requirements")
+    if not isinstance(requirements, list) or not requirements:
+        _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    req_keys: set[str] = set()
+    reqs: list[Mapping[str, Any]] = []
+    for item in requirements:
+        if not isinstance(item, Mapping):
+            _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+        key = _as_str(item.get("key"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+        statement = _as_str(item.get("statement"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+        if key in req_keys:
+            _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+        req_keys.add(key)
+        reqs.append({"key": key, "statement": statement, "source": _as_str(item.get("source", "entry_understanding"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")})
+    fields["requirements"] = reqs
+    assumptions = raw.get("assumptions", [])
+    if not isinstance(assumptions, list):
+        _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields["assumptions"] = [
+        {
+            "assumption_id": _as_str(item.get("assumption_id"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID"),
+            "statement": _as_str(item.get("statement"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID"),
+            "basis": item.get("basis") if isinstance(item.get("basis"), str) else "",
+            "status": _as_str(item.get("status", "UNCONFIRMED_SOURCE_ASSUMPTION"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID"),
+        }
+        for item in assumptions if isinstance(item, Mapping)
+    ]
+    fields["unresolved_items"] = _as_str_list(raw.get("unresolved_items", []), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    band = raw.get("complexity_band")
+    if band not in VALID_COMPLEXITY_BANDS:
+        _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields["complexity_band"] = band
+    arch = raw.get("candidate_architecture")
+    if not isinstance(arch, Mapping) or not isinstance(arch.get("status"), str) or not isinstance(arch.get("reason"), str):
+        _reject("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    fields["candidate_architecture"] = {"status": str(arch["status"]), "reason": str(arch["reason"])}
+    return fields
+
+
+def build_edited_proposal_content(base_content: Mapping[str, Any], fields: Mapping[str, Any]) -> ProposalCandidate:
+    """Overlay edited fields onto the source lineage preserved from the latest revision."""
+    source = _require_mapping(base_content.get("source"), "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+    content: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "compiler": PROPOSAL_COMPILER_EDITOR,
+        "source": {
+            "draft_id": source.get("draft_id"),
+            "draft_revision_id": source.get("draft_revision_id"),
+            "understanding_id": source.get("understanding_id"),
+            "understanding_revision_id": source.get("understanding_revision_id"),
+            "clarification_ids": list(source.get("clarification_ids", []) or []),
+            "assumption_ids": list(source.get("assumption_ids", []) or []),
+        },
+        "product_statement": fields["product_statement"],
+        "target_outcome": fields["target_outcome"],
+        "scope_in": sorted(set(fields["scope_in"])),
+        "scope_out": sorted(set(fields["scope_out"])),
+        "requirements": fields["requirements"],
+        "assumptions": fields["assumptions"],
+        "clarifications": list(base_content.get("clarifications", []) or []),
+        "candidate_architecture": fields["candidate_architecture"],
+        "proposed_phases": list(base_content.get("proposed_phases", ["review", "delivery-planning"]) or ["review", "delivery-planning"]),
+        "workforce_intent": dict(base_content.get("workforce_intent", {"status": "ADVISORY_ONLY", "allocated_workers": []})),
+        "verification_strategy": dict(base_content.get("verification_strategy", {"status": "REVIEW_REQUIRED", "requirement_keys": [item["key"] for item in fields["requirements"]]})),
+        "delivery_strategy": dict(base_content.get("delivery_strategy", {"status": "REVIEW_REQUIRED", "method": "not-authorized-for-production"})),
+        "complexity_band": fields["complexity_band"],
+        "known_risks": list(fields["unresolved_items"]),
+        "unresolved_items": list(fields["unresolved_items"]),
+        "constraints": sorted(set(base_content.get("constraints", []) or [])),
+    }
+    return ProposalCandidate(content=_normalise(content), content_hash=canonical_content_hash(content))
+
+
+MASTER_PLAN_EDITABLE_KEYS = (
+    "goal", "requirements", "constraints", "phases", "nodes", "dependencies", "verification_intent", "risks",
+)
+
+
+def validate_editable_master_plan_fields(raw: object) -> Mapping[str, Any]:
+    if not isinstance(raw, Mapping):
+        _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    if set(raw) - set(MASTER_PLAN_EDITABLE_KEYS):
+        _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    fields: dict[str, Any] = {}
+    fields["goal"] = _as_str(raw.get("goal"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    requirements = raw.get("requirements")
+    if not isinstance(requirements, list) or not requirements:
+        _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    req_keys: set[str] = set()
+    reqs: list[Mapping[str, Any]] = []
+    for item in requirements:
+        if not isinstance(item, Mapping):
+            _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        key = _as_str(item.get("key"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        statement = _as_str(item.get("statement"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        if key in req_keys:
+            _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        req_keys.add(key)
+        reqs.append({"key": key, "statement": statement, "source": _as_str(item.get("source", "entry_understanding"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")})
+    fields["requirements"] = reqs
+    fields["constraints"] = _as_str_list(raw.get("constraints", []), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    phases = raw.get("phases", [])
+    fields["phases"] = _as_str_list(phases, "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    nodes = raw.get("nodes")
+    if not isinstance(nodes, list) or not nodes:
+        _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    node_keys: set[str] = set()
+    node_list: list[Mapping[str, Any]] = []
+    for item in nodes:
+        if not isinstance(item, Mapping):
+            _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        node_key = _as_str(item.get("node_key"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        if node_key in node_keys:
+            _reject("ENTRY_PLAN_DAG_INVALID")
+        node_keys.add(node_key)
+        node_list.append({
+            "node_key": node_key,
+            "phase": _as_str(item.get("phase"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+            "title": _as_str(item.get("title"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+            "requirement_refs": _as_str_list(item.get("requirement_refs", []), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+            "verification_refs": _as_str_list(item.get("verification_refs", []), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+        })
+    fields["nodes"] = node_list
+    dependencies = raw.get("dependencies", [])
+    if not isinstance(dependencies, list):
+        _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    dep_list: list[Mapping[str, Any]] = []
+    for item in dependencies:
+        if not isinstance(item, Mapping):
+            _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        dep_list.append({
+            "source": _as_str(item.get("source"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+            "target": _as_str(item.get("target"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+        })
+    fields["dependencies"] = dep_list
+    verification = raw.get("verification_intent")
+    if not isinstance(verification, Mapping) or not isinstance(verification.get("requirement_keys"), list):
+        _reject("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    fields["verification_intent"] = {
+        "status": _as_str(verification.get("status", "REVIEW_REQUIRED"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+        "requirement_keys": _as_str_list(verification.get("requirement_keys"), "ENTRY_PLAN_EDIT_SCHEMA_INVALID"),
+    }
+    fields["risks"] = _as_str_list(raw.get("risks", []), "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+    return fields
+
+
+def build_edited_master_plan_content(
+    base_content: Mapping[str, Any],
+    fields: Mapping[str, Any],
+    proposal_revision_id: str,
+    proposal_content_hash: str,
+    source: Mapping[str, Any],
+) -> MasterPlanCandidate:
+    content: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "compiler": MASTER_PLAN_COMPILER_EDITOR,
+        "proposal": {"proposal_revision_id": proposal_revision_id, "proposal_content_hash": proposal_content_hash},
+        "source": {
+            "draft_id": source.get("draft_id"),
+            "draft_revision_id": source.get("draft_revision_id"),
+            "understanding_id": source.get("understanding_id"),
+            "understanding_revision_id": source.get("understanding_revision_id"),
+        },
+        "goal": fields["goal"],
+        "requirements": fields["requirements"],
+        "constraints": fields["constraints"],
+        "architecture": dict(base_content.get("architecture", {"status": "REVIEW_REQUIRED", "reason": "not-authored-by-editor"})),
+        "phases": fields["phases"],
+        "nodes": fields["nodes"],
+        "dependencies": fields["dependencies"],
+        "risks": fields["risks"],
+        "verification_intent": fields["verification_intent"],
+        "delivery_intent": dict(base_content.get("delivery_intent", {"status": "REVIEW_REQUIRED", "method": "not-authorized-for-production"})),
+        "workforce_intent": dict(base_content.get("workforce_intent", {"status": "ADVISORY_ONLY", "allocated_workers": []})),
+        "pre_approval_only": True,
+    }
+    validate_master_plan_content(content)
+    return MasterPlanCandidate(content=_normalise(content), content_hash=canonical_content_hash(content))
+
+
 def request_fingerprint(command_type: str, expected_version: int, reason: str, source_ids: Mapping[str, Any]) -> str:
     return canonical_content_hash({
         "command_type": command_type,

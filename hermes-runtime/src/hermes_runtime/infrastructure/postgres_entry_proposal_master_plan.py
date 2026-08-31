@@ -12,9 +12,14 @@ from hermes_runtime.domain.entry_proposal_master_plan import (
     ProposalSource,
     SourceAssumption,
     SourceClarification,
+    build_edited_master_plan_content,
+    build_edited_proposal_content,
+    canonical_content_hash,
     compile_master_plan,
     compile_proposal,
     request_fingerprint,
+    validate_editable_master_plan_fields,
+    validate_editable_proposal_fields,
 )
 
 
@@ -25,8 +30,9 @@ class EntryProposalMasterPlanStoreUnavailable(RuntimeError):
 class PostgresEntryProposalMasterPlanStore:
     """E3-only durable authority; it never addresses Project/P6 tables."""
 
-    def __init__(self, dsn: str):
+    def __init__(self, dsn: str, plan_materialization_guard=None):
         self._dsn = dsn
+        self._plan_materialization_guard = plan_materialization_guard
 
     def _connect(self):
         return psycopg.connect(self._dsn, row_factory=dict_row)
@@ -34,6 +40,18 @@ class PostgresEntryProposalMasterPlanStore:
     @staticmethod
     def _code(error: Exception) -> str:
         return str(error) if isinstance(error, EntryE3Rejected) else "ENTRY_PROPOSAL_COMPILER_FAILED"
+
+    @staticmethod
+    def _idempotency_conflict_code(command_type: str) -> str:
+        if command_type == "GENERATE_PROPOSAL":
+            return "ENTRY_PROPOSAL_IDEMPOTENCY_CONFLICT"
+        if command_type == "GENERATE_MASTER_PLAN":
+            return "ENTRY_PLAN_IDEMPOTENCY_CONFLICT"
+        if command_type == "SAVE_PROPOSAL_REVISION":
+            return "ENTRY_PROPOSAL_SAVE_IDEMPOTENCY_CONFLICT"
+        if command_type == "SAVE_MASTER_PLAN_REVISION":
+            return "ENTRY_PLAN_SAVE_IDEMPOTENCY_CONFLICT"
+        return "ENTRY_PROPOSAL_IDEMPOTENCY_CONFLICT"
 
     def _claim_receipt(
         self,
@@ -50,9 +68,7 @@ class PostgresEntryProposalMasterPlanStore:
         ).fetchone()
         if row:
             if row["request_fingerprint"] != fingerprint:
-                raise EntryE3Rejected(
-                    "ENTRY_PROPOSAL_IDEMPOTENCY_CONFLICT" if command_type == "GENERATE_PROPOSAL" else "ENTRY_PLAN_IDEMPOTENCY_CONFLICT"
-                )
+                raise EntryE3Rejected(self._idempotency_conflict_code(command_type))
             if row["status"] == "SUCCEEDED" and row["result_payload"]:
                 return dict(row["result_payload"])
             raise EntryE3Rejected(str(row["error_code"] or "ENTRY_PROPOSAL_COMPILER_FAILED"))
@@ -334,10 +350,20 @@ class PostgresEntryProposalMasterPlanStore:
                 "compiler": row["compiler_name"], "schema_version": row["schema_version"], "content_hash": row["canonical_content_hash"],
                 "content": dict(row["canonical_content"]), "created_at": row["created_at"].isoformat(),
             }
+        current = revision(revisions[-1])
+        proposal_row = c.execute(
+            "SELECT pr.proposal_revision_id FROM public.entry_proposals p JOIN public.entry_proposal_revisions pr "
+            "ON pr.proposal_id=p.proposal_id AND pr.revision_number=p.latest_revision_number WHERE p.proposal_id=%s",
+            (plan["proposal_id"],),
+        ).fetchone()
+        proposal_revision_status = (
+            "CURRENT" if proposal_row and proposal_row["proposal_revision_id"] == current["proposal_revision_id"] else "STALE"
+        )
         return {
             "master_plan_id": plan_id, "proposal_id": plan["proposal_id"], "draft_id": draft_id, "version": int(plan["version"]),
-            "latest_revision_number": int(plan["latest_revision_number"]), "current": revision(revisions[-1]),
+            "latest_revision_number": int(plan["latest_revision_number"]), "current": current,
             "revisions": [revision(row) for row in revisions], "pre_approval_only": True,
+            "proposal_revision_status": proposal_revision_status,
         }
 
     def get_master_plan(self, creator: str, draft_id: str) -> Mapping[str, Any]:
@@ -356,3 +382,127 @@ class PostgresEntryProposalMasterPlanStore:
     def list_master_plan_revisions(self, creator: str, draft_id: str) -> Mapping[str, Any]:
         result = self.get_master_plan(creator, draft_id)
         return {"availability": result["availability"], "reason": result.get("reason"), "items": []} if not result.get("item") else {"availability": "CURRENT", "items": result["item"]["revisions"]}
+
+    def save_proposal_revision(self, creator: str, draft_id: str, expected_version: int, idempotency_key: str, reason: str, content: Mapping[str, Any]) -> Mapping[str, Any]:
+        if not creator or not draft_id or not idempotency_key or not reason or expected_version < 0:
+            raise EntryE3Rejected("ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+        fields = validate_editable_proposal_fields(content)
+        command = "SAVE_PROPOSAL_REVISION"
+        fingerprint = request_fingerprint(command, expected_version, reason, {"draft_id": draft_id, "content_hash": canonical_content_hash(fields)})
+        try:
+            with self._connect() as c:
+                replay = self._claim_receipt(c, creator, command, idempotency_key, fingerprint)
+                if replay is not None:
+                    return replay
+                try:
+                    existing = c.execute(
+                        "SELECT * FROM public.entry_proposals WHERE draft_id=%s AND creator_subject=%s FOR UPDATE",
+                        (draft_id, creator),
+                    ).fetchone()
+                    if not existing:
+                        raise EntryE3Rejected("ENTRY_PROPOSAL_NOT_AVAILABLE")
+                    actual = int(existing["version"])
+                    if actual != expected_version:
+                        raise EntryE3Rejected("ENTRY_PROPOSAL_VERSION_CONFLICT")
+                    latest = c.execute(
+                        "SELECT * FROM public.entry_proposal_revisions WHERE proposal_id=%s AND revision_number=%s",
+                        (existing["proposal_id"], existing["latest_revision_number"]),
+                    ).fetchone()
+                    candidate = build_edited_proposal_content(dict(latest["canonical_content"]), fields)
+                    proposal_id = existing["proposal_id"]
+                    revision_number = int(existing["latest_revision_number"]) + 1
+                    version = actual + 1
+                    revision_id = "epr-" + uuid.uuid4().hex
+                    c.execute(
+                        "INSERT INTO public.entry_proposal_revisions("
+                        "proposal_revision_id,proposal_id,revision_number,source_draft_id,source_draft_revision_id,"
+                        "source_understanding_id,source_understanding_revision_id,compiler_name,schema_version,canonical_content,canonical_content_hash) "
+                        "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s)",
+                        (revision_id, proposal_id, revision_number, latest["source_draft_id"], latest["source_draft_revision_id"],
+                         latest["source_understanding_id"], latest["source_understanding_revision_id"], "proposal-editor-v1", "e3-v1",
+                         json.dumps(candidate.content), candidate.content_hash),
+                    )
+                    c.execute(
+                        "UPDATE public.entry_proposals SET version=%s,latest_revision_number=%s,updated_at=now() WHERE proposal_id=%s",
+                        (version, revision_number, proposal_id),
+                    )
+                    result = self._proposal_detail(c, creator, draft_id, proposal_id)
+                    self._complete_receipt(c, creator, command, idempotency_key, result)
+                    return result
+                except EntryE3Rejected as error:
+                    self._fail_receipt(creator, command, idempotency_key, self._code(error))
+                    raise
+        except EntryE3Rejected:
+            raise
+        except Exception as exc:
+            raise EntryProposalMasterPlanStoreUnavailable("ENTRY_PROPOSAL_AUTHORITY_UNAVAILABLE") from exc
+
+    def save_master_plan_revision(self, creator: str, draft_id: str, expected_version: int, idempotency_key: str, reason: str, content: Mapping[str, Any]) -> Mapping[str, Any]:
+        if not creator or not draft_id or not idempotency_key or not reason or expected_version < 0:
+            raise EntryE3Rejected("ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+        fields = validate_editable_master_plan_fields(content)
+        command = "SAVE_MASTER_PLAN_REVISION"
+        fingerprint = request_fingerprint(command, expected_version, reason, {"draft_id": draft_id, "content_hash": canonical_content_hash(fields)})
+        try:
+            with self._connect() as c:
+                replay = self._claim_receipt(c, creator, command, idempotency_key, fingerprint)
+                if replay is not None:
+                    return replay
+                try:
+                    proposal = c.execute(
+                        "SELECT * FROM public.entry_proposals WHERE draft_id=%s AND creator_subject=%s FOR UPDATE",
+                        (draft_id, creator),
+                    ).fetchone()
+                    if not proposal:
+                        raise EntryE3Rejected("ENTRY_PLAN_NOT_AVAILABLE")
+                    existing = c.execute(
+                        "SELECT * FROM public.entry_master_plans WHERE proposal_id=%s AND creator_subject=%s FOR UPDATE",
+                        (proposal["proposal_id"], creator),
+                    ).fetchone()
+                    if not existing:
+                        raise EntryE3Rejected("ENTRY_PLAN_NOT_AVAILABLE")
+                    if self._plan_materialization_guard and self._plan_materialization_guard(existing["master_plan_id"]):
+                        raise EntryE3Rejected("ENTRY_PLAN_MATERIALIZED_PROTECTED")
+                    actual = int(existing["version"])
+                    if actual != expected_version:
+                        raise EntryE3Rejected("ENTRY_PLAN_VERSION_CONFLICT")
+                    latest = c.execute(
+                        "SELECT * FROM public.entry_master_plan_revisions WHERE master_plan_id=%s AND revision_number=%s",
+                        (existing["master_plan_id"], existing["latest_revision_number"]),
+                    ).fetchone()
+                    candidate = build_edited_master_plan_content(
+                        dict(latest["canonical_content"]),
+                        fields,
+                        latest["proposal_revision_id"],
+                        latest["proposal_content_hash"],
+                        {
+                            "draft_id": latest["source_draft_revision_id"],
+                            "draft_revision_id": latest["source_draft_revision_id"],
+                            "understanding_id": latest["source_understanding_revision_id"],
+                            "understanding_revision_id": latest["source_understanding_revision_id"],
+                        },
+                    )
+                    plan_id = existing["master_plan_id"]
+                    revision_number = int(existing["latest_revision_number"]) + 1
+                    version = actual + 1
+                    revision_id = "empr-" + uuid.uuid4().hex
+                    c.execute(
+                        "INSERT INTO public.entry_master_plan_revisions("
+                        "master_plan_revision_id,master_plan_id,revision_number,proposal_revision_id,proposal_content_hash,"
+                        "source_draft_revision_id,source_understanding_revision_id,compiler_name,schema_version,canonical_content,canonical_content_hash) "
+                        "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::jsonb,%s)",
+                        (revision_id, plan_id, revision_number, latest["proposal_revision_id"], latest["proposal_content_hash"],
+                         latest["source_draft_revision_id"], latest["source_understanding_revision_id"], "master-plan-editor-v1", "e3-v1",
+                         json.dumps(candidate.content), candidate.content_hash),
+                    )
+                    c.execute("UPDATE public.entry_master_plans SET version=%s,latest_revision_number=%s,updated_at=now() WHERE master_plan_id=%s", (version, revision_number, plan_id))
+                    result = self._master_plan_detail(c, creator, draft_id, plan_id)
+                    self._complete_receipt(c, creator, command, idempotency_key, result)
+                    return result
+                except EntryE3Rejected as error:
+                    self._fail_receipt(creator, command, idempotency_key, self._code(error))
+                    raise
+        except EntryE3Rejected:
+            raise
+        except Exception as exc:
+            raise EntryProposalMasterPlanStoreUnavailable("ENTRY_PLAN_AUTHORITY_UNAVAILABLE") from exc

@@ -88,11 +88,14 @@ def build_app():
     )
     # No generic live LLM/provider is an established repository capability; remain fail-closed.
     entry_understanding_api = PostgresEntryUnderstandingStore(database_url, build_understanding_producer_from_env()) if database_url and oidc_verifier else UnavailableEntryUnderstandingApi()
-    entry_proposal_master_plan_api = PostgresEntryProposalMasterPlanStore(database_url) if database_url and oidc_verifier else UnavailableEntryProposalMasterPlanApi()
+    entry_proposal_master_plan_api = UnavailableEntryProposalMasterPlanApi()
     user_project_command_transport = UnavailableUserProjectCommandTransport()
     user_human_gate_transport = UnavailableUserHumanGateTransport()
     if database_url and oidc_verifier:
         _bridge_store = PostgresEntryApprovalBridgeStore(database_url)
+        entry_proposal_master_plan_api = PostgresEntryProposalMasterPlanStore(
+            database_url, plan_materialization_guard=lambda plan_id: _bridge_store.is_master_plan_approved(plan_id)
+        )
         _project_store = PostgresProjectStore(database_url)
         _control_plane = ControlPlane(_project_store)
         user_project_command_transport = UserProjectCommandTransport(
@@ -110,11 +113,13 @@ def build_app():
         )
     else:
         entry_approval_bridge_api = UnavailableEntryApprovalBridgeApi()
+    session_cookie_secure = os.getenv("HERMES_SESSION_COOKIE_SECURE", "true").strip().lower() != "false"
     return create_app(
         ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api, live_production_read_model, user_project_command_transport, user_human_gate_transport),
         StaticReadinessCheck(database_ready=bool(database_url)),
         allowed_cors_origins=origins,
         oidc_verifier=oidc_verifier,
+        session_cookie_secure=session_cookie_secure,
     )
 
 

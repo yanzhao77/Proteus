@@ -194,6 +194,9 @@ class ProductApiFacade:
             if method == "POST" and len(parts) == 3:
                 payload = self._e3_payload(request, "ENTRY_PROPOSAL_SCHEMA_INVALID")
                 return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.generate_proposal(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
+            if method == "POST" and len(parts) == 4 and parts[3] == "revisions":
+                payload = self._e3_edit_payload(request, "ENTRY_PROPOSAL_EDIT_SCHEMA_INVALID")
+                return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.save_proposal_revision(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"], payload["content"])})
             if len(parts) >= 4 and parts[3] == "master-plan":
                 if method == "GET" and len(parts) == 4:
                     return self._safe(200, self._entry_proposal_master_plan_api.get_master_plan(subject, draft_id))
@@ -202,6 +205,9 @@ class ProductApiFacade:
                 if method == "POST" and len(parts) == 4:
                     payload = self._e3_payload(request, "ENTRY_PLAN_SCHEMA_INVALID")
                     return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.generate_master_plan(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"])})
+                if method == "POST" and len(parts) == 5 and parts[4] == "revisions":
+                    payload = self._e3_edit_payload(request, "ENTRY_PLAN_EDIT_SCHEMA_INVALID")
+                    return self._safe(201, {"availability": "CURRENT", "item": self._entry_proposal_master_plan_api.save_master_plan_revision(subject, draft_id, payload["expected_version"], payload["idempotency_key"], payload["reason"], payload["content"])})
                 if method == "GET" and len(parts) == 5 and parts[4] == "approval-preview":
                     preview = self._entry_approval_bridge_api.preview(subject, draft_id)
                     if isinstance(preview, Mapping):
@@ -284,6 +290,22 @@ class ProductApiFacade:
         if not isinstance(key, str) or not key.strip() or not isinstance(reason, str) or not reason.strip() or not isinstance(expected, int) or expected < 0:
             raise ProductApiRejected(code)
         return {"idempotency_key": key, "reason": reason, "expected_version": expected}
+
+    @staticmethod
+    def _e3_edit_payload(request: ProductApiRequest, code: str) -> Mapping[str, Any]:
+        body = dict(request.body)
+        allowed = {"idempotency_key", "reason", "expected_version", "content"}
+        if set(body) - allowed:
+            raise ProductApiRejected(code)
+        key = body.get("idempotency_key") or request.headers.get("Idempotency-Key")
+        reason = body.get("reason")
+        expected = body.get("expected_version")
+        content = body.get("content")
+        if not isinstance(key, str) or not key.strip() or not isinstance(reason, str) or not reason.strip() or not isinstance(expected, int) or expected < 0:
+            raise ProductApiRejected(code)
+        if not isinstance(content, Mapping):
+            raise ProductApiRejected(code)
+        return {"idempotency_key": key, "reason": reason, "expected_version": expected, "content": content}
 
     @staticmethod
     def _e4_payload(request: ProductApiRequest, reconcile: bool = False) -> Mapping[str, Any]:

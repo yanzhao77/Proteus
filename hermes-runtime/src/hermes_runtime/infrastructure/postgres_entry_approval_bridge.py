@@ -190,3 +190,14 @@ class PostgresEntryApprovalBridgeStore:
                 return {"availability": "CURRENT", "item": dict(row)}
         except Exception as exc:
             raise EntryApprovalBridgeUnavailable("ENTRY_APPROVAL_UNAVAILABLE") from exc
+
+    def is_master_plan_approved(self, master_plan_id: str) -> bool:
+        """Read-only E4 guard used by E3 to protect approved/materialized plans from silent overwrite."""
+        try:
+            with self._connect() as c:
+                row = c.execute(
+                    "SELECT 1 FROM public.entry_approval_bridges WHERE master_plan_id=%s LIMIT 1", (master_plan_id,)
+                ).fetchone()
+                return row is not None
+        except Exception:
+            return False
