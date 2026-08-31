@@ -72,6 +72,7 @@ flowchart LR
 | **E4 · Approval Bridge** | **PASS / COMPLETE** | receipt-first durable saga，经既有 Control Plane ports 幂等物化。 |
 | **E5–E7 · Product Experience** | **PASS / COMPLETE** | Source-derived Product API/read model、production-real-API Factory Home resume、read-only Live Production snapshot/live-feed。 |
 | **E8 · Production Entry Trial** | **PASS / COMPLETE** | 同一项目的真实 E4→P6→E7 纵向验收已合并；E9–E11 Global Product Workspace 正在独立交付。 |
+| **E13 · Proposal/Master Plan Editor** | **PASS / COMPLETE** | 不可变 Proposal/Master Plan revision editor，客户端+服务端 DAG 校验，creator-scoped save，幂等性与 expected-version 冲突检测。 |
 
 ### Control Plane
 
@@ -276,4 +277,4 @@ Proteus 使用 [Apache License 2.0](LICENSE)。
 
 ## E9-only Acceptance Closure Status
 
-The E9 design-system acceptance scope is **PASS / COMPLETE**: 22 full locale catalogs, ten themes, typography and display preferences, RTL/CJK, accessibility, and browser-responsive evidence are delivered. E10 remains delivered. **E11 and E12 are PASS / COMPLETE**: the Project Operations Workspace trusted Control Plane transport and bounded E7 receipt reconciliation are merged, and the Human Gate Decision Center (creator-scoped Gate Inbox/Detail and APPROVE/REJECT decision transport) is merged with CI, real browser E2E, and PostgreSQL durable evidence passing. Accordingly, **the E9–E12 scope is COMPLETE**, and E13–E16 remain NOT ENTERED.
+The E9 design-system acceptance scope is **PASS / COMPLETE**: 22 full locale catalogs, ten themes, typography and display preferences, RTL/CJK, accessibility, and browser-responsive evidence are delivered. E10 remains delivered. **E11 and E12 are PASS / COMPLETE**: the Project Operations Workspace trusted Control Plane transport and bounded E7 receipt reconciliation are merged, and the Human Gate Decision Center (creator-scoped Gate Inbox/Detail and APPROVE/REJECT decision transport) is merged with CI, real browser E2E, and PostgreSQL durable evidence passing. Accordingly, **the E9–E12 scope is COMPLETE**. **E13 Proposal / Master Plan Editor is PASS / COMPLETE**: immutable Proposal/Master Plan revision editor with client+server DAG validation, creator-scoped save, idempotency and expected-version conflict; CI 3/3 PASS, Vitest 87/87 PASS, Playwright E2E 9/9 PASS, PostgreSQL 17/17 PASS, E3/E4/E11/E12 regression 65/65 PASS. E14–E16 remain NOT ENTERED.
