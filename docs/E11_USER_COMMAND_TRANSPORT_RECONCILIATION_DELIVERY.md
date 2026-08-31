@@ -64,3 +64,5 @@ All database evidence used the existing disposable PostgreSQL 16 migration basel
 This candidate now satisfies the post-command E7 reconciliation behavior that was missing from the first PR #30 review: the UI has an explicit pending/reconciling state, a bounded creator-scoped read loop, source-derived applied confirmation, safe rehydrate/uncertain handling, repeat-click prevention, abort cleanup, and reload receipt recovery.
 
 It does **not** change the overarching acceptance authority. E11 remains `PARTIAL / ACCEPTANCE GAP` until PR review, a separately authorized standard merge, and post-merge verification occur. E9–E11 Wave A remains `NOT COMPLETE`, and E12–E16 remain `NOT ENTERED`.
+
+> **Current status update (2026-08-31):** This document is a historical delivery artifact. E11 is now **PASS / COMPLETE** (PR #31 merged). E13 Proposal / Master Plan Editor is **PASS / COMPLETE** (PR #34 merged). See `docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md` §11 for current authority.
