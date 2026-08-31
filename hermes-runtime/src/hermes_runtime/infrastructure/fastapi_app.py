@@ -311,6 +311,14 @@ def create_app(
     @app.post("/production-drafts/{draft_id}/proposal/master-plan")
     async def generate_production_draft_master_plan(draft_id: str, request: Request):
         return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/master-plan", await _json_body(request))
+
+    @app.post("/production-drafts/{draft_id}/proposal/revisions")
+    async def save_production_draft_proposal_revision(draft_id: str, request: Request):
+        return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/revisions", await _json_body(request))
+
+    @app.post("/production-drafts/{draft_id}/proposal/master-plan/revisions")
+    async def save_production_draft_master_plan_revision(draft_id: str, request: Request):
+        return _draft_dispatch(request, "POST", f"/production-drafts/{draft_id}/proposal/master-plan/revisions", await _json_body(request))
     @app.get("/production-drafts/{draft_id}/proposal/master-plan/approval-preview")
     def production_draft_master_plan_approval_preview(draft_id: str, request: Request):
         return _draft_dispatch(request, "GET", f"/production-drafts/{draft_id}/proposal/master-plan/approval-preview", {})
@@ -461,7 +469,7 @@ def _dispatch(
         return _error("E2_UNDERSTANDING_AUTHORITY_UNAVAILABLE", 503, request_id, "understanding authority unavailable")
     except EntryE3Rejected as exc:
         code = str(exc).split(":", 1)[0]
-        status = 409 if code.endswith("_VERSION_CONFLICT") or code.endswith("_IDEMPOTENCY_CONFLICT") or code.endswith("_SOURCE_STALE") else 404 if code in {"ENTRY_PROPOSAL_NOT_AVAILABLE", "ENTRY_PLAN_NOT_AVAILABLE"} else 422
+        status = 409 if code.endswith("_VERSION_CONFLICT") or code.endswith("_IDEMPOTENCY_CONFLICT") or code.endswith("_SOURCE_STALE") or code in {"ENTRY_PLAN_MATERIALIZED_PROTECTED"} else 404 if code in {"ENTRY_PROPOSAL_NOT_AVAILABLE", "ENTRY_PLAN_NOT_AVAILABLE"} else 422
         return _error(code, status, request_id, "request rejected")
     except EntryProposalMasterPlanStoreUnavailable as exc:
         code = str(exc).split(":", 1)[0]
