@@ -149,9 +149,9 @@ All 99 E13 keys (including `e13.editor.saveReason` and 4 dependency validation k
 | Playwright E2E | 9 | 9 | 0 | 0 |
 | E13 PostgreSQL | 17 | 17 | 0 | 0 |
 | E3/E4 regression | 48 | 48 | 0 | 0 |
-| E11/E12 regression | — | PASS | — | — |
+| E11/E12 regression | 17 | 17 | 0 | 0 |
 | i18n catalog validation | 1 | 1 | 0 | 0 |
-| **Total** | **163** | **163** | **0** | **0** |
+| **Total** | **180** | **180** | **0** | **0** |
 
 ## 10. E14–E16 status
 

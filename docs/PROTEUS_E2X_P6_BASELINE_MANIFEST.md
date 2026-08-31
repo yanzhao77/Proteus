@@ -487,7 +487,7 @@ E9-only gates: frontend `66/66 PASS`, TypeScript/build PASS, oxlint `0/0`, no-DB
 
 | SHA-256 | Path | Classification |
 |---|---|---|
-| `bdf487fae3ef803e6d9a1bf5d384f42d235d95be4288522d3c9fa8c8edf55778` | `docs/E13_PROPOSAL_MASTER_PLAN_EDITOR_IMPLEMENTATION_DELIVERY_REPORT.md` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
+| `59a0374022ea02a4dc840e6d437a87b23ae009713edaa999ce390c0d5ef41733` | `docs/E13_PROPOSAL_MASTER_PLAN_EDITOR_IMPLEMENTATION_DELIVERY_REPORT.md` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
 | `10b1af3ab38120de0dc111c0e4956a6b89bf94111c62734f40b04433aa9d0959` | `hermes-runtime/src/hermes_runtime/application/product_api.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
 | `117b1a4b9aaa8660438b86048e249901c51deebe2757b09a03de6ee38bcb8896` | `frontend/src/e13ProposalPlanEditor.test.tsx` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
 | `1442fbf272e13fe3967a7de1d04c8480981cdc3fea8f5a0f2db41301da9256c9` | `hermes-runtime/tests/test_e13_proposal_master_plan_editor.py` | `THIS_E13_IMPLEMENTATION_CANDIDATE` |
