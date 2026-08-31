@@ -70,6 +70,8 @@
 | E11 最终接受状态 | **PARTIAL / ACCEPTANCE GAP**，直到实现 PR 经标准审查与合并后核验。 |
 | E9–E11 Wave A | **NOT COMPLETE**；本候选实现不改写历史 Wave A 的已接受范围。 |
 | E12–E16 | **NOT ENTERED**。 |
+
+> **当前状态更新 (2026-08-31):** 本文档为历史交付记录。E11 已 **PASS / COMPLETE**（PR #31 已合并）。E13 Proposal / Master Plan Editor 已 **PASS / COMPLETE**（PR #34 已合并）。当前权威状态见 `docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md` §11。
 | migration / ACL / role 变更 | **NONE**。 |
 | 实现 PR 合并 | **NOT AUTHORIZED；不得自动合并**。 |
 

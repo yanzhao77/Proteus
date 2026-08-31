@@ -3,6 +3,8 @@
 > **Status:** `DESIGN-ONLY / IMPLEMENTATION NOT AUTHORIZED`
 >
 > **Authority conclusion:** E11 remains **PARTIAL / ACCEPTANCE GAP**. This report neither implements nor authorizes a user command transport.
+>
+> **Current status update (2026-08-31):** This document is a historical design artifact. E11 is now **PASS / COMPLETE** (PR #31 merged). E13 Proposal / Master Plan Editor is **PASS / COMPLETE** (PR #34 merged). See `docs/PROTEUS_E2X_P6_BASELINE_MANIFEST.md` §11 for current authority.
 
 ## 1. Scope and verified baseline
 

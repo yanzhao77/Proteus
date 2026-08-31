@@ -1,8 +1,9 @@
 # E13 Proposal / Master Plan Editor — Implementation Delivery Report
 
-**Delivery state:** `E13 IMPLEMENTED / FULLY VALIDATED CANDIDATE — NOT ACCEPTED / NOT PUBLISHED`
+**Delivery state:** `E13 PASS / COMPLETE`
 **Baseline:** branch `feat/e13-proposal-master-plan-editor` at commit `53826f5bb44fd3e55c2e394ed4a3c91005c53479` (remote `master` E12-complete baseline).
-**Scope:** E13 only. This candidate does not enter E14–E16 and does not create a pull request. The authoritative status matrix in `PROTEUS_E2X_P6_BASELINE_MANIFEST.md` remains `E13–E16 | NOT ENTERED`.
+**Merge:** PR [#34](https://github.com/yanzhao77/Proteus/pull/34) merged at `e2506c470fdbb6fecd8ada935db6d080f45614bf`, post-merge verification passed. Status closure PR [#35](https://github.com/yanzhao77/Proteus/pull/35) updated the manifest and README.
+**Scope:** E13 only. This candidate does not enter E14–E16. The authoritative status matrix in `PROTEUS_E2X_P6_BASELINE_MANIFEST.md` records `E13 Proposal / Master Plan Editor | **PASS / COMPLETE**` and `E14–E16 | NOT ENTERED`.
 
 ## 1. Decision and authority boundary
 
@@ -155,11 +156,11 @@ All 99 E13 keys (including `e13.editor.saveReason` and 4 dependency validation k
 
 ## 10. E14–E16 status
 
-**NOT ENTERED.** No E14, E15, or E16 work has been started. The status matrix in `PROTEUS_E2X_P6_BASELINE_MANIFEST.md` remains unchanged: `E13–E16 | NOT ENTERED`.
+**NOT ENTERED.** No E14, E15, or E16 work has been started. The status matrix in `PROTEUS_E2X_P6_BASELINE_MANIFEST.md` records `E14–E16 | NOT ENTERED`.
 
 ## 11. Acceptance limits and next steps
 
-This is an implementation candidate only. It is intentionally uncommitted, unpublished, and unaccepted. The current remote `master` remains the E12-complete baseline until a separately authorized E13 delivery review, precise commit, pull request, CI review, and an independently authorized standard merge occur. E13 must not be represented as final authority completion merely because this isolated implementation and its evidence pass.
+PR [#34](https://github.com/yanzhao77/Proteus/pull/34) was merged into remote `master`. Post-merge verification confirmed: CI 3/3 PASS, Vitest 87/87 PASS, Playwright E2E 9/9 PASS, E13 PostgreSQL 17/17 PASS, E3/E4/E11/E12 regression 65/65 PASS, migration 0001→0033 PASS, production build PASS. Status closure PR [#35](https://github.com/yanzhao77/Proteus/pull/35) updated the manifest and README to reflect E13 PASS/COMPLETE. E13 does not enter E14–E16.
 
 ## References
 
