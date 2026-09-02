@@ -14,6 +14,10 @@ from hermes_runtime.application.user_human_gate_transport import (
     UnavailableUserHumanGateTransport,
     UserHumanGateRejected,
 )
+from hermes_runtime.application.worker_control_plane import (
+    UnavailableWorkerControlPlaneReadModel,
+    WorkerControlPlaneReadModel,
+)
 from hermes_runtime.domain.entry_draft import EntryDraftRejected
 from hermes_runtime.infrastructure.postgres_entry_draft import EntryDraftStoreUnavailable
 from hermes_runtime.domain.product_api import (
@@ -62,6 +66,7 @@ class ProductApiFacade:
         live_production_read_model=None,
         user_project_command_transport=None,
         user_human_gate_transport=None,
+        worker_control_plane_read_model=None,
     ) -> None:
         self._read_model = read_model
         self._command_gateway = command_gateway
@@ -74,6 +79,7 @@ class ProductApiFacade:
         self._user_project_command_transport = user_project_command_transport or UnavailableUserProjectCommandTransport()
         self._human_gate_transport_configured = user_human_gate_transport is not None
         self._user_human_gate_transport = user_human_gate_transport or UnavailableUserHumanGateTransport()
+        self._worker_control_plane_read_model = worker_control_plane_read_model or UnavailableWorkerControlPlaneReadModel()
 
     def handle(self, request: ProductApiRequest) -> ProductApiResponse:
         reject_forbidden_authority_shape(request)
@@ -254,6 +260,13 @@ class ProductApiFacade:
 
         if method == "GET" and len(parts) == 3 and parts[0] == "docker-processes" and parts[2] == "observations":
             return self._safe(200, self._read_model.docker_process_observations(parts[1], actor_scope))
+
+        if method == "GET" and parts == ["factory-home", "workers"]:
+            return self._safe(200, self._worker_control_plane_read_model.list_workers(actor_scope))
+        if method == "GET" and len(parts) == 3 and parts[:2] == ["factory-home", "workers"]:
+            return self._safe(200, self._worker_control_plane_read_model.worker_detail(parts[2], actor_scope))
+        if method == "GET" and parts == ["factory-home", "execution-queue"]:
+            return self._safe(200, self._worker_control_plane_read_model.execution_queue(actor_scope))
 
         raise ProductApiRejected("API_ROUTE_NOT_SUPPORTED")
 
