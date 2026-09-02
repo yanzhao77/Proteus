@@ -7,6 +7,9 @@ import { useUi } from './ui-context';
 import { endSession, readSession } from './api/session';
 import { reconcileE11Receipt, type E11ReconciliationContext } from './e11Reconciliation';
 import { E13ProposalPlanEditor } from './e13ProposalPlanEditor';
+import { WorkerFleet } from './components/WorkerFleet';
+import { WorkerDetail } from './components/WorkerDetail';
+import { ExecutionQueue } from './components/ExecutionQueue';
 
 const adapters = createAdapters();
 
@@ -30,7 +33,7 @@ function Shell({ children }: { children: ReactNode }) {
   const session = useResource(async () => { const result = await readSession(); return result.kind === 'unauthenticated' ? { kind: 'not_implemented' as const, message: result.message } : result; }, []);
   const signOut = async () => { if (await endSession()) void session.reload(); };
   const nav = [
-    ['/home', 'home', 'home'], ['/productions', 'grid', 'productions'], ['/drafts', 'info', 'drafts'], ['/gates', 'gate', 'gates'], ['/new', 'plus', 'newEntry'],
+    ['/home', 'home', 'home'], ['/productions', 'grid', 'productions'], ['/drafts', 'info', 'drafts'], ['/gates', 'gate', 'gates'], ['/workers', 'grid', 'workers'], ['/new', 'plus', 'newEntry'],
   ] as const;
   return <div className="workspace-shell"><a className="skip-link" href="#workspace-main">{t('skipToContent')}</a><aside className="workspace-sidebar"><Link className="workspace-brand" to="/home"><span className="workspace-brand-mark">P</span><span>{t('appName')}<small className="ui-kicker">{t('workspace')}</small></span></Link><nav className="workspace-nav" aria-label={t('workspaceNavigation')}>{nav.map(([to, icon, label]) => <NavLink key={to} to={to}><Icon name={icon}/><span>{t(label)}</span></NavLink>)}</nav></aside><main id="workspace-main" className="workspace-main" tabIndex={-1}><header className="workspace-topbar"><span className="ui-kicker">{t('readOnly')} · {t('productApi')}</span><div className="workspace-identity"><StatusBadge value={session.phase === 'data' ? 'CURRENT' : t('signedOut')} />{session.phase === 'data' && <button className="ui-button secondary" onClick={() => void signOut()}>{session.value?.subject}</button>}<IconButton icon="settings" label={t('settings')} onClick={() => setPreferencesOpen((value) => !value)} pressed={preferencesOpen}/></div></header>{preferencesOpen && <PreferencePanel onClose={() => setPreferencesOpen(false)}/>}<div className="workspace-content">{children}</div></main></div>;
 }
@@ -169,4 +172,4 @@ function Operations() {
 }
 
 function ProductionRedirect() { const { id = '' } = useParams(); return <Navigate replace to={`/productions/${encodeURIComponent(id)}/operations`}/>; }
-export default function App() { return <UiProvider><Routes><Route path="/" element={<Navigate replace to="/home"/>}/><Route path="/home" element={<Home/>}/><Route path="/new" element={<NewEntry/>}/><Route path="/drafts" element={<Drafts/>}/><Route path="/drafts/:id" element={<DraftWorkspace/>}/><Route path="/productions" element={<Productions/>}/><Route path="/productions/:id" element={<ProductionRedirect/>}/><Route path="/productions/:id/operations" element={<Operations/>}/><Route path="/gates" element={<Gates/>}/><Route path="/gates/:id" element={<GateDetail/>}/><Route path="*" element={<Navigate replace to="/home"/>}/></Routes></UiProvider>; }
+export default function App() { return <UiProvider><Routes><Route path="/" element={<Navigate replace to="/home"/>}/><Route path="/home" element={<Home/>}/><Route path="/new" element={<NewEntry/>}/><Route path="/drafts" element={<Drafts/>}/><Route path="/drafts/:id" element={<DraftWorkspace/>}/><Route path="/productions" element={<Productions/>}/><Route path="/productions/:id" element={<ProductionRedirect/>}/><Route path="/productions/:id/operations" element={<Operations/>}/><Route path="/gates" element={<Gates/>}/><Route path="/gates/:id" element={<GateDetail/>}/><Route path="/workers" element={<WorkerFleet/>}/><Route path="/workers/:id" element={<WorkerDetail/>}/><Route path="/execution-queue" element={<ExecutionQueue/>}/><Route path="*" element={<Navigate replace to="/home"/>}/></Routes></UiProvider>; }

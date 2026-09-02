@@ -1,4 +1,4 @@
-import type { AdapterResult, CommandMetadata, DraftListViewModel, DraftViewModel, UnderstandingViewModel, FactoryAdapters, GateApi, GateViewModel, ProductionApi, ProductionCardViewModel, ProductionDraftApi, ProductionPortfolioApi } from '../models';
+import type { AdapterResult, CommandMetadata, DraftListViewModel, DraftViewModel, UnderstandingViewModel, FactoryAdapters, GateApi, GateViewModel, ProductionApi, ProductionCardViewModel, ProductionDraftApi, ProductionPortfolioApi, WorkerControlPlaneApi } from '../models';
 
 const pending = <T>(name: string): Promise<AdapterResult<T>> => Promise.resolve({ kind: 'not_implemented', message: `${name} is not implemented by the current Product API.` });
 
@@ -36,4 +36,9 @@ class PendingProductionApi implements ProductionApi {
   resume(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return pending('ProductionApi.resume'); }
   stop(): Promise<AdapterResult<import('../models').ProjectCommandReceiptViewModel>> { return pending('ProductionApi.stop'); }
 }
-export const authorityPendingAdapters = (): FactoryAdapters => ({ mode: 'authority_pending', draft: new PendingDraftApi(), portfolio: new PendingPortfolioApi(), gates: new PendingGateApi(), production: new PendingProductionApi() });
+class PendingWorkerControlPlaneApi implements WorkerControlPlaneApi {
+  listWorkers(): Promise<AdapterResult<import('../models').WorkerFleetItemViewModel[]>> { return pending('WorkerControlPlaneApi.listWorkers'); }
+  getWorker(_workerId: string): Promise<AdapterResult<import('../models').WorkerDetailViewModel>> { return pending('WorkerControlPlaneApi.getWorker'); }
+  getExecutionQueue(): Promise<AdapterResult<import('../models').ExecutionQueueItemViewModel[]>> { return pending('WorkerControlPlaneApi.getExecutionQueue'); }
+}
+export const authorityPendingAdapters = (): FactoryAdapters => ({ mode: 'authority_pending', draft: new PendingDraftApi(), portfolio: new PendingPortfolioApi(), gates: new PendingGateApi(), production: new PendingProductionApi(), workers: new PendingWorkerControlPlaneApi() });

@@ -25,6 +25,7 @@ from hermes_runtime.application.readiness import StaticReadinessCheck
 from hermes_runtime.application.factory_home_read_model import UnavailableFactoryHomeReadModel
 from hermes_runtime.infrastructure.postgres_factory_home_read_model import DenyAllActorProjectScope, PostgresCreatorActorProjectScope, PostgresFactoryHomeReadModel
 from hermes_runtime.infrastructure.postgres_live_production_read_model import PostgresLiveProductionReadModel, UnavailableLiveProductionReadModel
+from hermes_runtime.infrastructure.postgres_worker_control_plane_read_model import PostgresWorkerControlPlaneReadModel
 from hermes_runtime.infrastructure.postgres_entry_draft import PostgresEntryDraftStore
 from hermes_runtime.infrastructure.postgres_entry_understanding import PostgresEntryUnderstandingStore
 from hermes_runtime.infrastructure.postgres_entry_proposal_master_plan import PostgresEntryProposalMasterPlanStore
@@ -86,6 +87,10 @@ def build_app():
         PostgresLiveProductionReadModel(database_url, _creator_scope)
         if _creator_scope else UnavailableLiveProductionReadModel()
     )
+    worker_control_plane_read_model = (
+        PostgresWorkerControlPlaneReadModel(database_url, _creator_scope)
+        if _creator_scope else None
+    )
     # No generic live LLM/provider is an established repository capability; remain fail-closed.
     entry_understanding_api = PostgresEntryUnderstandingStore(database_url, build_understanding_producer_from_env()) if database_url and oidc_verifier else UnavailableEntryUnderstandingApi()
     entry_proposal_master_plan_api = UnavailableEntryProposalMasterPlanApi()
@@ -115,7 +120,7 @@ def build_app():
         entry_approval_bridge_api = UnavailableEntryApprovalBridgeApi()
     session_cookie_secure = os.getenv("HERMES_SESSION_COOKIE_SECURE", "true").strip().lower() != "false"
     return create_app(
-        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api, live_production_read_model, user_project_command_transport, user_human_gate_transport),
+        ProductApiFacade(EmptyReadModel(), RejectingGateway(), factory_home_read_model, entry_draft_api, entry_understanding_api, entry_proposal_master_plan_api, entry_approval_bridge_api, live_production_read_model, user_project_command_transport, user_human_gate_transport, worker_control_plane_read_model),
         StaticReadinessCheck(database_ready=bool(database_url)),
         allowed_cors_origins=origins,
         oidc_verifier=oidc_verifier,

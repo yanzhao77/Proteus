@@ -244,6 +244,18 @@ def create_app(
     def factory_home_status(request: Request):
         return _factory_dispatch(request, "/factory-home/status")
 
+    @app.get("/factory-home/workers")
+    def factory_home_workers(request: Request):
+        return _factory_dispatch(request, "/factory-home/workers")
+
+    @app.get("/factory-home/workers/{worker_id}")
+    def factory_home_worker_detail(worker_id: str, request: Request):
+        return _factory_dispatch(request, f"/factory-home/workers/{worker_id}")
+
+    @app.get("/factory-home/execution-queue")
+    def factory_home_execution_queue(request: Request):
+        return _factory_dispatch(request, "/factory-home/execution-queue")
+
     @app.get("/production-drafts")
     def production_drafts(request: Request):
         return _draft_dispatch(request, "GET", "/production-drafts", {})
