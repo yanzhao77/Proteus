@@ -228,7 +228,8 @@ The runner used only the governed E2 Product API route surface. It created no Pr
 | E12 Human Gate Decision Center | **PASS / COMPLETE** — creator-scoped Gate Inbox/Detail and APPROVE/REJECT decision transport merged to master; CI, real browser E2E, PostgreSQL durable evidence and post-merge master verification passed. |
 | E9–E12 | **PASS / COMPLETE** — E9 Global Design System, E10 Identity / Workspace Shell, E11 Project Operations Workspace and E12 Human Gate Decision Center are merged and accepted by the current evidence authority. |
 | E13 Proposal / Master Plan Editor | **PASS / COMPLETE** — immutable Proposal/Master Plan revision editor with client+server DAG validation, creator-scoped save, idempotency and expected-version conflict; CI (3/3 PASS), Vitest (87/87 PASS), Playwright E2E (9/9 PASS), PostgreSQL (17/17 PASS), E3/E4/E11/E12 regression (65/65 PASS), migration 0033 verified. |
-| E14–E16 | **NOT ENTERED** |
+| E14 Worker Control Plane | **PASS / COMPLETE** — creator-scoped read-only Worker Fleet/Detail/Queue projection over P2 authority facts; no DML, no fencing token, no migration; CI (3/3 PASS), Vitest (94/94 PASS), backend (17/17 PASS incl. 5/5 real-PostgreSQL), explicit 111-test split; security review PASS-WITH-FINDINGS (3 hunters + 2 PoCs, cross-creator isolation 36/36 CONFIRMED). |
+| E15–E16 | **NOT ENTERED** |
 
 ## 12. Documentation/Metadata-Only Correction Record
 
